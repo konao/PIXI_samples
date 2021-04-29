@@ -1,4 +1,4 @@
-## PIXI Graphics Sprite Sample (2) - Dynamic content change
+## PIXI Graphics Sprite Sample (1) - Rotating Circle
 
 ### how to run
 
