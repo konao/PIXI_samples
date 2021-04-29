@@ -7,7 +7,6 @@
 const { BaseSpr } = require('./baseSpr');
 const U = require('./utils');
 
-// 動的スプライト
 class DynSpr extends BaseSpr {
     constructor() {
         super();
