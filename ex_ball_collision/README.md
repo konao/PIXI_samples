@@ -1,8 +1,4 @@
-## PIXI Graphics Sprite Sample (3) - Moving Cells
-
-Drawing cells that chase after mouse position.
-
-Grid and cells are drawn on PIXI.Graphics object in each frame.
+## PIXI Graphics Sprite Sample - Experiment for making pinball
 
 ### how to run
 
