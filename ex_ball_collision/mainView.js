@@ -13,7 +13,7 @@ const { Wall } = require('./wall');
 
 let bPause = false;
 let mousePos = {x: 0, y: 0};
-let mousePressPos = {x: 0, y: 0};
+let mousePressPos = {x: 0, y: 0, which: 0};
 
 //Create a Pixi Application
 let app = new PIXI.Application({ 
@@ -93,6 +93,7 @@ $(window).on('mousedown', e => {
     // console.log(`x=${e.clientX}, y=${e.clientY}`);
     mousePressPos = {
         x: e.clientX,
-        y: e.clientY
+        y: e.clientY,
+        which: e.which
     };
 });

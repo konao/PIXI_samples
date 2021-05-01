@@ -39,8 +39,11 @@ class Ball extends BaseSpr {
     }
 
     setMouesPressPos(mp) {
-        this._x = mp.x;
-        this._y = mp.y;
+        if (mp.which === 1) {
+            // 左ボタンクリック
+            this._x = mp.x;
+            this._y = mp.y;    
+        }
         // this.setPos({
         //     x: mp.x,
         //     y: mp.y
