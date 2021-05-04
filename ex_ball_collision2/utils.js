@@ -25,6 +25,10 @@ const d2r = (deg) => {
     return Math.PI * deg / 180.0;
 }
 
+const getVecLen = (v) => {
+    return Math.sqrt(v.x*v.x + v.y*v.y);
+}
+
 // {x, y}とpListの最少距離と、その最少距離の点を返す
 //
 // @param {x, y} 対象点
@@ -155,6 +159,9 @@ const getCrossPoint = (p, v, q1, q2) => {
             // rv = vがcpで反射したときの方向ベクトル
             let rvx = 2*qv2x - vx;
             let rvy = 2*qv2y - vy;
+            let len_rv = Math.sqrt(rvx*rvx + rvy*rvy);
+            rvx /= len_rv;
+            rvy /= len_rv;
             let refv = {x: rvx, y: rvy};
 
             return {
@@ -174,6 +181,7 @@ module.exports = {
     isFracZero,
     isEqual,
     d2r,
+    getVecLen,
     getNearestPos,
     getCrossPoint
 }

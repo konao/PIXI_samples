@@ -36,6 +36,24 @@ class Wall extends BaseSpr {
         this._pts = pts;
     }
 
+    // 中心(x, y), 半径rの円形の壁を生成
+    //
+    // @param cx [i] 中心x座標
+    // @param cy [i] 中心y座標
+    // @param r [i] 半径
+    genCircleWallPoints(cx, cy, r) {
+        this._pts = [];
+
+        const dDeg = 15;
+        let deg = 0.0;
+        while (deg < 360) {
+            let x = cx + r*Math.cos(U.d2r(deg));
+            let y = cy + r*Math.sin(U.d2r(deg));
+            this._pts.push({x: x, y: y});
+            deg += dDeg;
+        }
+    }
+
     // @param p {x, y} [i] ボールの位置
     // @param v {x, y} [i] ボールの進行方向ベクトル
     //

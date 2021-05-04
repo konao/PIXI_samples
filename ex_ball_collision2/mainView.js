@@ -44,6 +44,7 @@ $(window).on('load', () => {
 
     // loader.add('assets/characters.json');
     loader.load((loader, resources) => {
+
         // 壁生成
         let w0 = new Wall();
         w0.setWallPoints([
@@ -85,7 +86,22 @@ $(window).on('load', () => {
             {x: 1000, y: 700}
         ]);
         w3.init(PIXI, app.stage, w, h);
-        wallList.push(w3);
+        wallList.push(w3);    
+
+        let w4 = new Wall();
+        w4.genCircleWallPoints(1200, 150, 50);
+        w4.init(PIXI, app.stage, w, h);
+        wallList.push(w4);
+
+        let w5 = new Wall();
+        w5.genCircleWallPoints(500, 300, 40);
+        w5.init(PIXI, app.stage, w, h);
+        wallList.push(w5);
+
+        let w6 = new Wall();
+        w6.genCircleWallPoints(200, 700, 50);
+        w6.init(PIXI, app.stage, w, h);
+        wallList.push(w6);
 
         // イジェクター生成
         ej.setPos({x: 0, y: 0});
@@ -94,8 +110,8 @@ $(window).on('load', () => {
         app.ticker.add((delta) => {
             // 画面更新
             if (!bPause) {
+                ej.update(wallList);
                 wallList.forEach(wall => {
-                    ej.update(wall);
                     wall.update();
                     ballList.forEach(ball => {
                         ball.update(wall);
@@ -151,6 +167,9 @@ $(window).on('mousedown', e => {
             // ejectorから位置、方向を得る
             let ejPos = ej.getPos();
             let ejVec = ej.getVec();
+
+            let len = Math.sqrt(ejVec.x*ejVec.x + ejVec.y*ejVec.y);
+            console.log(`len(ejVec)=${len}`);
 
             // ボールを生成
             let newBall = new Ball();

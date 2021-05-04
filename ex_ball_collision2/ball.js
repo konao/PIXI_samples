@@ -72,21 +72,40 @@ class Ball extends BaseSpr {
     }
 
     update(wall) {
-        this._x += this._vx;
-        this._y += this._vy;
-
         // ボールの進行線と壁の交点を計算
         let p = {x: this._x, y: this._y};
         let v = {x: this._vx, y: this._vy};
         let cpInfo = wall.calcCrossPoint(p, v);
         if (cpInfo !== null) {
-            if (cpInfo.dist <= 5) {
+            let vLen = U.getVecLen(v);
+            const ballRadius = 5;
+            if (cpInfo.dist <= ballRadius) {
                 // 衝突した
                 // 方向を変える
                 let rv = cpInfo.refv;
+                // let len_rv = U.getVecLen(rv);
+                // console.log(`len(rv)=${len_rv}`);
                 this._vx = rv.x;
                 this._vy = rv.y;
+
+                this._x += this._vx;
+                this._y += this._vy;    
+            } 
+            else if (vLen+ballRadius >= cpInfo.dist) {
+                // ボールを進めた先が壁を超えている
+                let rv = cpInfo.refv;
+                // let len_rv = U.getVecLen(rv);
+                // console.log(`len(rv)=${len_rv}`);
+                this._vx = rv.x;
+                this._vy = rv.y;
+                
+                // ボールの位置を補正
+                this._x += this._vx;
+                this._y += this._vy;    
             }
+        } else {
+            this._x += this._vx;
+            this._y += this._vy;    
         }
 
         if (this._g) {

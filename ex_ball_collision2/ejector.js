@@ -63,7 +63,7 @@ class Ejector extends BaseSpr {
         container.addChild(cont);
     }
 
-    update(wall) {
+    update(wallList) {
         if (this._g) {
             // ----------------------------------------
             //  スプライトの再描画（画像イメージの更新）
@@ -79,19 +79,32 @@ class Ejector extends BaseSpr {
             this._g.moveTo(this._x, this._y);
             this._g.lineTo(this._x+(this._vx*2000), this._y+(this._vy*2000));
 
-            // ボールの進行線と壁の交点を計算
-            let p = {x: this._x, y: this._y};
-            let v = {x: this._vx, y: this._vy};
-            let cpInfo = wall.calcCrossPoint(p, v);
-            if (cpInfo !== null) {
+            let closestCpInfo = null;
+            wallList.forEach(wall => {
+                // ボールの進行線と壁の交点を計算
+                let p = {x: this._x, y: this._y};
+                let v = {x: this._vx, y: this._vy};
+                let cpInfo = wall.calcCrossPoint(p, v);
+
+                if (cpInfo) {
+                    // pに一番近い交差点をclosestCpInfoにする
+                    if (closestCpInfo === null) {
+                        closestCpInfo = cpInfo;
+                    } else if (cpInfo.dist < closestCpInfo.dist) {
+                        closestCpInfo = cpInfo;
+                    }
+                }
+            });
+
+            if (closestCpInfo !== null) {
                 // 交点があれば描画
-                let cp = cpInfo.cp;
+                let cp = closestCpInfo.cp;
                 this._g.beginFill(0x0000ff);
                 this._g.drawEllipse(cp.x, cp.y, 5, 5);
                 this._g.endFill();
 
                 // 反射ベクトル
-                let rv = cpInfo.refv;
+                let rv = closestCpInfo.refv;
                 this._g.lineStyle(1, 0x0ff00, 0.5);
                 this._g.moveTo(cp.x, cp.y);
                 this._g.lineTo(cp.x+rv.x*2000, cp.y+rv.y*2000);
