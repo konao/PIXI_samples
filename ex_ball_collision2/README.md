@@ -1,4 +1,4 @@
-## PIXI Graphics Sprite Sample - Experiment for making pinball
+## PIXI Graphics Sprite Sample - Experiment for making pinball (2)
 
 ### how to run
 
