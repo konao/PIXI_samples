@@ -78,30 +78,30 @@ $(window).on('load', () => {
         w2.init(PIXI, app.stage, w, h);
         wallList.push(w2);
 
-        let w3 = new Wall();
-        w3.setWallPoints([
-            {x: 1200, y: 400},
-            {x: 1300, y: 800},
-            {x: 800, y: 800},
-            {x: 1000, y: 700}
-        ]);
-        w3.init(PIXI, app.stage, w, h);
-        wallList.push(w3);    
+        // let w3 = new Wall();
+        // w3.setWallPoints([
+        //     {x: 1200, y: 400},
+        //     {x: 1300, y: 800},
+        //     {x: 800, y: 800},
+        //     {x: 1000, y: 700}
+        // ]);
+        // w3.init(PIXI, app.stage, w, h);
+        // wallList.push(w3);    
 
-        let w4 = new Wall();
-        w4.genCircleWallPoints(1200, 150, 50);
-        w4.init(PIXI, app.stage, w, h);
-        wallList.push(w4);
+        // let w4 = new Wall();
+        // w4.genCircleWallPoints(1200, 150, 50);
+        // w4.init(PIXI, app.stage, w, h);
+        // wallList.push(w4);
 
-        let w5 = new Wall();
-        w5.genCircleWallPoints(500, 300, 40);
-        w5.init(PIXI, app.stage, w, h);
-        wallList.push(w5);
+        // let w5 = new Wall();
+        // w5.genCircleWallPoints(500, 300, 40);
+        // w5.init(PIXI, app.stage, w, h);
+        // wallList.push(w5);
 
-        let w6 = new Wall();
-        w6.genCircleWallPoints(200, 700, 50);
-        w6.init(PIXI, app.stage, w, h);
-        wallList.push(w6);
+        // let w6 = new Wall();
+        // w6.genCircleWallPoints(200, 700, 50);
+        // w6.init(PIXI, app.stage, w, h);
+        // wallList.push(w6);
 
         // イジェクター生成
         ej.setPos({x: 0, y: 0});
@@ -113,9 +113,9 @@ $(window).on('load', () => {
                 ej.update(wallList);
                 wallList.forEach(wall => {
                     wall.update();
-                    ballList.forEach(ball => {
-                        ball.update(wall);
-                    });
+                });
+                ballList.forEach(ball => {
+                    ball.update(wallList);
                 });
             }
         });
@@ -154,15 +154,15 @@ $(window).on('mousemove', e => {
 $(window).on('mousedown', e => {
     // console.log(`x=${e.clientX}, y=${e.clientY}`);
     console.log(e);
-    if (e.which === 1) {
-        // 左ボタンクリック
+    if (e.which === 3) {
+        // 右ボタンクリック
         let mousePressPos = {
             x: e.clientX,
             y: e.clientY
         };
         if (ej) ej.setMouesPressPos(mousePressPos);        
-    } else if (e.which === 3) {
-        // 右ボタンクリック
+    } else if (e.which === 1) {
+        // 左ボタンクリック
         if (ej) {
             // ejectorから位置、方向を得る
             let ejPos = ej.getPos();

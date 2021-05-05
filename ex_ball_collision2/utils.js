@@ -25,10 +25,88 @@ const d2r = (deg) => {
     return Math.PI * deg / 180.0;
 }
 
-const getVecLen = (v) => {
+// ========================================================
+// ベクトル演算
+// ========================================================
+
+// -----------------------------------------------
+// 加算
+// -----------------------------------------------
+const vecAdd = (v1, v2) => {
+    return {
+        x: v1.x+v2.x,
+        y: v1.y+v2.y
+    };
+}
+
+// -----------------------------------------------
+// 減算
+// -----------------------------------------------
+const vecSub = (v1, v2) => {
+    return {
+        x: v1.x-v2.x,
+        y: v1.y-v2.y
+    };
+}
+
+// -----------------------------------------------
+// スカラー倍
+//
+// @param v {x, y} [i] ベクトル
+// @param k [i] 係数
+//
+// vをスカラー倍(k倍)したベクトルを返す
+// -----------------------------------------------
+const vecScalar = (v, k) => {
+    return {
+        x: v.x*k,
+        y: v.y*k
+    };
+}
+
+// -----------------------------------------------
+// 内積
+//
+// @param v1 {x, y} [i] ベクトル1
+// @param v2 {x, y} [i] ベクトル2
+//
+// @retutrn v1とv2の内積
+// -----------------------------------------------
+const vecInnerProd = (v1, v2) => {
+    return v1.x*v2.x + v1.y*v1.y;
+}
+
+// -----------------------------------------------
+// 長さを返す
+//
+// @param v {x, y} [i] ベクトル
+//
+// @return vの長さ
+// -----------------------------------------------
+const vecGetLen = (v) => {
     return Math.sqrt(v.x*v.x + v.y*v.y);
 }
 
+// -----------------------------------------------
+// 正規化する
+//
+// @param v {x, y} [i] ベクトル
+//
+// @return vを正規化したベクトル（長さ=1）
+// -----------------------------------------------
+const vecNormalize = (v) => {
+    const len = vecGetLen(v);
+    if (len > 0) {
+        return {
+            x: v.x/len,
+            y: v.y/len
+        };
+    } else {
+        return v;
+    }
+}
+
+// --------------------------------------------------------------
 // {x, y}とpListの最少距離と、その最少距離の点を返す
 //
 // @param {x, y} 対象点
@@ -37,6 +115,7 @@ const getVecLen = (v) => {
 // @return {minDist, nearestPt}
 // minDist ... 最少距離．pListが空の場合は-1になる．
 // nearestPt ... 最少距離を与える点．pListが空の場合はnullになる．
+// --------------------------------------------------------------
 const getNearestPos = ({x, y}, pList) => {
     let minDist2 = -1;  // 最少距離の二乗
     let nearestPt = null;   // 最近点
@@ -75,19 +154,23 @@ const getNearestPos = ({x, y}, pList) => {
     }
 }
 
+// --------------------------------------------------------------
+// ボールと壁の交点を求める
+//
 // @param p [i] ボールの位置
 // @param v [i] ボール進行方向ベクトル（長さ1）
 // pからv方向に伸びる直線（ボールの進行線）をLとする．
 //
-// @param q1 [i] 線分Wの単点1
-// @param q2 [i] 線分Wの単点2
+// @param q1 [i] 線分Wの端点1
+// @param q2 [i] 線分Wの端点2
 // q1とq2を結ぶ線分Wは壁を構成するものとする．
 //
 // @return {cp, dist, refv}
-// cp : 交点{x, y}
+// cp : LとWの交点{x, y}
 // dist: pからcpまでの距離
-// refv: cpで反射したときの方向ベクトル
+// refv: cpで反射したときの方向ベクトル（長さ1）
 // 交差しない場合はnullが返る
+// --------------------------------------------------------------
 const getCrossPoint = (p, v, q1, q2) => {
     let px = p.x;
     let py = p.y;
@@ -175,13 +258,84 @@ const getCrossPoint = (p, v, q1, q2) => {
     }
 }
 
+// --------------------------------------------------------------
+// ボールの位置、方向ベクトルと壁の線分から、
+// ボールの更新された位置と方向ベクトルを返す．
+// 壁に衝突したときは反射させる．
+//
+// @param p [i] ボールの位置
+// @param v [i] ボール進行方向ベクトル（長さ1でなくてよい）
+// @param r [i] ボールの半径
+// pからv方向に伸びる直線（ボールの進行線）をLとする．
+//
+// @param q1 [i] 線分Wの端点1
+// @param q2 [i] 線分Wの端点2
+// q1とq2を結ぶ線分Wは壁を構成するものとする．
+//
+// @return {p, v, bRefrect}
+// p : ボールの新しい位置
+// v : ボールの新しい方向ベクトル
+// bRefrect : true=ボールは壁に衝突した（反射した）
+// 反射した場合、p2はボールの反射点になる．この時、v2>0なら、再度反射の可能性があるので、
+// 画面に存在する他の壁との衝突判定が必要．
+// （bReflect=falseになるまで再帰的にreflectを呼ぶ必要がある）
+// --------------------------------------------------------------
+const reflect = (p, v, r, q1, q2) => {
+    // 方向ベクトルを正規化
+    const nv = vecNormalize(v);
+
+    // LとWの交点を求める
+    let cpInfo = getCrossPoint(p, nv, q1, q2);
+    if (cpInfo === null) {
+        // 交点なし
+        // pをv方向へ進める
+        let p2 = vecAdd(p, v);
+        return {
+            p: p2,
+            v: v,
+            bReflect: false
+        }
+    } else {
+        // 交点あり
+        let d = vecGetLen(v);   // 移動距離
+        let dist = cpInfo.dist; // pからLとWの交点までの距離
+        if (dist-d > r) {
+            // 衝突していない
+            let p2 = vecAdd(p, v);
+            return {
+                p: p2,
+                v: v,
+                bReflect: false
+            }    
+        } else {
+            // 衝突した
+            // pを更新
+            let cp = cpInfo.cp; // 交点
+            let refp = vecAdd(p, vecAdd(vecSub(cp, p), vecScalar(nv, -r))); // 反射点
+            let d2 = d-dist+r;
+            let refv = vecScalar(cpInfo.refv, d2); // 反射後の方向ベクトル
+            return {
+                p: refp,
+                v: refv,
+                bReflect: true
+            };
+        }
+    }
+}
+
 module.exports = {
     randDouble,
     randInt,
     isFracZero,
     isEqual,
     d2r,
-    getVecLen,
+    vecAdd,
+    vecSub,
+    vecScalar,
+    vecInnerProd,
+    vecGetLen,
+    vecNormalize,
     getNearestPos,
-    getCrossPoint
+    getCrossPoint,
+    reflect
 }

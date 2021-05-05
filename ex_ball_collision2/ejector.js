@@ -18,18 +18,14 @@ class Ejector extends BaseSpr {
         let mx = mp.x;
         let my = mp.y;
 
-        let vx = mx - this._x;
-        let vy = my - this._y;
+        let v = {
+            x: mx - this._x,
+            y: my - this._y
+        };
+        let nv = U.vecNormalize(v);
 
-        let len = Math.sqrt(vx*vx + vy*vy);
-        if (len > 0) {
-            // 長さを1にする
-            vx /= len;
-            vy /= len;
-        }
-
-        this._vx = vx;
-        this._vy = vy;
+        this._vx = nv.x;
+        this._vy = nv.y;
     }
 
     setMouesPressPos(mp) {

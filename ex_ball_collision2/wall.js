@@ -7,7 +7,7 @@ class Wall extends BaseSpr {
 
         this._g = null; // スプライトイメージ(PIXI.Graphics)
 
-        this._pts = []; // 壁を構成する点の座標のリスト
+        this._pts = []; // 壁を構成する点の座標のリスト．各点のフォーマットは{x, y}
 
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;        
@@ -51,6 +51,45 @@ class Wall extends BaseSpr {
             let y = cy + r*Math.sin(U.d2r(deg));
             this._pts.push({x: x, y: y});
             deg += dDeg;
+        }
+    }
+
+    // 辺の数を返す
+    //
+    // ptsが3以上の時 ---> ptsの数
+    // ptsが2の時 --> 1（辺は1個）
+    // それ以外 --> 0
+    countEdges() {
+        const n = this._pts.length;
+        if (n>=3) {
+            return n;
+        } else if (n === 2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    // @param i [i] 0<=i<countEdge()
+    //
+    // @return {p1, p2}
+    // i番目の辺の端点
+    // p1, p2共にフォーマットは{x, y}
+    // iが範囲オーバーの時はnullが返る
+    getEdge(i) {
+        const n = this._pts.length;
+        if ((i < 0) || (i >= n)) {
+            return null;
+        } else if (i === n-1) {
+            return {
+                p1: this._pts[i],
+                p2: this._pts[0]
+            };
+        } else {
+            return {
+                p1: this._pts[i],
+                p2: this._pts[i+1]
+            };
         }
     }
 
