@@ -33,6 +33,7 @@ class Ball extends BaseSpr {
         this._p = mp;
         // ここでBaseSpr._update()を呼ばない
         // （スプライトオブジェクト自身は移動させない）
+        return this;
     }
 
     getVec() {
@@ -42,12 +43,17 @@ class Ball extends BaseSpr {
     // @param v [i] 方向ベクトル
     setVec(v) {
         this._v = v;
+        return this;
+    }
+
+    setRadius(r) {
+        this._r = r;
+        return this;
     }
 
     init(PIXI, container, w, h) {
         this._w = w;
         this._h = h;
-        this._r = 10;
 
         let cont = new PIXI.Container();
         cont.sortableChildren = true;  // zIndex値でのソートを有効にする
@@ -77,7 +83,7 @@ class Ball extends BaseSpr {
             this._g.clear();
             this._g.beginFill(0x00ffff);
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
-            this._g.drawEllipse(this._p.x, this._p.y, 5, 5);  // 中心(cx, cy), 半径(rx, ry)
+            this._g.drawEllipse(this._p.x, this._p.y, this._r, this._r);  // 中心(cx, cy), 半径(rx, ry)
             this._g.endFill();
         }
     }
@@ -88,6 +94,7 @@ class Ball extends BaseSpr {
 
         // pをv方向に移動したときに交差する最も近い辺を求める --> nearestEdge
         let nearestEdge = null;
+        let minDist = -1;
         wallList.forEach(wall => {
             let nEdge = wall.countEdges();
             let edgeList = [];   // {p1, p2} p1=開始点, p2=終了点
@@ -104,7 +111,6 @@ class Ball extends BaseSpr {
                 };
             });
             // cpInfosの中から、最もdistの小さいもの(=pに最も近い交点)を選ぶ
-            let minDist = -1;
             edgeInfos.forEach(ei => {
                 if (ei.cpInfo !== null) {
                     if ((minDist < 0) || (ei.cpInfo.dist < minDist)) {

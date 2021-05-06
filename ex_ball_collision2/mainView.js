@@ -11,14 +11,19 @@ const U = require('./utils');
 const { Ball } = require('./ball');
 const { Wall } = require('./wall');
 const { Ejector } = require('./ejector');
+const { Text } = require('./text');
 
-let w = 0;
-let h = 0;
-let bPause = false;
+let g_w = 0;
+let g_h = 0;
+let g_bPause = false;
+let g_ballSize = 5;
+let g_ballSpeed = 1;
 
-let ej = new Ejector();
-let ballList = [];
-let wallList = [];
+let g_ej = new Ejector();
+let g_ballList = [];
+let g_wallList = [];
+
+let g_infoText = null;
 
 //Create a Pixi Application
 let app = new PIXI.Application({ 
@@ -38,9 +43,9 @@ const loader = PIXI.Loader.shared;
 // ロード時とリサイズ時の両方でイベントを受け取る
 // https://qiita.com/chillart/items/15bc48f98897391e12ca
 $(window).on('load', () => {
-    w = window.innerWidth-30;
-    h = window.innerHeight-50;
-    app.renderer.resize(w, h);
+    g_w = window.innerWidth-30;
+    g_h = window.innerHeight-50;
+    app.renderer.resize(g_w, g_h);
 
     // loader.add('assets/characters.json');
     loader.load((loader, resources) => {
@@ -49,12 +54,12 @@ $(window).on('load', () => {
         let w0 = new Wall();
         w0.setWallPoints([
             {x: 10, y: 10},
-            {x: w-10, y: 10},
-            {x: w-10, y: h-10},
-            {x: 10, y: h-10}
+            {x: g_w-10, y: 10},
+            {x: g_w-10, y: g_h-10},
+            {x: 10, y: g_h-10}
         ]);
-        w0.init(PIXI, app.stage, w, h);
-        wallList.push(w0);
+        w0.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w0);
 
         let w1 = new Wall();
         w1.setWallPoints([
@@ -66,8 +71,8 @@ $(window).on('load', () => {
             {x: 900, y: 600},
             {x: 500, y: 800}
         ]);
-        w1.init(PIXI, app.stage, w, h);
-        wallList.push(w1);
+        w1.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w1);
 
         let w2 = new Wall();
         w2.setWallPoints([
@@ -75,79 +80,96 @@ $(window).on('load', () => {
             {x: 900, y: 150},
             {x: 700, y: 400}
         ]);
-        w2.init(PIXI, app.stage, w, h);
-        wallList.push(w2);
+        w2.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w2);
 
-        // let w3 = new Wall();
-        // w3.setWallPoints([
-        //     {x: 1200, y: 400},
-        //     {x: 1300, y: 800},
-        //     {x: 800, y: 800},
-        //     {x: 1000, y: 700}
-        // ]);
-        // w3.init(PIXI, app.stage, w, h);
-        // wallList.push(w3);    
+        let w3 = new Wall();
+        w3.setWallPoints([
+            {x: 1200, y: 400},
+            {x: 1300, y: 800},
+            {x: 800, y: 800},
+            {x: 1000, y: 700}
+        ]);
+        w3.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w3);    
 
-        // let w4 = new Wall();
-        // w4.genCircleWallPoints(1200, 150, 50);
-        // w4.init(PIXI, app.stage, w, h);
-        // wallList.push(w4);
+        let w4 = new Wall();
+        w4.genCircleWallPoints(1200, 150, 50);
+        w4.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w4);
 
-        // let w5 = new Wall();
-        // w5.genCircleWallPoints(500, 300, 40);
-        // w5.init(PIXI, app.stage, w, h);
-        // wallList.push(w5);
+        let w5 = new Wall();
+        w5.genCircleWallPoints(500, 300, 40);
+        w5.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w5);
 
-        // let w6 = new Wall();
-        // w6.genCircleWallPoints(200, 700, 50);
-        // w6.init(PIXI, app.stage, w, h);
-        // wallList.push(w6);
+        let w6 = new Wall();
+        w6.genCircleWallPoints(200, 700, 50);
+        w6.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w6);
 
         // イジェクター生成
-        ej.setPos({x: 0, y: 0});
-        ej.init(PIXI, app.stage, w, h);
+        g_ej.setPos({x: 0, y: 0});
+        g_ej.init(PIXI, app.stage, g_w, g_h);
+
+        // 操作説明
+        new Text()
+            .initSprite(PIXI, app.stage)
+            .setText('→/← : size up/down  ↑/↓ : speed up/down')
+            .setPos(10, 10)
+            .setFontSize(20)
+            .setColor('cyan');
+        
+        new Text()
+            .initSprite(PIXI, app.stage)
+            .setText('mouse left click : eject ball / right click : ejector pos move')
+            .setPos(g_w-530, 10)
+            .setFontSize(20)
+            .setColor('cyan');
+
+        g_infoText = new Text()
+            .initSprite(PIXI, app.stage)
+            .setText(`size: ${g_ballSize}  speed: ${g_ballSpeed}`)
+            .setPos(10, 30)
+            .setFontSize(20)
+            .setColor('cyan');
 
         app.ticker.add((delta) => {
             // 画面更新
-            if (!bPause) {
-                ej.update(wallList);
-                wallList.forEach(wall => {
+            if (!g_bPause) {
+                g_ej.update(g_wallList);
+                g_wallList.forEach(wall => {
                     wall.update();
                 });
-                ballList.forEach(ball => {
-                    ball.update(wallList);
+                g_ballList.forEach(ball => {
+                    ball.update(g_wallList);
                 });
             }
         });
     });
 });
 
-$(window).on('resize', () => {
-    w = window.innerWidth-30;
-    h = window.innerHeight-50;
-    app.renderer.resize(w, h);
-    console.log(`resized to (${w}, ${h})`);
-});
-
-$(window).on('keydown', e => {
-    // console.log(`keydown (${e.which})`);
-    switch (e.which) {
-        case 32:    // space
-        {
-            bPause = !bPause;
-            break;
-        }
+const showStatus = () => {
+    if (g_infoText) {
+        g_infoText.setText(`size: ${g_ballSize}  speed: ${g_ballSpeed}`)
     }
+}
+
+$(window).on('resize', () => {
+    g_w = window.innerWidth-30;
+    g_h = window.innerHeight-50;
+    app.renderer.resize(g_w, g_h);
+    console.log(`resized to (${g_w}, ${g_h})`);
 });
 
 $(window).on('mousemove', e => {
     // console.log(`x=${e.clientX}, y=${e.clientY}`);
-    if (ej) {
+    if (g_ej) {
         let mousePos = {
             x: e.clientX,
             y: e.clientY
         };
-        ej.setMousePos(mousePos);
+        g_ej.setMousePos(mousePos);
     }
 });
 
@@ -160,27 +182,70 @@ $(window).on('mousedown', e => {
             x: e.clientX,
             y: e.clientY
         };
-        if (ej) ej.setMouesPressPos(mousePressPos);        
+        if (g_ej) g_ej.setMouesPressPos(mousePressPos);        
     } else if (e.which === 1) {
         // 左ボタンクリック
-        if (ej) {
+        if (g_ej) {
             // ejectorから位置、方向を得る
-            let ejPos = ej.getPos();
-            let ejVec = ej.getVec();
-
-            let len = Math.sqrt(ejVec.x*ejVec.x + ejVec.y*ejVec.y);
-            console.log(`len(ejVec)=${len}`);
+            let ejPos = g_ej.getPos();
+            let ejVec = g_ej.getVec();
+            ejVec = U.vecScalar(ejVec, g_ballSpeed);
 
             // ボールを生成
             let newBall = new Ball();
-            newBall.setBallPos(ejPos);
-            newBall.setVec(ejVec);
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            newBall.init(PIXI, app.stage, w, h);
+            newBall.setRadius(g_ballSize)
+                .setBallPos(ejPos)
+                .setVec(ejVec);
+            newBall.init(PIXI, app.stage, g_w, g_h);
 
-            console.log(`newBall: (x,y)=(${ejPos.x}, ${ejPos.y})`);
-            ballList.push(newBall);
+            g_ballList.push(newBall);
+        }
+    }
+});
+
+$(window).on('keydown', e => {
+    // console.log(`keydown (${e.which})`);
+    switch (e.which) {
+        case 32:    // space
+        {
+            g_bPause = !g_bPause;
+            break;
+        }
+        case 37:    // left
+        {
+            // ボールサイズ縮小
+            if (g_ballSize > 1) {
+                g_ballSize--;
+                showStatus();
+            }
+            break;
+        }
+        case 39:    // right
+        {
+            // ボールサイズ拡大
+            if (g_ballSize < 30) {
+                g_ballSize++;
+                showStatus();
+            }
+            break;
+        }
+        case 38:    // up
+        {
+            // ボールスピードアップ
+            if (g_ballSpeed < 50) {
+                g_ballSpeed++;
+                showStatus();
+            }
+            break;
+        }
+        case 40:    // down
+        {
+            // ボールスピードダウン
+            if (g_ballSpeed > 1) {
+                g_ballSpeed--;
+                showStatus();
+            }
+            break;
         }
     }
 });

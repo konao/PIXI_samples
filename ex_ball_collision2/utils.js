@@ -3,6 +3,10 @@
 // *******************************************************
 const EPSILON = 1e-5;
 
+// =================================================
+// 乱数生成
+// =================================================
+
 const randDouble = (x) => {
     return Math.random() * x;
 }
@@ -10,6 +14,10 @@ const randDouble = (x) => {
 const randInt = (x) => {
     return Math.trunc(Math.random() * x);
 }
+
+// =================================================
+//  色々
+// =================================================
 
 // xが整数ならtrue．小数点部分があるならfalse
 // eplisionで微妙な誤差でおかしくなることを防ぐ
@@ -24,6 +32,7 @@ const isEqual = (x, y) => {
     return (Math.abs(x-y) < EPSILON);
 }
 
+// 角度単位変換（度 --> ラジアン）
 const d2r = (deg) => {
     return Math.PI * deg / 180.0;
 }
@@ -34,6 +43,11 @@ const d2r = (deg) => {
 
 // -----------------------------------------------
 // 加算
+//
+// @param v1 {x, y} [i] ベクトル1
+// @param v2 {x, y} [i] ベクトル2
+//
+// @return v1+v2を返す
 // -----------------------------------------------
 const vecAdd = (v1, v2) => {
     return {
@@ -44,6 +58,11 @@ const vecAdd = (v1, v2) => {
 
 // -----------------------------------------------
 // 減算
+//
+// @param v1 {x, y} [i] ベクトル1
+// @param v2 {x, y} [i] ベクトル2
+//
+// @return v1-v2を返す
 // -----------------------------------------------
 const vecSub = (v1, v2) => {
     return {
@@ -76,7 +95,7 @@ const vecScalar = (v, k) => {
 // @retutrn v1とv2の内積
 // -----------------------------------------------
 const vecInnerProd = (v1, v2) => {
-    return v1.x*v2.x + v1.y*v1.y;
+    return v1.x*v2.x + v1.y*v2.y;
 }
 
 // -----------------------------------------------
@@ -96,6 +115,7 @@ const vecGetLen = (v) => {
 // @param v {x, y} [i] ベクトル
 //
 // @return vを正規化したベクトル（長さ=1）
+// もともとゼロベクトルだった場合はそのままゼロベクトルを返す
 // -----------------------------------------------
 const vecNormalize = (v) => {
     const len = vecGetLen(v);
@@ -175,19 +195,10 @@ const getNearestPos = ({x, y}, pList) => {
 // 交差しない場合はnullが返る
 // --------------------------------------------------------------
 const getCrossPoint = (p, v, q1, q2) => {
-    let px = p.x;
-    let py = p.y;
-    let vx = v.x;
-    let vy = v.y;
-    let q1x = q1.x;
-    let q1y = q1.y;
-    let q2x = q2.x;
-    let q2y = q2.y;
-
-    let M11 = vx;
-    let M21 = vy;
-    let M12 = q1x - q2x;
-    let M22 = q1y - q2y;
+    let M11 = v.x;
+    let M21 = v.y;
+    let M12 = q1.x - q2.x;
+    let M22 = q1.y - q2.y;
 
     let D = M11*M22-M21*M12;    // Determinant
     if (D === 0) {
@@ -215,40 +226,28 @@ const getCrossPoint = (p, v, q1, q2) => {
         // console.log('');
 
         // 交点までの係数t, sを計算
-        let t = iM11*(q1x-px) + iM12*(q1y-py);
-        let s = iM21*(q1x-px) + iM22*(q1y-py);
+        let t = iM11*(q1.x-p.x) + iM12*(q1.y-p.y);
+        let s = iM21*(q1.x-p.x) + iM22*(q1.y-p.y);
 
         if ((s >= 0) && (s <= 1.0) && (t > 0)) {
             // 線分q1, q2内、かつvの正方向で交差している
-            // 交点Cを計算
-            let cx = px + t*vx;
-            let cy = py + t*vy;
-            let cp = {x: cx, y: cy};
+            // 交点cpを計算
+            let cp = vecAdd(p, vecScalar(v, t));
 
             // pからcpまでの距離
-            let v2x = cx - px;
-            let v2y = cy - py;
-            let dist = Math.sqrt(v2x*v2x + v2y*v2y);
+            let dist = vecGetLen(vecSub(cp, p));
 
             // qv = q1-->q2方向の単位ベクトル
-            let qvx = q2x - q1x;
-            let qvy = q2y - q1y;
-            let len_v3 = Math.sqrt(qvx*qvx + qvy*qvy);
-            qvx /= len_v3;
-            qvy /= len_v3;
+            let qv = vecNormalize(vecSub(q2, q1));
 
             // ip = vとqvの内積
-            let ip = vx*qvx + vy*qvy;
+            let ip = vecInnerProd(v, qv);
+
             // qv2 = vのqv方向への正射影ベクトル
-            let qv2x = ip * qvx;
-            let qv2y = ip * qvy;
-            // rv = vがcpで反射したときの方向ベクトル
-            let rvx = 2*qv2x - vx;
-            let rvy = 2*qv2y - vy;
-            let len_rv = Math.sqrt(rvx*rvx + rvy*rvy);
-            rvx /= len_rv;
-            rvy /= len_rv;
-            let refv = {x: rvx, y: rvy};
+            let qv2 = vecScalar(qv, ip);
+
+            // refv = vがcpで反射したときの方向ベクトル
+            let refv = vecNormalize(vecSub(vecScalar(qv2, 2), v));
 
             return {
                 cp: cp,
