@@ -6,49 +6,42 @@ const { BaseSpr } = require('./baseSpr');
 const U = require('./utils');
 const Wall = require('./wall');
 
+// このクラスはボールの描画をPIXI.Graphicsオブジェクトへの
+// 直接描画により行う．そのため、スプライト自身(=PIXI.Graphics)は
+// 移動せず、位置を固定(=(0, 0))のままにする．
+// そのため、BaseSpr._update()を呼ばない経路でのsetterを用意している．
+// （例：setBallPos）
 class Ball extends BaseSpr {
     constructor() {
         super();
 
         this._g = null; // スプライトイメージ(PIXI.Graphics)
-
+        
         this._r = 0;    // 半径
-        this._vx = 0;   // 移動ベクトル
-        this._vy = 0;
+    
+        // 移動ベクトル
+        this._v = {
+            x: 0.0,
+            y: 0.0
+        }
+    
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;
     }
 
-    setMousePos(mp) {
-        let mx = mp.x;
-        let my = mp.y;
-
-        let v = {
-            x: mx - this._x,
-            y: my - this._y
-        };
-        let nv = U.vecNormalize(v);
-
-        this._vx = nv.x;
-        this._vy = nv.y;
-    }
-
-    setPosDirect(mp) {
-        this._x = mp.x;
-        this._y = mp.y;    
+    setBallPos(mp) {
+        this._p = mp;
+        // ここでBaseSpr._update()を呼ばない
+        // （スプライトオブジェクト自身は移動させない）
     }
 
     getVec() {
-        return {
-            x: this._vx,
-            y: this._vy
-        };
+        return this._v;
     }
 
     // @param v [i] 方向ベクトル
     setVec(v) {
-        this._vx = v.x;
-        this._vy = v.y;
+        this._v = v;
     }
 
     init(PIXI, container, w, h) {
@@ -68,17 +61,14 @@ class Ball extends BaseSpr {
     }
 
     update(wallList) {
-        let v = {x: this._vx, y: this._vy};
-        let speed = U.vecGetLen(v);
+        let speed = U.vecGetLen(this._v);
 
         this.updateSub(wallList);
 
-        // [TODO] **** 修正 ****
-        // this._vx, _vyを元のスピードに戻す
-        let v2 = {x: this._vx, y: this._vy};
-        let vOrigSpeed = U.vecScalar(U.vecNormalize(v2), speed);
-        this._vx = vOrigSpeed.x;
-        this._vy = vOrigSpeed.y;
+        // [TODO] **** 後で修正 ****
+        // this._vを元のスピードに戻す
+        let vOrigSpeed = U.vecScalar(U.vecNormalize(this._v), speed);
+        this._v = vOrigSpeed;
 
         if (this._g) {
             // ----------------------------------------
@@ -87,14 +77,14 @@ class Ball extends BaseSpr {
             this._g.clear();
             this._g.beginFill(0x00ffff);
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
-            this._g.drawEllipse(this._x, this._y, 5, 5);  // 中心(cx, cy), 半径(rx, ry)
+            this._g.drawEllipse(this._p.x, this._p.y, 5, 5);  // 中心(cx, cy), 半径(rx, ry)
             this._g.endFill();
         }
     }
 
     updateSub(wallList) {
-        let p = {x: this._x, y: this._y};
-        let v = {x: this._vx, y: this._vy};
+        let p = this._p;
+        let v = this._v;
 
         // pをv方向に移動したときに交差する最も近い辺を求める --> nearestEdge
         let nearestEdge = null;
@@ -135,10 +125,8 @@ class Ball extends BaseSpr {
             // console.log(`newPosInfo.bRefrect=(${newPosInfo.bReflect})`);
 
             // 位置と方向ベクトルを更新
-            this._x = newPosInfo.p.x;
-            this._y = newPosInfo.p.y;
-            this._vx = newPosInfo.v.x;
-            this._vy = newPosInfo.v.y;
+            this._p = newPosInfo.p;
+            this._v = newPosInfo.v;
 
             if (newPosInfo.bReflect) {
                 // 反射した

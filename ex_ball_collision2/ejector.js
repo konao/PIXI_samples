@@ -12,40 +12,30 @@ class Ejector extends BaseSpr {
 
         this._g = null; // スプライトイメージ(PIXI.Graphics)
 
-        this._vx = 0;   // 移動ベクトル
-        this._vy = 0;
+        // ボール発射方向
+        this._v = {
+            x: 0.0,
+            y: 0.0
+        };
+
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;        
     }
 
     setMousePos(mp) {
-        let mx = mp.x;
-        let my = mp.y;
-
-        let v = {
-            x: mx - this._x,
-            y: my - this._y
-        };
+        let v = U.vecSub(mp, this._p);
         let nv = U.vecNormalize(v);
-
-        this._vx = nv.x;
-        this._vy = nv.y;
+        this._v = nv;
     }
 
     setMouesPressPos(mp) {
-        this._x = mp.x;
-        this._y = mp.y;    
-        // this.setPos({
-        //     x: mp.x,
-        //     y: mp.y
-        // });
+        this._p = mp;
+        // ここでBaseSpr._update()を呼ばない
+        // （スプライトオブジェクト自身は移動させない）
     }
 
     getVec() {
-        return {
-            x: this._vx,
-            y: this._vy
-        };
+        return this._v;
     }
 
     init(PIXI, container, w, h) {
@@ -71,20 +61,18 @@ class Ejector extends BaseSpr {
             this._g.clear();
             this._g.beginFill(0x500000);
             this._g.lineStyle(2, 0xffff00, 0.7);  // 太さ、色、アルファ(0=透明)
-            this._g.drawEllipse(this._x, this._y, 10, 10);  // 中心(cx, cy), 半径(rx, ry)
+            this._g.drawEllipse(this._p.x, this._p.y, 10, 10);  // 中心(cx, cy), 半径(rx, ry)
             this._g.endFill();
 
             // 移動方向ベクトルを描画
             this._g.lineStyle(1, 0xffffff, 0.5);  // 太さ、色、アルファ(0=透明)
-            this._g.moveTo(this._x, this._y);
-            this._g.lineTo(this._x+(this._vx*2000), this._y+(this._vy*2000));
+            this._g.moveTo(this._p.x, this._p.y);
+            this._g.lineTo(this._p.x+(this._v.x*2000), this._p.y+(this._v.y*2000));
 
             let closestCpInfo = null;
             wallList.forEach(wall => {
                 // ボールの進行線と壁の交点を計算
-                let p = {x: this._x, y: this._y};
-                let v = {x: this._vx, y: this._vy};
-                let cpInfo = wall.calcCrossPoint(p, v);
+                let cpInfo = wall.calcCrossPoint(this._p, this._v);
 
                 if (cpInfo) {
                     // pに一番近い交差点をclosestCpInfoにする

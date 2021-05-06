@@ -7,13 +7,17 @@ class BaseSpr {
     constructor() {
         this._spr = null;
 
-        // 位置        
-        this._x = 0.0; 
-        this._y = 0.0;
+        // 位置 
+        this._p = {
+            x: 0.0,
+            y: 0.0
+        };
 
         // 拡大倍率
-        this._sx = 1.0;
-        this._sy = 1.0;
+        this._scale = {
+            x: 1.0,
+            y: 1.0
+        };
 
         // 回転角（度）
         this._degRot = 0.0;
@@ -26,29 +30,21 @@ class BaseSpr {
     }
 
     getPos() {
-        return {
-            x: this._x,
-            y: this._y
-        };
+        return this._p;
     }
 
-    setPos({x, y}) {
-        this._x = x;
-        this._y = y;
+    setPos(p) {
+        this._p = p;
 
         this._update();
     }
 
     getScale() {
-        return {
-            sx: this._sx,
-            sy: this._sy
-        };
+        return this._scale;
     }
 
-    setScale({sx, sy}) {
-        this._sx = sx;
-        this._sy = sy;
+    setScale(scale) {
+        this._scale = scale;
 
         this._update();
     }
@@ -78,12 +74,11 @@ class BaseSpr {
     }
 
     _update() {
+        // このオブジェクトの状態をPIXIスプライトオブジェクトに反映させる
         if (this._spr) {
-            this._spr.x = this._x;
-            this._spr.y = this._y;
+            this._spr = this._p;
             this._spr.rotation = U.d2r(this._degRot);
-            this._spr.scale.x = this._sx;
-            this._spr.scale.y = this._sy;
+            this._spr.scale = this._scale;
             this._spr.zIndex = this._zIndex;
         }
     }

@@ -173,7 +173,7 @@ $(window).on('mousedown', e => {
 
             // ボールを生成
             let newBall = new Ball();
-            newBall.setPosDirect(ejPos);
+            newBall.setBallPos(ejPos);
             newBall.setVec(ejVec);
             const w = window.innerWidth;
             const h = window.innerHeight;
