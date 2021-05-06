@@ -16,8 +16,9 @@ const { Text } = require('./text');
 let g_w = 0;
 let g_h = 0;
 let g_bPause = false;
-let g_ballSize = 5;
-let g_ballSpeed = 1;
+let g_nBalls = 0;   // ボールの個数
+let g_ballSize = 5; // ボールのサイズ
+let g_ballSpeed = 1;    // ボールのスピード
 
 let g_ej = new Ejector();
 let g_ballList = [];
@@ -109,7 +110,7 @@ $(window).on('load', () => {
         g_wallList.push(w6);
 
         // イジェクター生成
-        g_ej.setPos({x: 0, y: 0});
+        g_ej.setPos({x: g_w/2, y: g_h/2});
         g_ej.init(PIXI, app.stage, g_w, g_h);
 
         // 操作説明
@@ -129,7 +130,7 @@ $(window).on('load', () => {
 
         g_infoText = new Text()
             .initSprite(PIXI, app.stage)
-            .setText(`size: ${g_ballSize}  speed: ${g_ballSpeed}`)
+            .setText(`balls: ${g_nBalls}  size: ${g_ballSize}  speed: ${g_ballSpeed}`)
             .setPos(10, 30)
             .setFontSize(20)
             .setColor('cyan');
@@ -151,7 +152,7 @@ $(window).on('load', () => {
 
 const showStatus = () => {
     if (g_infoText) {
-        g_infoText.setText(`size: ${g_ballSize}  speed: ${g_ballSpeed}`)
+        g_infoText.setText(`balls: ${g_nBalls}  size: ${g_ballSize}  speed: ${g_ballSpeed}`);
     }
 }
 
@@ -199,6 +200,8 @@ $(window).on('mousedown', e => {
             newBall.init(PIXI, app.stage, g_w, g_h);
 
             g_ballList.push(newBall);
+            g_nBalls++;
+            showStatus();
         }
     }
 });

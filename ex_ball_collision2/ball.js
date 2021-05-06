@@ -81,7 +81,7 @@ class Ball extends BaseSpr {
             //  スプライトの再描画（画像イメージの更新）
             // ----------------------------------------
             this._g.clear();
-            this._g.beginFill(0x00ffff);
+            this._g.beginFill(0x0088ff);
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
             this._g.drawEllipse(this._p.x, this._p.y, this._r, this._r);  // 中心(cx, cy), 半径(rx, ry)
             this._g.endFill();
