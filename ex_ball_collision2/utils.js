@@ -105,8 +105,20 @@ const vecInnerProd = (v1, v2) => {
 //
 // @return vの長さ
 // -----------------------------------------------
-const vecGetLen = (v) => {
+const vecLen = (v) => {
     return Math.sqrt(v.x*v.x + v.y*v.y);
+}
+
+// -----------------------------------------------
+// 2点間の距離を返す
+//
+// @param v1 {x, y} [i] ベクトル1
+// @param v2 {x, y} [i] ベクトル2
+//
+// @retutrn v1とv2の距離
+// -----------------------------------------------
+const vecDist = (v1, v2) => {
+    return vecLen(vecSub(v1, v2));
 }
 
 // -----------------------------------------------
@@ -118,7 +130,7 @@ const vecGetLen = (v) => {
 // もともとゼロベクトルだった場合はそのままゼロベクトルを返す
 // -----------------------------------------------
 const vecNormalize = (v) => {
-    const len = vecGetLen(v);
+    const len = vecLen(v);
     if (len > 0) {
         return {
             x: v.x/len,
@@ -235,7 +247,7 @@ const getCrossPoint = (p, v, q1, q2) => {
             let cp = vecAdd(p, vecScalar(v, t));
 
             // pからcpまでの距離
-            let dist = vecGetLen(vecSub(cp, p));
+            let dist = vecLen(vecSub(cp, p));
 
             // qv = q1-->q2方向の単位ベクトル
             let qv = vecNormalize(vecSub(q2, q1));
@@ -299,7 +311,7 @@ const reflect = (p, v, r, q1, q2) => {
         }
     } else {
         // 交点あり
-        let d = vecGetLen(v);   // 移動距離
+        let d = vecLen(v);   // 移動距離
         let dist = cpInfo.dist; // pからLとWの交点までの距離
         if (dist-d > r) {
             // 衝突していない
@@ -344,7 +356,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 
 }
 
-// 点pから線分m(pX, pY)への垂線kの足を計算
+// 点pから線分m(pX, pY)への垂線kの足pFを計算
 //
 // @param p [i] 基準点
 // @param pX [i] 線分mの端点1
@@ -355,10 +367,53 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 // {
 //    a: number,    // 線分mのパラメータ
 //    b: number,    // 垂線kのパラメータ
-//    dist: number  // pからmへの距離(>=0)
+//    dist: number  // pからmへの距離(>=0)．pFが線分m上にない(pX-->pYの間にない)場合はnullになる．
 // }
 const calcFoot = (p, pX, pY) => {
+    let v = U.vecNormalize(U.vecSub(pY, pX))    // pX --> pYへの単位ベクトル
+    let u = {   // vに直交する単位ベクトル
+        x: v.y,
+        y: -v.x
+    };
 
+    let M11 = u.x;
+    let M21 = u.y;
+    let M12 = -v.x;
+    let M22 = -v.y;
+
+    let D = M11*M22-M21*M12;    // Determinant
+    if (D === 0) {
+        // mとkが平行（ここには来ないはず）
+        return null;
+    } else {
+        // Mの逆行列-->iM (inverse of M)
+        let iM11 = M22 / D;
+        let iM21 = -M21 / D;
+        let iM12 = -M12 / D;
+        let iM22 = M11 / D;
+
+        let a = iM11*(pX.x-p.x) + iM12*(pX.y-p.y);
+        let b = iM21*(pX.x-p.x) + iM22*(pX.y-p.y);
+
+        if ((0 <= b) && (b <= 1)) {
+            // Fは線分m上
+            let pF = U.vecAdd(p, U.vecScalar(u, b));
+            let dist = U.vecDist(p, pF);    // pからpF(垂線の足)までの距離
+
+            return {
+                a: a,
+                b: b,
+                dist: dist
+            }
+        } else {
+            // Fは線分m上にはない
+            return {
+                a: a,
+                b: b,
+                dist: null
+            }
+        }
+    }
 }
 
 module.exports = {
@@ -371,7 +426,8 @@ module.exports = {
     vecSub,
     vecScalar,
     vecInnerProd,
-    vecGetLen,
+    vecLen,
+    vecDist,
     vecNormalize,
     getNearestPos,
     getCrossPoint,

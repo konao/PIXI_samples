@@ -67,7 +67,7 @@ class Ball extends BaseSpr {
     }
 
     update(wallList) {
-        let speed = U.vecGetLen(this._v);
+        let speed = U.vecLen(this._v);
 
         this.updateSub(wallList);
 
