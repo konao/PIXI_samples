@@ -325,6 +325,42 @@ const reflect = (p, v, r, q1, q2) => {
     }
 }
 
+// 2つの線分間の最短距離を求める．
+// 後続の計算に必要な補助情報も返す．
+//
+// @param pA [i] 線分lの端点1
+// @param pB [i] 線分lの端点2
+// @param pX [i] 線分mの端点1
+// @param pY [i] 線分mの端点2
+// @param r [i] ボールの半径
+//
+// @return 距離情報（フォーマットは以下）
+// {
+//    dmin : number, // 最短距離
+//    (dmin>0 : lとmは交差しない．dmin==0 : lとmは交差する．dmin==null : lとmは接触しない)
+//    P : Vec   // ボールがmと接触する時の中心座標(dmin >= 0のときのみ意味あり)
+// }
+const calcLinesDist = (pA, pB, pX, pY, r) => {
+
+}
+
+// 点pから線分m(pX, pY)への垂線kの足を計算
+//
+// @param p [i] 基準点
+// @param pX [i] 線分mの端点1
+// @param pY [i] 線分mの端点2
+// p, pX, pYはベクトル
+//
+// @return 距離情報
+// {
+//    a: number,    // 線分mのパラメータ
+//    b: number,    // 垂線kのパラメータ
+//    dist: number  // pからmへの距離(>=0)
+// }
+const calcFoot = (p, pX, pY) => {
+
+}
+
 module.exports = {
     randDouble,
     randInt,
