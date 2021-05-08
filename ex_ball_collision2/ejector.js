@@ -5,6 +5,7 @@
 const { BaseSpr } = require('./baseSpr');
 const U = require('./utils');
 const Wall = require('./wall');
+const { Text } = require('./text'); // [FOOT]
 
 class Ejector extends BaseSpr {
     constructor() {
@@ -51,6 +52,14 @@ class Ejector extends BaseSpr {
         this._spr = cont;
 
         container.addChild(cont);
+
+        // [FOOT]
+        this._msg = new Text();
+        this._msg.initSprite(PIXI, container)
+            .setText('msg')
+            .setPos(10, 800)
+            .setFontSize(20)
+            .setColor('cyan');
     }
 
     update(wallList) {
@@ -93,10 +102,36 @@ class Ejector extends BaseSpr {
 
                 // 反射ベクトル
                 let rv = closestCpInfo.refv;
-                this._g.lineStyle(1, 0x0ff00, 0.5);
+                this._g.lineStyle(1, 0x00ff00, 0.5);
                 this._g.moveTo(cp.x, cp.y);
                 this._g.lineTo(cp.x+rv.x*2000, cp.y+rv.y*2000);
             }
+
+            // ******* 垂線の足計算のテスト ********
+            // [FOOT]
+            // let pX = {x: 100, y: 300};
+            // let pY = {x: 200, y: 600};
+            
+            // this._g.lineStyle(1, 0xffffff, 1);
+            // this._g.moveTo(pX.x, pX.y);
+            // this._g.lineTo(pY.x, pY.y);
+
+            // let foot = U.calcFoot(this._p, pX, pY);
+            // if (foot === null) {
+            //     this._msg.setText('something wrong');
+            // } else {
+            //     let msg = '';
+            //     if (foot.dist === null) {
+            //         msg = `p is not on pX->pY (a=${foot.a}, b=${foot.b})`;
+            //     } else {
+            //         msg = `dist=${foot.dist}, pF=(${foot.pF.x}, ${foot.pF.y}), a=${foot.a}, b=${foot.b}`;
+
+            //         this._g.lineStyle(1, 0x00ffff, 1);
+            //         this._g.moveTo(this._p.x, this._p.y);
+            //         this._g.lineTo(foot.pF.x, foot.pF.y);
+            //     }
+            //     this._msg.setText(msg);
+            // }
         }
     }
 }

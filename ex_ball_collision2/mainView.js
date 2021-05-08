@@ -120,7 +120,7 @@ $(window).on('load', () => {
             .setPos(10, 10)
             .setFontSize(20)
             .setColor('cyan');
-        
+    
         new Text()
             .initSprite(PIXI, app.stage)
             .setText('mouse left click : eject ball / right click : ejector pos move')
@@ -132,6 +132,16 @@ $(window).on('load', () => {
             .initSprite(PIXI, app.stage)
             .setText(`balls: ${g_nBalls}  size: ${g_ballSize}  speed: ${g_ballSpeed}`)
             .setPos(10, 30)
+            .setFontSize(20)
+            .setColor('cyan');
+
+        // [TEST]
+        g_G = new PIXI.Graphics();
+        app.stage.addChild(g_G);
+        g_Msg = new Text()
+            .initSprite(PIXI, app.stage)
+            .setText(`dist`)
+            .setPos(10, 850)
             .setFontSize(20)
             .setColor('cyan');
 
@@ -174,6 +184,15 @@ $(window).on('mousemove', e => {
     }
 });
 
+// [TEST]
+let g_cc = 0;
+let g_pA = null;
+let g_pB = null;
+let g_pX = null;
+let g_pY = null;
+let g_G = null;
+let g_Msg = null;
+
 $(window).on('mousedown', e => {
     // console.log(`x=${e.clientX}, y=${e.clientY}`);
     console.log(e);
@@ -183,7 +202,55 @@ $(window).on('mousedown', e => {
             x: e.clientX,
             y: e.clientY
         };
-        if (g_ej) g_ej.setMouesPressPos(mousePressPos);        
+        if (g_ej) g_ej.setMouesPressPos(mousePressPos);
+
+        switch (g_cc) {
+            case 0: {
+                g_pA = mousePressPos;
+                g_cc++;
+                break;
+            }
+            case 1: {
+                g_pB = mousePressPos;
+                g_cc++;
+                break;
+            }
+            case 2: {
+                g_pX = mousePressPos;
+                g_cc++;
+                break;
+            }
+            case 3: {
+                g_pY = mousePressPos;
+                g_cc=0;
+                break;
+            }
+        }
+        if ((g_pA !== null) && (g_pB !== null) && (g_pX !== null) && (g_pY !== null)) {
+            g_G.clear();
+            g_G.lineStyle(1, 0xffff00, 1);  // 黄色
+            g_G.moveTo(g_pA.x, g_pA.y);
+            g_G.lineTo(g_pB.x, g_pB.y);
+
+            g_G.lineStyle(1, 0xff0000, 1);  // 赤
+            g_G.moveTo(g_pX.x, g_pX.y);
+            g_G.lineTo(g_pY.x, g_pY.y);
+
+            let di = U.calcLinesDist(g_pA, g_pB, g_pX, g_pY, 0);
+            if (di !== null) {
+                if (di.dmin !== null) {
+                    g_Msg.setText(`dmin=${di.dmin}`);
+                }
+
+                if (di.pMin !== null) {
+                    g_G.lineStyle(1, 0x00ffff, 1);
+                    g_G.beginFill(0x0000ff);
+                    g_G.drawEllipse(di.pMin.x, di.pMin.y, 7, 7);
+                    g_G.endFill();
+                }
+            }
+        }
+
     } else if (e.which === 1) {
         // 左ボタンクリック
         if (g_ej) {

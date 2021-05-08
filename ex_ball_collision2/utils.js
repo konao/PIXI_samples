@@ -340,41 +340,189 @@ const reflect = (p, v, r, q1, q2) => {
 // 2つの線分間の最短距離を求める．
 // 後続の計算に必要な補助情報も返す．
 //
-// @param pA [i] 線分lの端点1
-// @param pB [i] 線分lの端点2
-// @param pX [i] 線分mの端点1
-// @param pY [i] 線分mの端点2
+// @param pA [i] 線分gの端点1
+// @param pB [i] 線分gの端点2
+// @param pX [i] 線分lの端点1
+// @param pY [i] 線分lの端点2
 // @param r [i] ボールの半径
 //
 // @return 距離情報（フォーマットは以下）
 // {
 //    dmin : number, // 最短距離
-//    (dmin>0 : lとmは交差しない．dmin==0 : lとmは交差する．dmin==null : lとmは接触しない)
-//    P : Vec   // ボールがmと接触する時の中心座標(dmin >= 0のときのみ意味あり)
+//    (dmin>0 : lとgは交差しない．dmin==0 : lとgは交差する．dmin==null : lとgは接触しない)
+//    pC : Vec  // ボールがlと接触する時の中心座標(dmin >= 0のときのみ意味あり)
+//    pMin: Vec  // 最短距離を与える点 (for debug)
 // }
 const calcLinesDist = (pA, pB, pX, pY, r) => {
+    // pAからlへの垂線の足を計算 --> pFA
+    let pFA = calcFoot(pA, pX, pY);
+    if (pFA.pF !== null) {
+        console.log(`pFA={pF: (${pFA.pF.x}, ${pFA.pF.y}), dist: ${pFA.dist}, a: ${pFA.a}, b: ${pFA.b}}`);
+    } else {
+        console.log(`pFA={pF: null, dist: null, a: ${pFA.a}, b: ${pFA.b}}`);
+    }
 
+    // pBからmへの垂線の足を計算 --> pFB
+    let pFB = calcFoot(pB, pX, pY);
+    if (pFB.pF !== null) {
+        console.log(`pFB={pF: (${pFB.pF.x}, ${pFB.pF.y}), dist: ${pFB.dist}, a: ${pFB.a}, b: ${pFB.b}}`);
+    } else {
+        console.log(`pFB={pF: null, dist: null, a: ${pFB.a}, b: ${pFB.b}}`);
+    }
+    
+
+    if ((pFA.pF === null) && (pFB.pF === null) && ((pFA.b>1 && pFB.b>1) || (pFA.b<0 && pFB.b<0))) {
+        // pA, pBの足が、共にl上になく、しかも両方ともlの同じ側の外れにある
+        // ---> dmin==nullとする
+        console.log('[1] pA, pB neither has foot');
+        return {
+            dmin: null,
+            pC: null,
+            pMin: null
+        }
+    } else {
+        if (pFA.a * pFB.a > 0) {
+            // pAとpBはlの同じ側にある
+            // ---> gとlは交差しない(dmin>0)
+            if ((pFA.pF !== null) && (pFB.pF !== null)) {
+                console.log('[2] pA, pB both has perpendicular point');
+                // pA, pBどちらからも垂線が引ける
+                // 短い方の距離を最短距離とする
+                if (pFA.dist < pFB.dist) {
+                    // pCを求める
+                    let pC = null;  // **** TODO ****
+
+                    return {
+                        dmin: pFA.dist,
+                        pC: pC,
+                        pMin: pA
+                    }
+                } else {
+                    // pCを求める
+                    let pC = null;  // **** TODO ****
+
+                    return {
+                        dmin: pFB.dist,
+                        pC: pC,
+                        pMin: pB
+                    }
+                }
+            } else {
+                console.log('[3] either pA or pB has perpendicular point');
+                // mの方向ベクトル
+                let v =  vecSub(pY, pX);
+                
+                // mの垂線のベクトル
+                let u = {
+                    x: v.y,
+                    y: -v.x
+                }
+
+                // pXを通ってlに垂直な直線とgの交点への距離 --> pX_g_dist
+                let pX_g_dist = calcDist_PointToLine(pX, u, pA, pB);
+
+                // pYを通ってlに垂直な直線とgの交点への距離 --> pY_g_dist
+                let pY_g_dist = calcDist_PointToLine(pY, u, pA, pB);
+
+                // pFA.dist, pFB.dist, pX_g_dist, pY_g_distのうちで、最も小さい値を最短距離とする．
+                let dmin = -1;
+                let pMin = null;
+                if (pFA.dist !== null) {
+                    console.log(`pFA.dist=${pFA.dist}`);
+                    dmin = pFA.dist;
+                    pMin = pA;
+                }
+                if (pFB.dist !== null) {
+                    console.log(`pFB.dist=${pFB.dist}`);
+                    if (dmin<0 || pFB.dist<dmin) {
+                        dmin = pFB.dist;
+                        pMin = pB;
+                    }
+                }
+                if (pX_g_dist.dist !== null) {
+                    console.log(`pX_g_dist=${pX_g_dist.dist}`);
+                    if (dmin<0 || pX_g_dist.dist<dmin) {
+                        dmin = pX_g_dist.dist;
+                        pMin = pX;
+                    }
+                }
+                if (pY_g_dist.dist !== null) {
+                    console.log(`pY_g_dist=${pY_g_dist.dist}`);
+                    if (dmin<0 || pY_g_dist.dist<dmin) {
+                        dmin = pY_g_dist.dist;
+                        pMin = pY;
+                    }
+                }
+
+                // pCを求める
+                let pC = null;  // **** TODO ****
+
+                return {
+                    dmin: 0,
+                    pC: pC,
+                    pMin: pMin
+                }
+            }
+        } else {
+            console.log('[4] pA and pB are in other side');
+            // pAとpBはlの反対側にある
+            // ---> gとlは交差する(dmin=0)
+
+            // pCを求める
+            let pC = null;  // **** TODO ****
+
+            return {
+                dmin: 0,
+                pC: pC,
+                pMin: null
+            }
+        }
+    }
 }
 
-// 点pから線分m(pX, pY)への垂線kの足pFを計算
+// 点pから線分l(pX, pY)への垂線mの足pFを計算
 //
 // @param p [i] 基準点
-// @param pX [i] 線分mの端点1
-// @param pY [i] 線分mの端点2
+// @param pX [i] 線分lの端点1
+// @param pY [i] 線分lの端点2
 // p, pX, pYはベクトル
 //
 // @return 距離情報
 // {
-//    a: number,    // 線分mのパラメータ
-//    b: number,    // 垂線kのパラメータ
-//    dist: number  // pからmへの距離(>=0)．pFが線分m上にない(pX-->pYの間にない)場合はnullになる．
+//    pF: {x, y},   // 垂線の足の位置
+//    dist: number,  // pからmへの距離(>=0)．pFが線分m上にない(pX-->pYの間にない)場合はnullになる．
+//    a: number,    // 垂線mのパラメータ
+//    b: number     // 線分lのパラメータ
 // }
+// 注）pF, distと異なり、a, bは常に求まる（pF, distはnullになり得る）
 const calcFoot = (p, pX, pY) => {
-    let v = U.vecNormalize(U.vecSub(pY, pX))    // pX --> pYへの単位ベクトル
-    let u = {   // vに直交する単位ベクトル
+    let v = vecSub(pY, pX);    // pX --> pYへのベクトル
+    let u = {   // vに直交するベクトル
         x: v.y,
         y: -v.x
     };
+
+    return calcDist_PointToLine(p, u, pX, pY);
+}
+
+// pを通って方向ベクトルuの直線mと線分l(pX-->pX)の交点pFを求め、
+// pからpFまでの距離他の情報を返す
+//
+// @param p [i] 基準点
+// @param m [i] mの方向ベクトル
+// @param pX [i] lの端点1
+// @param pY [i] lの端点2
+//
+// @return 距離情報
+// {
+//    pF: {x, y},   // mとlの交点
+//    dist: number,  // pからlへの距離(>=0)．pFが線分l上にない(pX-->pYの間にない)場合はnullになる．
+//    a: number,    // 線分mのパラメータ
+//    b: number     // 垂線kのパラメータ
+// }
+// 注）pF, distと異なり、a, bは常に求まる（pF, distはnullになり得る）
+const calcDist_PointToLine = (p, u, pX, pY) => {
+    let v = vecSub(pY, pX);    // pX --> pYへのベクトル
 
     let M11 = u.x;
     let M21 = u.y;
@@ -397,20 +545,22 @@ const calcFoot = (p, pX, pY) => {
 
         if ((0 <= b) && (b <= 1)) {
             // Fは線分m上
-            let pF = U.vecAdd(p, U.vecScalar(u, b));
-            let dist = U.vecDist(p, pF);    // pからpF(垂線の足)までの距離
+            let pF = vecAdd(p, vecScalar(u, a));
+            let dist = vecDist(p, pF);    // pからpF(垂線の足)までの距離
 
             return {
+                dist: dist,
+                pF: pF,
                 a: a,
-                b: b,
-                dist: dist
+                b: b
             }
         } else {
             // Fは線分m上にはない
             return {
+                dist: null,
+                pF: null,
                 a: a,
-                b: b,
-                dist: null
+                b: b
             }
         }
     }
@@ -431,5 +581,8 @@ module.exports = {
     vecNormalize,
     getNearestPos,
     getCrossPoint,
-    reflect
+    reflect,
+    calcLinesDist,
+    calcFoot,
+    calcDist_PointToLine
 }
