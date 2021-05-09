@@ -337,6 +337,57 @@ const reflect = (p, v, r, q1, q2) => {
     }
 }
 
+// calcLinesDist用の補助関数．
+// オブジェクトのdistメンバーの値が最小の要素を配列から検索する
+//
+// @param xs [i] 距離情報の配列 (=[x])
+// 各要素(=x)は、targetとauxメンバを持つ．
+// targetにセットされているオブジェクトのdistメンバの値を比較し、
+// それが最小のxを返す．
+// auxには任意のオブジェクトをセットできる．（=補助情報）
+//
+// @return distの最小値を含む要素．全要素のdistがnullの場合はnullが返る
+//
+// @example
+// getMinDist([
+//     {
+//         target: {dist: 3},
+//         aux: 'A'
+//     },
+//     {
+//         target: {dist: null},
+//         aux: 'B'
+//     },
+//     {
+//         target: {dist: 2},
+//         aux: 'C'
+//     }
+// ]);
+// --> {
+//     target: {dist: 2},
+//     aux: 'C'
+// }
+//
+// getMinDist([
+//     {
+//         target: {dist: null},
+//         aux: 'A'
+//     }
+// ]);
+// ---> null
+const getMinDist = (xs) => {
+    let result = xs.reduce((prev, curr) => {
+        if (curr.target.dist === null) {
+            return prev;
+        } else if ((prev === null) || (curr.target.dist < prev.target.dist)) {
+            return curr;
+        } else {
+            return prev;
+        }
+    }, null);
+    return result;
+}
+
 // 2つの線分間の最短距離を求める．
 // 後続の計算に必要な補助情報も返す．
 //
@@ -350,132 +401,92 @@ const reflect = (p, v, r, q1, q2) => {
 // {
 //    dmin : number, // 最短距離
 //    (dmin>0 : lとgは交差しない．dmin==0 : lとgは交差する．dmin==null : lとgは接触しない)
-//    pC : Vec  // ボールがlと接触する時の中心座標(dmin >= 0のときのみ意味あり)
+//    pTangentCenter : Vec  // ボールがlと接触する時の中心座標(dmin >= 0のときのみ意味あり)
 //    pMin: Vec  // 最短距離を与える点 (for debug)
 // }
 const calcLinesDist = (pA, pB, pX, pY, r) => {
-    // pAからlへの垂線の足を計算 --> pFA
-    let pFA = calcFoot(pA, pX, pY);
-    if (pFA.pF !== null) {
-        console.log(`pFA={pF: (${pFA.pF.x}, ${pFA.pF.y}), dist: ${pFA.dist}, a: ${pFA.a}, b: ${pFA.b}}`);
-    } else {
-        console.log(`pFA={pF: null, dist: null, a: ${pFA.a}, b: ${pFA.b}}`);
+    // lの方向ベクトル
+    let v =  vecSub(pY, pX);
+
+    // lの垂線のベクトル
+    let u = {
+        x: v.y,
+        y: -v.x
     }
 
-    // pBからmへの垂線の足を計算 --> pFB
-    let pFB = calcFoot(pB, pX, pY);
-    if (pFB.pF !== null) {
-        console.log(`pFB={pF: (${pFB.pF.x}, ${pFB.pF.y}), dist: ${pFB.dist}, a: ${pFB.a}, b: ${pFB.b}}`);
-    } else {
-        console.log(`pFB={pF: null, dist: null, a: ${pFB.a}, b: ${pFB.b}}`);
-    }
+    // pAからlへの垂線の足を計算 --> pA_l
+    let pA_l = calcDist_PointToLine(pA, u, pX, pY);
+
+    // pBからmへの垂線の足を計算 --> pB_l
+    let pB_l = calcDist_PointToLine(pB, u, pX, pY);
+
+    // pXを通ってlに垂直な直線とgの交点への距離 --> pX_g
+    let pX_g = calcDist_PointToLine(pX, u, pA, pB);
+
+    // pYを通ってlに垂直な直線とgの交点への距離 --> pY_g
+    let pY_g = calcDist_PointToLine(pY, u, pA, pB);
     
+    if (pA_l.a * pB_l.a > 0) {
+        console.log('[1] pA and pB are in same side');
+        // pAとpBはlの同じ側にある
+        // ---> gとlは交差しない(dmin>0)        
+    } else {
+        console.log('[2] pA and pB are in other side');
+        // pAとpBはlの反対側にある
+        // ---> gとlは交差する
 
-    if ((pFA.pF === null) && (pFB.pF === null) && ((pFA.b>1 && pFB.b>1) || (pFA.b<0 && pFB.b<0))) {
-        // pA, pBの足が、共にl上になく、しかも両方ともlの同じ側の外れにある
-        // ---> dmin==nullとする
-        console.log('[1] pA, pB neither has foot');
+        // gとlの交点を求める --> pC
+        let u = vecSub(pB, pA);
+        let pC = calcDist_PointToLine(pA, u, pX, pY);
+
+        if ((pC.b >= 0) && (pC.b <= 1.0)) {
+            // pCがl上にある --> dmin=0
+            console.log('[2-1] cross point is on XY');
+
+            // pTCを求める [TODO]
+            let pTC = null;
+            
+            return {
+                dmin: 0,
+                pTangentCenter: pTC,
+                pMin: pC.pF
+            };
+        } else {
+            console.log('[2-1] cross point is outside of XY');
+            // ない --> pA, pBからlへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
+            // のうちの、最も小さい値をdminとする．
+        }
+    }
+
+    // pA_l.dist, pB_l.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
+    let minElem = getMinDist([{
+        target: pA_l,
+        aux: pA
+    }, {
+        target: pB_l,
+        aux: pB
+    }, {
+        target: pX_g,
+        aux: pX
+    }, {
+        target: pY_g,
+        aux: pY
+    }]);
+
+    if (minElem === null) {
         return {
             dmin: null,
-            pC: null,
+            pTangentCenter: null,
             pMin: null
         }
     } else {
-        if (pFA.a * pFB.a > 0) {
-            // pAとpBはlの同じ側にある
-            // ---> gとlは交差しない(dmin>0)
-            if ((pFA.pF !== null) && (pFB.pF !== null)) {
-                console.log('[2] pA, pB both has perpendicular point');
-                // pA, pBどちらからも垂線が引ける
-                // 短い方の距離を最短距離とする
-                if (pFA.dist < pFB.dist) {
-                    // pCを求める
-                    let pC = null;  // **** TODO ****
+        // pTCを求める [TODO]
+        let pTC = null;
 
-                    return {
-                        dmin: pFA.dist,
-                        pC: pC,
-                        pMin: pA
-                    }
-                } else {
-                    // pCを求める
-                    let pC = null;  // **** TODO ****
-
-                    return {
-                        dmin: pFB.dist,
-                        pC: pC,
-                        pMin: pB
-                    }
-                }
-            } else {
-                console.log('[3] either pA or pB has perpendicular point');
-                // mの方向ベクトル
-                let v =  vecSub(pY, pX);
-                
-                // mの垂線のベクトル
-                let u = {
-                    x: v.y,
-                    y: -v.x
-                }
-
-                // pXを通ってlに垂直な直線とgの交点への距離 --> pX_g_dist
-                let pX_g_dist = calcDist_PointToLine(pX, u, pA, pB);
-
-                // pYを通ってlに垂直な直線とgの交点への距離 --> pY_g_dist
-                let pY_g_dist = calcDist_PointToLine(pY, u, pA, pB);
-
-                // pFA.dist, pFB.dist, pX_g_dist, pY_g_distのうちで、最も小さい値を最短距離とする．
-                let dmin = -1;
-                let pMin = null;
-                if (pFA.dist !== null) {
-                    console.log(`pFA.dist=${pFA.dist}`);
-                    dmin = pFA.dist;
-                    pMin = pA;
-                }
-                if (pFB.dist !== null) {
-                    console.log(`pFB.dist=${pFB.dist}`);
-                    if (dmin<0 || pFB.dist<dmin) {
-                        dmin = pFB.dist;
-                        pMin = pB;
-                    }
-                }
-                if (pX_g_dist.dist !== null) {
-                    console.log(`pX_g_dist=${pX_g_dist.dist}`);
-                    if (dmin<0 || pX_g_dist.dist<dmin) {
-                        dmin = pX_g_dist.dist;
-                        pMin = pX;
-                    }
-                }
-                if (pY_g_dist.dist !== null) {
-                    console.log(`pY_g_dist=${pY_g_dist.dist}`);
-                    if (dmin<0 || pY_g_dist.dist<dmin) {
-                        dmin = pY_g_dist.dist;
-                        pMin = pY;
-                    }
-                }
-
-                // pCを求める
-                let pC = null;  // **** TODO ****
-
-                return {
-                    dmin: 0,
-                    pC: pC,
-                    pMin: pMin
-                }
-            }
-        } else {
-            console.log('[4] pA and pB are in other side');
-            // pAとpBはlの反対側にある
-            // ---> gとlは交差する(dmin=0)
-
-            // pCを求める
-            let pC = null;  // **** TODO ****
-
-            return {
-                dmin: 0,
-                pC: pC,
-                pMin: null
-            }
+        return {
+            dmin: minElem.target.dist,
+            pTangentCenter: pTC,
+            pMin: minElem.aux
         }
     }
 }
@@ -490,7 +501,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 // @return 距離情報
 // {
 //    pF: {x, y},   // 垂線の足の位置
-//    dist: number,  // pからmへの距離(>=0)．pFが線分m上にない(pX-->pYの間にない)場合はnullになる．
+//    dist: number,  // pからlへの距離(>=0)．pFが線分l上にない(pX-->pYの間にない)場合はnullになる．
 //    a: number,    // 垂線mのパラメータ
 //    b: number     // 線分lのパラメータ
 // }
@@ -518,7 +529,7 @@ const calcFoot = (p, pX, pY) => {
 //    pF: {x, y},   // mとlの交点
 //    dist: number,  // pからlへの距離(>=0)．pFが線分l上にない(pX-->pYの間にない)場合はnullになる．
 //    a: number,    // 線分mのパラメータ
-//    b: number     // 垂線kのパラメータ
+//    b: number     // 線分lのパラメータ
 // }
 // 注）pF, distと異なり、a, bは常に求まる（pF, distはnullになり得る）
 const calcDist_PointToLine = (p, u, pX, pY) => {
@@ -582,6 +593,7 @@ module.exports = {
     getNearestPos,
     getCrossPoint,
     reflect,
+    getMinDist,
     calcLinesDist,
     calcFoot,
     calcDist_PointToLine

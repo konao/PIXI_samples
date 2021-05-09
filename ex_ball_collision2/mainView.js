@@ -240,6 +240,8 @@ $(window).on('mousedown', e => {
             if (di !== null) {
                 if (di.dmin !== null) {
                     g_Msg.setText(`dmin=${di.dmin}`);
+                } else {
+                    g_Msg.setText(`dmin=null`);
                 }
 
                 if (di.pMin !== null) {
@@ -319,3 +321,56 @@ $(window).on('keydown', e => {
         }
     }
 });
+
+// test
+let dists;
+dists = [
+    {target: {dist: 10}, aux: 'A'},
+    {target: {dist: null}, aux: 'B'},
+    {target: {dist: 5}, aux: 'C'},
+    {target: {dist: null}, aux: 'D'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [
+    {target: {dist: -3}, aux: 'A'},
+    {target: {dist: 10}, aux: 'B'},
+    {target: {dist: 5}, aux: 'C'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [
+    {target: {dist: null}, aux: 'A'},
+    {target: {dist: 10}, aux: 'B'},
+    {target: {dist: null}, aux: 'C'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [
+    {target: {dist: null}, aux: 'A'},
+    {target: {dist: 10}, aux: 'B'},
+    {target: {dist: 2}, aux: 'C'},
+    {target: {dist: null}, aux: 'D'},
+    {target: {dist: 8}, aux: 'E'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [
+    {target: {dist: 7}, aux: 'A'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [
+    {target: {dist: null}, aux: 'A'},
+    {target: {dist: null}, aux: 'B'},
+    {target: {dist: null}, aux: 'C'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [
+    {target: {dist: null}, aux: 'A'}
+];
+console.log(U.getMinDist(dists));
+
+dists = [];
+console.log(U.getMinDist(dists));
