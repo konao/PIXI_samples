@@ -491,31 +491,6 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     }
 }
 
-// 点pから線分l(pX, pY)への垂線mの足pFを計算
-//
-// @param p [i] 基準点
-// @param pX [i] 線分lの端点1
-// @param pY [i] 線分lの端点2
-// p, pX, pYはベクトル
-//
-// @return 距離情報
-// {
-//    pF: {x, y},   // 垂線の足の位置
-//    dist: number,  // pからlへの距離(>=0)．pFが線分l上にない(pX-->pYの間にない)場合はnullになる．
-//    a: number,    // 垂線mのパラメータ
-//    b: number     // 線分lのパラメータ
-// }
-// 注）pF, distと異なり、a, bは常に求まる（pF, distはnullになり得る）
-const calcFoot = (p, pX, pY) => {
-    let v = vecSub(pY, pX);    // pX --> pYへのベクトル
-    let u = {   // vに直交するベクトル
-        x: v.y,
-        y: -v.x
-    };
-
-    return calcDist_PointToLine(p, u, pX, pY);
-}
-
 // pを通って方向ベクトルuの直線mと線分l(pX-->pX)の交点pFを求め、
 // pからpFまでの距離他の情報を返す
 //
@@ -595,6 +570,5 @@ module.exports = {
     reflect,
     getMinDist,
     calcLinesDist,
-    calcFoot,
     calcDist_PointToLine
 }
