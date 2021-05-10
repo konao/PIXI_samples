@@ -377,7 +377,7 @@ const reflect = (p, v, r, q1, q2) => {
 // ---> null
 const getMinDist = (xs) => {
     let result = xs.reduce((prev, curr) => {
-        if (curr.target.dist === null) {
+        if (!curr.target.insideSegment) {
             return prev;
         } else if ((prev === null) || (curr.target.dist < prev.target.dist)) {
             return curr;
@@ -443,8 +443,11 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // pCがl上にある --> dmin=0
             console.log('[2-1] cross point is on XY');
 
-            // pTCを求める [TODO]
-            let pTC = null;
+            // pTCを求める
+            let b = pA_l.dist;
+            let k = r/b;
+            console.log(`[0] b=${b}, k=${k}`);
+            let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
             
             return {
                 dmin: 0,
@@ -480,8 +483,26 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             pMin: null
         }
     } else {
-        // pTCを求める [TODO]
+        // pTCを求める 
         let pTC = null;
+
+        if (minElem.target.dist < r) {
+            // lへの最短距離がrより小さい = ボールがlに接触する
+            let a = minElem.target.dist;
+            let b = pA_l.dist;
+            if (minElem.aux === pB) {
+                let k = (r-a)/(b-a);
+                console.log(`[1] a=${a}, b=${b}, k=${k}`);
+                pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
+            } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
+                if (minElem.target.b > 0) {
+                    // XgまたはYgが線分g上にある場合のみpTCを求める
+                    let k = (r-a)/(b-a);
+                    console.log(`[2] a=${a}, b=${b}, k=${k}`);
+                    pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
+                }
+            }
+        }
 
         return {
             dmin: minElem.target.dist,
@@ -502,11 +523,11 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 // @return 距離情報
 // {
 //    pF: {x, y},   // mとlの交点
-//    dist: number,  // pからlへの距離(>=0)．pFが線分l上にない(pX-->pYの間にない)場合はnullになる．
+//    dist: number,  // pからlへの距離(>=0)
+//    insideSegment: boolean,   // true=pFが線分l上にある, false=ない
 //    a: number,    // 線分mのパラメータ
 //    b: number     // 線分lのパラメータ
 // }
-// 注）pF, distと異なり、a, bは常に求まる（pF, distはnullになり得る）
 const calcDist_PointToLine = (p, u, pX, pY) => {
     let v = vecSub(pY, pX);    // pX --> pYへのベクトル
 
@@ -529,26 +550,19 @@ const calcDist_PointToLine = (p, u, pX, pY) => {
         let a = iM11*(pX.x-p.x) + iM12*(pX.y-p.y);
         let b = iM21*(pX.x-p.x) + iM22*(pX.y-p.y);
 
-        if ((0 <= b) && (b <= 1)) {
-            // Fは線分m上
-            let pF = vecAdd(p, vecScalar(u, a));
-            let dist = vecDist(p, pF);    // pからpF(垂線の足)までの距離
+        let pF = vecAdd(p, vecScalar(u, a));
+        let dist = vecDist(p, pF);    // pからpF(垂線の足)までの距離
 
-            return {
-                dist: dist,
-                pF: pF,
-                a: a,
-                b: b
-            }
-        } else {
-            // Fは線分m上にはない
-            return {
-                dist: null,
-                pF: null,
-                a: a,
-                b: b
-            }
-        }
+        // Fが線分m上にあるか？
+        let insideSegment = ((0 <= b) && (b <= 1)) ? true : false;
+
+        return {
+            dist: dist,
+            pF: pF,
+            insideSegment: insideSegment,
+            a: a,
+            b: b
+        };
     }
 }
 

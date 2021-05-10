@@ -17,7 +17,7 @@ let g_w = 0;
 let g_h = 0;
 let g_bPause = false;
 let g_nBalls = 0;   // ボールの個数
-let g_ballSize = 5; // ボールのサイズ
+let g_ballSize = 10; // ボールのサイズ
 let g_ballSpeed = 1;    // ボールのスピード
 
 let g_ej = new Ejector();
@@ -236,7 +236,7 @@ $(window).on('mousedown', e => {
             g_G.moveTo(g_pX.x, g_pX.y);
             g_G.lineTo(g_pY.x, g_pY.y);
 
-            let di = U.calcLinesDist(g_pA, g_pB, g_pX, g_pY, 0);
+            let di = U.calcLinesDist(g_pA, g_pB, g_pX, g_pY, g_ballSize);
             if (di !== null) {
                 if (di.dmin !== null) {
                     g_Msg.setText(`dmin=${di.dmin}`);
@@ -248,6 +248,13 @@ $(window).on('mousedown', e => {
                     g_G.lineStyle(1, 0x00ffff, 1);
                     g_G.beginFill(0x0000ff);
                     g_G.drawEllipse(di.pMin.x, di.pMin.y, 7, 7);
+                    g_G.endFill();
+                }
+
+                if (di.pTangentCenter !== null) {
+                    g_G.lineStyle(1, 0xffffff, 1);
+                    g_G.beginFill(0x008000);
+                    g_G.drawEllipse(di.pTangentCenter.x, di.pTangentCenter.y, g_ballSize, g_ballSize);
                     g_G.endFill();
                 }
             }
@@ -325,50 +332,50 @@ $(window).on('keydown', e => {
 // test
 let dists;
 dists = [
-    {target: {dist: 10}, aux: 'A'},
-    {target: {dist: null}, aux: 'B'},
-    {target: {dist: 5}, aux: 'C'},
-    {target: {dist: null}, aux: 'D'}
+    {target: {dist: 10, insideSegment: true}, aux: 'A'},
+    {target: {dist: 7, insideSegment: false}, aux: 'B'},
+    {target: {dist: 5, insideSegment: true}, aux: 'C'},
+    {target: {dist: -3, insideSegment: false}, aux: 'D'}
 ];
 console.log(U.getMinDist(dists));
 
 dists = [
-    {target: {dist: -3}, aux: 'A'},
-    {target: {dist: 10}, aux: 'B'},
-    {target: {dist: 5}, aux: 'C'}
+    {target: {dist: -3, insideSegment: true}, aux: 'A'},
+    {target: {dist: 10, insideSegment: true}, aux: 'B'},
+    {target: {dist: 5, insideSegment: true}, aux: 'C'}
 ];
 console.log(U.getMinDist(dists));
 
 dists = [
-    {target: {dist: null}, aux: 'A'},
-    {target: {dist: 10}, aux: 'B'},
-    {target: {dist: null}, aux: 'C'}
+    {target: {dist: 4, insideSegment: false}, aux: 'A'},
+    {target: {dist: 10, insideSegment: true}, aux: 'B'},
+    {target: {dist: 3, insideSegment: false}, aux: 'C'}
 ];
 console.log(U.getMinDist(dists));
 
 dists = [
-    {target: {dist: null}, aux: 'A'},
-    {target: {dist: 10}, aux: 'B'},
-    {target: {dist: 2}, aux: 'C'},
-    {target: {dist: null}, aux: 'D'},
-    {target: {dist: 8}, aux: 'E'}
+    {target: {dist: 1, insideSegment: false}, aux: 'A'},
+    {target: {dist: 10, insideSegment: true}, aux: 'B'},
+    {target: {dist: 2, insideSegment: true}, aux: 'C'},
+    {target: {dist: -5, insideSegment: false}, aux: 'D'},
+    {target: {dist: 8, insideSegment: true}, aux: 'E'}
 ];
 console.log(U.getMinDist(dists));
 
 dists = [
-    {target: {dist: 7}, aux: 'A'}
+    {target: {dist: 7, insideSegment: true}, aux: 'A'}
 ];
 console.log(U.getMinDist(dists));
 
 dists = [
-    {target: {dist: null}, aux: 'A'},
-    {target: {dist: null}, aux: 'B'},
-    {target: {dist: null}, aux: 'C'}
+    {target: {dist: 10, insideSegment: false}, aux: 'A'},
+    {target: {dist: 3, insideSegment: false}, aux: 'B'},
+    {target: {dist: 7, insideSegment: false}, aux: 'C'}
 ];
 console.log(U.getMinDist(dists));
 
 dists = [
-    {target: {dist: null}, aux: 'A'}
+    {target: {dist: 8, insideSegment: false}, aux: 'A'}
 ];
 console.log(U.getMinDist(dists));
 
