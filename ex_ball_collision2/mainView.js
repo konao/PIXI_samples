@@ -77,9 +77,9 @@ $(window).on('load', () => {
 
         let w2 = new Wall();
         w2.setWallPoints([
-            {x: 600, y: 100},
-            {x: 900, y: 150},
-            {x: 700, y: 400}
+            {x: 400, y: 100},
+            {x: 800, y: 150},
+            {x: 600, y: 400}
         ]);
         w2.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w2);
@@ -148,13 +148,98 @@ $(window).on('load', () => {
         app.ticker.add((delta) => {
             // 画面更新
             if (!g_bPause) {
-                g_ej.update(g_wallList);
+                // g_ej.update(g_wallList);
                 g_wallList.forEach(wall => {
                     wall.update();
                 });
-                g_ballList.forEach(ball => {
-                    ball.update(g_wallList);
-                });
+                // g_ballList.forEach(ball => {
+                //     ball.update(g_wallList);
+                // });
+
+                if (g_pA_pB_updated) {
+                    g_pA_pB_updated = false;
+
+                    g_G.clear();
+                    if ((g_pA !== null) && (g_pB !== null)) {
+                        g_G.lineStyle(1, 0xffff00, 1);  // 黄色
+                        g_G.moveTo(g_pA.x, g_pA.y);
+                        g_G.lineTo(g_pB.x, g_pB.y);
+            
+                        // pをv方向に移動したときに交差する最も近い辺を求める --> nearestEdge
+                        let nearestEdge = null;
+                        let minDist = -1;
+                        g_wallList.forEach(wall => {
+                            let nEdge = wall.countEdges();
+                            let edgeList = [];   // {p1, p2} p1=開始点, p2=終了点
+                            for (let i=0; i<nEdge; i++) {
+                                // i番目の辺の端点を取得
+                                let e = wall.getEdge(i);
+                                edgeList.push(e);
+                            }
+    
+                            let edgeInfos = edgeList.map(e => {
+                                // console.log(`e.p1=(${e.p1.x}, ${e.p1.y})`);
+                                // console.log(`e.p2=(${e.p2.x}, ${e.p2.y})`);
+                                let cpInfo = U.calcLinesDist(g_pA, g_pB, e.p1, e.p2, g_ballSize);
+                                // console.log(`cpInfo.dmin=${cpInfo.dmin}`);
+                                return {
+                                    e: e,
+                                    cpInfo: cpInfo
+                                };
+                            });
+
+                            // cpInfosの中から、pから接触点までの距離が最も小さい辺を選ぶ
+                            edgeInfos.forEach(ei => {
+                                if ((ei.cpInfo !== null) && (ei.cpInfo.pTangentCenter !== null)) {
+                                    let dist = U.vecDist(g_pA, ei.cpInfo.pTangentCenter);
+                                    if ((minDist < 0) || (dist < minDist)) {
+                                        minDist = dist
+                                        nearestEdge = ei;
+                                        // console.log(`minDist=${minDist}`);
+                                    }    
+                                }
+                            });
+                        });
+            
+                        if (nearestEdge) {
+                            let pX = nearestEdge.e.p1;
+                            let pY = nearestEdge.e.p2;
+                            g_G.lineStyle(1, 0xff0000, 1);  // 赤
+                            g_G.moveTo(pX.x, pX.y);
+                            g_G.lineTo(pY.x, pY.y);
+
+                            let di = nearestEdge.cpInfo;
+                            if (di !== null) {
+                                if (di.dmin !== null) {
+                                    g_Msg.setText(`dmin=${di.dmin}`);
+                                } else {
+                                    g_Msg.setText(`dmin=null`);
+                                }
+                
+                                if (di.pMin !== null) {
+                                    g_G.lineStyle(1, 0x00ffff, 1);
+                                    g_G.beginFill(0x0000ff);
+                                    g_G.drawEllipse(di.pMin.x, di.pMin.y, 7, 7);
+                                    g_G.endFill();
+                                }
+                
+                                if (di.pTangentCenter !== null) {
+                                    g_G.lineStyle(1, 0xffffff, 1);
+                                    g_G.beginFill(0x008000);
+                                    g_G.drawEllipse(di.pTangentCenter.x, di.pTangentCenter.y, g_ballSize, g_ballSize);
+                                    g_G.endFill();
+                                }
+                            }
+                        }
+                    }
+    
+                    if (g_focus) {
+                        g_G.lineStyle(1, 0x00ffff, 1);
+                        g_G.beginFill(0x0000ff);
+                        g_G.drawEllipse(g_focus.x, g_focus.y, 10, 10);
+                        g_G.endFill();
+                    }
+                }
             }
         });
     });
@@ -174,28 +259,46 @@ $(window).on('resize', () => {
 });
 
 $(window).on('mousemove', e => {
-    // console.log(`x=${e.clientX}, y=${e.clientY}`);
     if (g_ej) {
         let mousePos = {
             x: e.clientX,
             y: e.clientY
         };
         g_ej.setMousePos(mousePos);
+
+        let r1 = U.vecDist(mousePos, g_pA);
+        let r2 = U.vecDist(mousePos, g_pB);
+        const CLOSE_DIST = 20;
+        if (r1 < CLOSE_DIST) {
+            g_focus = g_pA;
+            if (g_mousePress) {
+                g_pA = mousePos;
+                g_pA_pB_updated = true;
+            }
+        } else if (r2 < CLOSE_DIST) {
+            g_focus = g_pB;
+            if (g_mousePress) {
+                g_pB = mousePos;
+                g_pA_pB_updated = true;
+            }
+        } else {
+            g_focus = null;
+        }
     }
 });
 
 // [TEST]
-let g_cc = 0;
-let g_pA = null;
-let g_pB = null;
-let g_pX = null;
-let g_pY = null;
+let g_pA = {x: 200, y: 400};
+let g_pB = {x: 700, y: 400};
+let g_focus = null;
+let g_mousePress = false;
+let g_pA_pB_updated = true;
 let g_G = null;
 let g_Msg = null;
 
 $(window).on('mousedown', e => {
     // console.log(`x=${e.clientX}, y=${e.clientY}`);
-    console.log(e);
+    // console.log(e);
     if (e.which === 3) {
         // 右ボタンクリック
         let mousePressPos = {
@@ -204,62 +307,7 @@ $(window).on('mousedown', e => {
         };
         if (g_ej) g_ej.setMouesPressPos(mousePressPos);
 
-        switch (g_cc) {
-            case 0: {
-                g_pA = mousePressPos;
-                g_cc++;
-                break;
-            }
-            case 1: {
-                g_pB = mousePressPos;
-                g_cc++;
-                break;
-            }
-            case 2: {
-                g_pX = mousePressPos;
-                g_cc++;
-                break;
-            }
-            case 3: {
-                g_pY = mousePressPos;
-                g_cc=0;
-                break;
-            }
-        }
-        if ((g_pA !== null) && (g_pB !== null) && (g_pX !== null) && (g_pY !== null)) {
-            g_G.clear();
-            g_G.lineStyle(1, 0xffff00, 1);  // 黄色
-            g_G.moveTo(g_pA.x, g_pA.y);
-            g_G.lineTo(g_pB.x, g_pB.y);
-
-            g_G.lineStyle(1, 0xff0000, 1);  // 赤
-            g_G.moveTo(g_pX.x, g_pX.y);
-            g_G.lineTo(g_pY.x, g_pY.y);
-
-            let di = U.calcLinesDist(g_pA, g_pB, g_pX, g_pY, g_ballSize);
-            if (di !== null) {
-                if (di.dmin !== null) {
-                    g_Msg.setText(`dmin=${di.dmin}`);
-                } else {
-                    g_Msg.setText(`dmin=null`);
-                }
-
-                if (di.pMin !== null) {
-                    g_G.lineStyle(1, 0x00ffff, 1);
-                    g_G.beginFill(0x0000ff);
-                    g_G.drawEllipse(di.pMin.x, di.pMin.y, 7, 7);
-                    g_G.endFill();
-                }
-
-                if (di.pTangentCenter !== null) {
-                    g_G.lineStyle(1, 0xffffff, 1);
-                    g_G.beginFill(0x008000);
-                    g_G.drawEllipse(di.pTangentCenter.x, di.pTangentCenter.y, g_ballSize, g_ballSize);
-                    g_G.endFill();
-                }
-            }
-        }
-
+        g_mousePress = true;
     } else if (e.which === 1) {
         // 左ボタンクリック
         if (g_ej) {
@@ -269,17 +317,21 @@ $(window).on('mousedown', e => {
             ejVec = U.vecScalar(ejVec, g_ballSpeed);
 
             // ボールを生成
-            let newBall = new Ball();
-            newBall.setRadius(g_ballSize)
-                .setBallPos(ejPos)
-                .setVec(ejVec);
-            newBall.init(PIXI, app.stage, g_w, g_h);
+            // let newBall = new Ball();
+            // newBall.setRadius(g_ballSize)
+            //     .setBallPos(ejPos)
+            //     .setVec(ejVec);
+            // newBall.init(PIXI, app.stage, g_w, g_h);
 
-            g_ballList.push(newBall);
-            g_nBalls++;
-            showStatus();
+            // g_ballList.push(newBall);
+            // g_nBalls++;
+            // showStatus();
         }
     }
+});
+
+$(window).on('mouseup', e => {
+    g_mousePress = false;
 });
 
 $(window).on('keydown', e => {

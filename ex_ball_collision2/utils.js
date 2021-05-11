@@ -400,9 +400,16 @@ const getMinDist = (xs) => {
 // @return 距離情報（フォーマットは以下）
 // {
 //    dmin : number, // 最短距離
-//    (dmin>0 : lとgは交差しない．dmin==0 : lとgは交差する．dmin==null : lとgは接触しない)
+//    (1) dmin>0:lとgは交差しない
+//    (2) dmin==0:lとgは交差する
+//    (3) dmin==null:lとgは接触しない
+//    注）(1)(2)は共に直線mが線分lに交わる場合．ただし(1)は線分mが線分lに交わるが、(2)は交わらない場合
+//        (3)は直線mが線分lに交わらない場合．
+//
 //    pTangentCenter : Vec  // ボールがlと接触する時の中心座標(dmin >= 0のときのみ意味あり)
-//    pMin: Vec  // 最短距離を与える点 (for debug)
+//    pMin: Vec  // 最短距離を与える点 (dmin>0のとき：pA, pB, pX, pYのいずれか)
+//               // lとgの交点(dmin==0のとき)
+//    (for debug)
 // }
 const calcLinesDist = (pA, pB, pX, pY, r) => {
     // lの方向ベクトル
@@ -426,88 +433,138 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     // pYを通ってlに垂直な直線とgの交点への距離 --> pY_g
     let pY_g = calcDist_PointToLine(pY, u, pA, pB);
     
-    if (pA_l.a * pB_l.a > 0) {
-        console.log('[1] pA and pB are in same side');
-        // pAとpBはlの同じ側にある
-        // ---> gとlは交差しない(dmin>0)        
-    } else {
-        console.log('[2] pA and pB are in other side');
-        // pAとpBはlの反対側にある
-        // ---> gとlは交差する
+    if ((pX_g !== null) && (pY_g !== null)) {
+        // 直線mと直線lが垂直に交わっていない場合
 
-        // gとlの交点を求める --> pC
-        let u = vecSub(pB, pA);
-        let pC = calcDist_PointToLine(pA, u, pX, pY);
-
-        if ((pC.b >= 0) && (pC.b <= 1.0)) {
-            // pCがl上にある --> dmin=0
-            console.log('[2-1] cross point is on XY');
-
-            // pTCを求める
-            let b = pA_l.dist;
-            let k = r/b;
-            console.log(`[0] b=${b}, k=${k}`);
-            let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
-            
-            return {
-                dmin: 0,
-                pTangentCenter: pTC,
-                pMin: pC.pF
-            };
+        if (pA_l.a * pB_l.a > 0) {
+            // console.log('[1] pA and pB are in same side');
+            // pAとpBはlの同じ側にある
+            // ---> gとlは交差しない(dmin>0)        
         } else {
-            console.log('[2-1] cross point is outside of XY');
-            // ない --> pA, pBからlへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
-            // のうちの、最も小さい値をdminとする．
-        }
-    }
-
-    // pA_l.dist, pB_l.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
-    let minElem = getMinDist([{
-        target: pA_l,
-        aux: pA
-    }, {
-        target: pB_l,
-        aux: pB
-    }, {
-        target: pX_g,
-        aux: pX
-    }, {
-        target: pY_g,
-        aux: pY
-    }]);
-
-    if (minElem === null) {
-        return {
-            dmin: null,
-            pTangentCenter: null,
-            pMin: null
-        }
-    } else {
-        // pTCを求める 
-        let pTC = null;
-
-        if (minElem.target.dist < r) {
-            // lへの最短距離がrより小さい = ボールがlに接触する
-            let a = minElem.target.dist;
-            let b = pA_l.dist;
-            if (minElem.aux === pB) {
-                let k = (r-a)/(b-a);
-                console.log(`[1] a=${a}, b=${b}, k=${k}`);
-                pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
-            } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
-                if (minElem.target.b > 0) {
-                    // XgまたはYgが線分g上にある場合のみpTCを求める
-                    let k = (r-a)/(b-a);
-                    console.log(`[2] a=${a}, b=${b}, k=${k}`);
-                    pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
-                }
+            // console.log('[2] pA and pB are in other side');
+            // pAとpBはlの反対側にある
+            // ---> gとlは交差する
+    
+            // gとlの交点を求める --> pC
+            let u = vecSub(pB, pA);
+            let pC = calcDist_PointToLine(pA, u, pX, pY);
+    
+            if ((pC.b >= 0) && (pC.b <= 1.0)) {
+                // pCがl上にある --> dmin=0
+                // console.log('[2-1] cross point is on XY');
+    
+                // pTCを求める
+                let b = pA_l.dist;
+                let k = r/b;
+                // console.log(`[0] b=${b}, k=${k}`);
+                let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
+                
+                return {
+                    dmin: 0,
+                    pTangentCenter: pTC,
+                    pMin: pC.pF
+                };
+            } else {
+                // console.log('[2-1] cross point is outside of XY');
+                // ない --> pA, pBからlへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
+                // のうちの、最も小さい値をdminとする．
             }
         }
+    
+        // pA_l.dist, pB_l.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
+        let minElem = getMinDist([{
+            target: pA_l,
+            aux: pA
+        }, {
+            target: pB_l,
+            aux: pB
+        }, {
+            target: pX_g,
+            aux: pX
+        }, {
+            target: pY_g,
+            aux: pY
+        }]);
+    
+        if (minElem === null) {
+            return {
+                dmin: null,
+                pTangentCenter: null,
+                pMin: null
+            }
+        } else {
+            // pTCを求める 
+            let pTC = null;
+    
+            if (minElem.target.dist < r) {
+                // lへの最短距離がrより小さい = ボールがlに接触する
+                let a = minElem.target.dist;
+                let b = pA_l.dist;
+                if (minElem.aux === pB) {
+                    let k = (r-a)/(b-a);
+                    console.log(`[1] a=${a}, b=${b}, k=${k}`);
+                    pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
+                } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
+                    if (minElem.target.b > 0) {
+                        // XgまたはYgが線分g上にある場合のみpTCを求める
+                        let k = (r-a)/(b-a);
+                        console.log(`[2] a=${a}, b=${b}, k=${k}`);
+                        pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
+                    }
+                }
+            }
+    
+            return {
+                dmin: (pTC !== null) ? minElem.target.dist : null,
+                pTangentCenter: pTC,
+                pMin: minElem.aux
+            }
+        }    
+    } else {
+        // 直線mと直線lが垂直に交わっている場合
 
-        return {
-            dmin: minElem.target.dist,
-            pTangentCenter: pTC,
-            pMin: minElem.aux
+        // pA_l, pB_lのうち、distが小さいほうをdminとする．
+        let minElem = getMinDist([{
+            target: pA_l,
+            aux: pA
+        }, {
+            target: pB_l,
+            aux: pB
+        }]);
+
+        if (minElem === null) {
+            return {
+                dmin: null,
+                pTangentCenter: null,
+                pMin: null
+            }
+        } else {
+            // pTCを求める 
+            let pTC = null;
+    
+            // if (minElem.target.dist < r) {
+            //     // lへの最短距離がrより小さい = ボールがlに接触する
+            //     let a = minElem.target.dist;
+            //     let b = pA_l.dist;
+            //     if (minElem.aux === pB) {
+            //         let k = (r-a)/(b-a);
+            //         console.log(`[1] a=${a}, b=${b}, k=${k}`);
+            //         pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
+            //     } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
+            //         if (minElem.target.b > 0) {
+            //             // XgまたはYgが線分g上にある場合のみpTCを求める
+            //             let k = (r-a)/(b-a);
+            //             console.log(`[2] a=${a}, b=${b}, k=${k}`);
+            //             pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
+            //         }
+            //     }
+            // }
+    
+            return {
+                dmin: (pTC !== null) ? minElem.target.dist : null,
+                pTangentCenter: pTC,
+                pMin: minElem.aux
+            }
         }
     }
 }
