@@ -518,11 +518,11 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             }
         } else {
             // pTCを求める 
-            // （pTCは線分lに半径rで接する円の中心座標）
+            // （pTCは線分mに半径rで接する円の中心座標）
             let pTC = null;
     
             if (minElem.target.dist < r) {
-                // mへの最短距離がrより小さい = ボールがlに接触する
+                // mへの最短距離がrより小さい = ボールがmに接触する
                 let a = minElem.target.dist;
                 let b = pA_m.dist;
                 if (minElem.aux === pB) {
