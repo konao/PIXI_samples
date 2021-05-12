@@ -100,10 +100,10 @@ $(window).on('load', () => {
         w5.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w5);
 
-        // let w6 = new Wall();
-        // w6.genCircleWallPoints(200, 700, 50);
-        // w6.init(PIXI, app.stage, g_w, g_h);
-        // g_wallList.push(w6);
+        let w6 = new Wall();
+        w6.genCircleWallPoints(900, 700, 50);
+        w6.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w6);
 
         // 操作説明
         new Text()

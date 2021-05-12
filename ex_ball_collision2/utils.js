@@ -409,74 +409,73 @@ const getMinDist = (xs) => {
 //
 // @param pA [i] 線分gの端点1
 // @param pB [i] 線分gの端点2
-// @param pX [i] 線分lの端点1
-// @param pY [i] 線分lの端点2
+// @param pX [i] 線分mの端点1
+// @param pY [i] 線分mの端点2
 // @param r [i] ボールの半径
 //
 // @return 距離情報（フォーマットは以下）
 // {
 //    dmin : number, // 最短距離
-//    (1) dmin>0:lとgは交差しない
-//    (2) dmin==0:lとgは交差する
-//    (3) dmin==null:lとgは接触しない
-//    注）(1)(2)は共に直線mが線分lに交わる場合．ただし(1)は線分mが線分lに交わるが、(2)は交わらない場合
-//        (3)は直線mが線分lに交わらない場合．
+//    (1) dmin>0:gとmは交差しない
+//    (2) dmin==0:gとmは交差する
+//    (3) dmin==null:gとmは接触しない
+//    注）(1)(2)は共に直線gが線分mに交わる場合．ただし(1)は線分gが線分mに交わるが、(2)は交わらない場合
+//        (3)は直線gが線分mに交わらない場合．
 //
-//    pTangentCenter : Vec  // ボールがlと接触する時の中心座標(dmin >= 0のときのみ意味あり)
+//    pTangentCenter : Vec  // ボールがmと接触する時の中心座標(dmin>=0のときのみ意味あり)
 //    pMin: Vec  // 最短距離を与える点 (dmin>0のとき：pA, pB, pX, pYのいずれか)
-//               // lとgの交点(dmin==0のとき)
-//    (for debug)
+//               // gとmの交点(dmin==0のとき)
 // }
 const calcLinesDist = (pA, pB, pX, pY, r) => {
-    // lの方向ベクトル
-    let v =  vecSub(pY, pX);
+    // mの方向ベクトル
+    let u =  vecSub(pY, pX);
 
-    // lの垂線のベクトル
-    let u = {
-        x: v.y,
-        y: -v.x
+    // mの垂線のベクトル
+    let pu = {
+        x: u.y,
+        y: -u.x
     }
 
-    // pAからlへの垂線の足を計算 --> pA_l
-    let pA_l = calcDist_PointToLine(pA, u, pX, pY);
+    // pAからmへの垂線の足を計算 --> pA_m
+    let pA_m = calcDist_PointToLine(pA, pu, pX, pY);
 
-    // pBからmへの垂線の足を計算 --> pB_l
-    let pB_l = calcDist_PointToLine(pB, u, pX, pY);
+    // pBからmへの垂線の足を計算 --> pB_m
+    let pB_m = calcDist_PointToLine(pB, pu, pX, pY);
 
-    // pXを通ってlに垂直な直線とgの交点への距離 --> pX_g
-    let pX_g = calcDist_PointToLine(pX, u, pA, pB);
+    // pXを通ってmに垂直な直線とgの交点への距離 --> pX_g
+    let pX_g = calcDist_PointToLine(pX, pu, pA, pB);
 
-    // pYを通ってlに垂直な直線とgの交点への距離 --> pY_g
-    let pY_g = calcDist_PointToLine(pY, u, pA, pB);
+    // pYを通ってmに垂直な直線とgの交点への距離 --> pY_g
+    let pY_g = calcDist_PointToLine(pY, pu, pA, pB);
     
     if ((pX_g !== null) && (pY_g !== null)) {
         // 直線mと直線lが垂直に交わっていない場合
 
-        if (pA_l.a * pB_l.a > 0) {
+        if (pA_m.a * pB_m.a > 0) {
             // console.log('[1] pA and pB are in same side');
-            // pAとpBはlの同じ側にある
-            // ---> gとlは交差しない(dmin>0)        
+            // pAとpBはmの同じ側にある
+            // ---> gとmは交差しない(dmin>0)        
         } else {
             // console.log('[2] pA and pB are in other side');
-            // pAとpBはlの反対側にある
-            // ---> gとlは交差する
+            // pAとpBはmの反対側にある
+            // ---> gとmは交差する
     
-            // gとlの交点を求める --> pC
+            // gとmの交点を求める --> pC
             let pC = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
     
             if ((pC.b >= 0) && (pC.b <= 1.0)) {
-                // pCがl上にある --> dmin=0
+                // pCがm上にある --> dmin=0
                 // console.log('[2-1] cross point is on XY');
     
                 // pTCを求める
-                let b = pA_l.dist;
+                let b = pA_m.dist;
                 let k = r/b;
                 // console.log(`[0] b=${b}, k=${k}`);
                 let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
                 // let pTC = pA;
 
                 // pTCからpQを求め、それが線分lにあるかチェックする
-                pQ = calcDist_PointToLine(pTC, u, pX, pY);
+                pQ = calcDist_PointToLine(pTC, pu, pX, pY);
                 if (!pQ.insideSegment) {
                     // QはXY上にない
                     pTC = null;
@@ -491,17 +490,17 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 };
             } else {
                 // console.log('[2-1] cross point is outside of XY');
-                // ない --> pA, pBからlへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
+                // ない --> pA, pBからmへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
                 // のうちの、最も小さい値をdminとする．
             }
         }
     
-        // pA_l.dist, pB_l.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
+        // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
         let minElem = getMinDist([{
-            target: pA_l,
+            target: pA_m,
             aux: pA
         }, {
-            target: pB_l,
+            target: pB_m,
             aux: pB
         }, {
             target: pX_g,
@@ -523,14 +522,14 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             let pTC = null;
     
             if (minElem.target.dist < r) {
-                // lへの最短距離がrより小さい = ボールがlに接触する
+                // mへの最短距離がrより小さい = ボールがlに接触する
                 let a = minElem.target.dist;
-                let b = pA_l.dist;
+                let b = pA_m.dist;
                 if (minElem.aux === pB) {
                     let k = (r-a)/(b-a);
                     pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
                     
-                    pQ = calcDist_PointToLine(pTC, u, pX, pY);
+                    pQ = calcDist_PointToLine(pTC, pu, pX, pY);
                     console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
                     if (!pQ.insideSegment) {
                         // QはXY上にない
@@ -543,7 +542,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                         pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
                         // さらにpTCからQを求め、Qが線分l上にあるかもチェックする
                         // （Qが線分lになければボールは線分lには接触しない）
-                        pQ = calcDist_PointToLine(pTC, u, pX, pY);
+                        pQ = calcDist_PointToLine(pTC, pu, pX, pY);
                         console.log(`[2-2] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
                         if (!pQ.insideSegment) {
                             // QはXY上にない
@@ -585,14 +584,14 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             }
         }    
     } else {
-        // 直線mと直線lが垂直に交わっている場合
+        // 直線gと直線mが垂直に交わっている場合
 
-        // pA_l, pB_lのうち、distが小さいほうをdminとする．
+        // pA_m, pB_mのうち、distが小さいほうをdminとする．
         let minElem = getMinDist([{
-            target: pA_l,
+            target: pA_m,
             aux: pA
         }, {
-            target: pB_l,
+            target: pB_m,
             aux: pB
         }]);
 
@@ -607,9 +606,9 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             let pTC = null;
     
             // if (minElem.target.dist < r) {
-            //     // lへの最短距離がrより小さい = ボールがlに接触する
+            //     // mへの最短距離がrより小さい = ボールがmに接触する
             //     let a = minElem.target.dist;
-            //     let b = pA_l.dist;
+            //     let b = pA_m.dist;
             //     if (minElem.aux === pB) {
             //         let k = (r-a)/(b-a);
             //         console.log(`[1] a=${a}, b=${b}, k=${k}`);
@@ -634,7 +633,8 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     }
 }
 
-// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点を返す（2点あるが、pAに近い方）
+// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)を返す（2点あるが、pAに近い方）
+// pCが見つからなければnullを返す
 const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
     let nv = vecNormalize(vecSub(pB, pA)); // pA --> pBの単位ベクトル
     // nvに直交するベクトル
@@ -665,33 +665,33 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
     return null;
 }
 
-// pを通って方向ベクトルuの直線mと線分l(pX-->pX)の交点pFを求め、
+// pを通って方向ベクトルvの直線lと線分m(pX-->pX)の交点pFを求め、
 // pからpFまでの距離他の情報を返す
 //
 // @param p [i] 基準点
-// @param u [i] mの方向ベクトル
-// @param pX [i] lの端点1
-// @param pY [i] lの端点2
+// @param v [i] lの方向ベクトル
+// @param pX [i] mの端点1
+// @param pY [i] mの端点2
 //
 // @return 距離情報
 // {
-//    pF: {x, y},   // mとlの交点
-//    dist: number,  // pからlへの距離(>=0)
-//    insideSegment: boolean,   // true=pFが線分l上にある, false=ない
-//    a: number,    // pFにおける線分mのパラメータ
-//    b: number     // pFにおける線分lのパラメータ
+//    pF: {x, y},   // lとmの交点
+//    dist: number,  // pからmへの距離(>=0)
+//    insideSegment: boolean,   // true=pFが線分m上にある, false=ない
+//    a: number,    // pFにおける線分lのパラメータ
+//    b: number     // pFにおける線分mのパラメータ
 // }
-const calcDist_PointToLine = (p, u, pX, pY) => {
-    let v = vecSub(pY, pX);    // pX --> pYへのベクトル
+const calcDist_PointToLine = (p, v, pX, pY) => {
+    let u = vecSub(pY, pX);    // pX --> pYへのベクトル
 
-    let M11 = u.x;
-    let M21 = u.y;
-    let M12 = -v.x;
-    let M22 = -v.y;
+    let M11 = v.x;
+    let M21 = v.y;
+    let M12 = -u.x;
+    let M22 = -u.y;
 
     let D = M11*M22-M21*M12;    // Determinant
     if (D === 0) {
-        // mとkが平行（ここには来ないはず）
+        // lとmが平行
         return null;
     } else {
         // Mの逆行列-->iM (inverse of M)
@@ -703,7 +703,7 @@ const calcDist_PointToLine = (p, u, pX, pY) => {
         let a = iM11*(pX.x-p.x) + iM12*(pX.y-p.y);
         let b = iM21*(pX.x-p.x) + iM22*(pX.y-p.y);
 
-        let pF = vecAdd(p, vecScalar(u, a));
+        let pF = vecAdd(p, vecScalar(v, a));
         let dist = vecDist(p, pF);    // pからpF(垂線の足)までの距離
 
         // Fが線分m上にあるか？
