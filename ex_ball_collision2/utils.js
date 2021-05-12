@@ -446,8 +446,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // ---> gとlは交差する
     
             // gとlの交点を求める --> pC
-            let u = vecSub(pB, pA);
-            let pC = calcDist_PointToLine(pA, u, pX, pY);
+            let pC = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
     
             if ((pC.b >= 0) && (pC.b <= 1.0)) {
                 // pCがl上にある --> dmin=0
@@ -458,7 +457,17 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 let k = r/b;
                 // console.log(`[0] b=${b}, k=${k}`);
                 let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
-                
+                // let pTC = pA;
+
+                // pTCからpQを求め、それが線分lにあるかチェックする
+                pQ = calcDist_PointToLine(pTC, u, pX, pY);
+                if (!pQ.insideSegment) {
+                    // QはXY上にない
+                    pTC = null;
+                }
+
+                console.log(`[1] b=${b}, k=${k}, pQ.b=${pQ.b}`);
+                // console.log(`[1] b=${b}, k=${k}`);
                 return {
                     dmin: 0,
                     pTangentCenter: pTC,
@@ -502,17 +511,31 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 let b = pA_l.dist;
                 if (minElem.aux === pB) {
                     let k = (r-a)/(b-a);
-                    console.log(`[1] a=${a}, b=${b}, k=${k}`);
                     pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
+                    
+                    pQ = calcDist_PointToLine(pTC, u, pX, pY);
+                    console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
+                    if (!pQ.insideSegment) {
+                        // QはXY上にない
+                        pTC = null;
+                    }
                 } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
-                    if (minElem.target.b > 0) {
+                    if ((minElem.target.b >= 0) && (minElem.target.b < 1)) {
                         // XgまたはYgが線分g上にある場合のみpTCを求める
                         let k = (r-a)/(b-a);
-                        console.log(`[2] a=${a}, b=${b}, k=${k}`);
                         pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
+                        // さらにpTCからQを求め、Qが線分l上にあるかもチェックする
+                        // （Qが線分lになければボールは線分lには接触しない）
+                        pQ = calcDist_PointToLine(pTC, u, pX, pY);
+                        console.log(`[2-2] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
+                        if (!pQ.insideSegment) {
+                            // QはXY上にない
+                            pTC = null;
+                        }
                     }
                 }
             }
+            
     
             return {
                 dmin: (pTC !== null) ? minElem.target.dist : null,
@@ -559,6 +582,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             //         }
             //     }
             // }
+            console.log(`[3]`);
     
             return {
                 dmin: (pTC !== null) ? minElem.target.dist : null,
@@ -582,8 +606,8 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 //    pF: {x, y},   // mとlの交点
 //    dist: number,  // pからlへの距離(>=0)
 //    insideSegment: boolean,   // true=pFが線分l上にある, false=ない
-//    a: number,    // 線分mのパラメータ
-//    b: number     // 線分lのパラメータ
+//    a: number,    // pFにおける線分mのパラメータ
+//    b: number     // pFにおける線分lのパラメータ
 // }
 const calcDist_PointToLine = (p, u, pX, pY) => {
     let v = vecSub(pY, pX);    // pX --> pYへのベクトル
