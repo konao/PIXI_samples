@@ -1,5 +1,8 @@
 // *******************************************************
 //  ユーティリティ関数群
+
+const { DEG_TO_RAD } = require("pixi.js");
+
 // *******************************************************
 const EPSILON = 1e-5;
 
@@ -139,6 +142,22 @@ const vecNormalize = (v) => {
     } else {
         return v;
     }
+}
+
+// -----------------------------------------------
+// ベクトルを回転させる
+//
+// @param v {x, y} [i] ベクトル
+// @param deg [i] 回転角（時計回り）
+//
+// @return vを角度deg回転させたベクトル
+// -----------------------------------------------
+const vecRotate = (v, deg) => {
+    const theta = Math.PI * deg / 360;
+    return {
+        x: Math.cos(theta)*v.x + Math.sin(theta)*v.y,
+        y: -Math.sin(theta)*v.x + Math.cos(theta)*v.y
+    };
 }
 
 // --------------------------------------------------------------
@@ -503,6 +522,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             }
         } else {
             // pTCを求める 
+            // （pTCは線分lに半径rで接する円の中心座標）
             let pTC = null;
     
             if (minElem.target.dist < r) {
@@ -520,7 +540,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                         pTC = null;
                     }
                 } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
-                    if ((minElem.target.b >= 0) && (minElem.target.b < 1)) {
+                    if ((minElem.target.b >= 0) && (minElem.target.b <= 1)) {
                         // XgまたはYgが線分g上にある場合のみpTCを求める
                         let k = (r-a)/(b-a);
                         pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
@@ -531,6 +551,30 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                         if (!pQ.insideSegment) {
                             // QはXY上にない
                             pTC = null;
+                        }
+
+                        if (pTC === null) {
+                            let pC = null;
+                            let dmin = -1;
+                            // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
+                            // ぶつかる場合は、pAからの距離が短いほうをpCとする．
+                            let pCX = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
+                            if (pCX !== null) {
+                                dmin = vecDist(pA, pCX);
+                                pC = pCX;
+                            }
+                            let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
+                            if (pCY !== null) {
+                                dmin2 = vecDist(pA, pCY);
+                                if (dmin2 < dmin) {
+                                    dmin = dmin2;
+                                    pC = pCY;
+                                }
+                            }
+                            
+                            if (pC !== null) {
+                                pTC = pC;
+                            }
                         }
                     }
                 }
@@ -593,11 +637,42 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     }
 }
 
+// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点を返す（2点あるが、pAに近い方）
+const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
+    let nv = vecNormalize(vecSub(pB, pA)); // pA --> pBの単位ベクトル
+    // nvに直交するベクトル
+    let nu = {
+        x: nv.y,
+        y: -nv.x
+    }
+
+    // pXから線分gへの垂線の足(pX_g)を求める
+    let pX_g = calcDist_PointToLine(pX, nu, pA, pB);
+    if ((pX_g !== null) && (pX_g.insideSegment)) {
+        let d = pX_g.dist;  // pXからpX_gまでの距離
+        if (r > d) {
+            let k = Math.sqrt(r*r-d*d);
+            // pC=求める円の中心
+            let pC = vecAdd(pX_g.pF, vecScalar(nv, -k));
+
+            // pCが線分g上にあるか確認
+            // (pA-->pC方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていればOK)
+            let vAC = vecNormalize(vecSub(pC, pA));
+            if (vecInnerProd(nv, vAC) > 0) {
+                // pCは線分g上にある
+                return pC;
+            }
+        }
+    }
+
+    return null;
+}
+
 // pを通って方向ベクトルuの直線mと線分l(pX-->pX)の交点pFを求め、
 // pからpFまでの距離他の情報を返す
 //
 // @param p [i] 基準点
-// @param m [i] mの方向ベクトル
+// @param u [i] mの方向ベクトル
 // @param pX [i] lの端点1
 // @param pY [i] lの端点2
 //
@@ -660,6 +735,7 @@ module.exports = {
     vecLen,
     vecDist,
     vecNormalize,
+    vecRotate,
     getNearestPos,
     getCrossPoint,
     reflect,
