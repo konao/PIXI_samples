@@ -73,7 +73,7 @@ class Ball extends BaseSpr {
 
         // [TODO] **** 後で修正 ****
         // this._vを元のスピードに戻す
-        let vOrigSpeed = U.vecScalar(U.vecNormalize(this._v), speed);
+        let vOrigSpeed = U.vecScalar(U.vecNorm(this._v), speed);
         this._v = vOrigSpeed;
 
         if (this._g) {

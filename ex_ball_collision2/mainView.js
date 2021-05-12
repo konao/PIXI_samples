@@ -166,7 +166,7 @@ const draw = () => {
         g_G.lineTo(g_pB.x, g_pB.y);
 
         // 矢印を描く
-        let rv = U.vecScalar(U.vecNormalize(U.vecSub(g_pA, g_pB)), 20);
+        let rv = U.vecScalar(U.vecNorm(U.vecSub(g_pA, g_pB)), 20);
         let pB1 = U.vecAdd(g_pB, U.vecRotate(rv, 30));
         g_G.moveTo(g_pB.x, g_pB.y);
         g_G.lineTo(pB1.x, pB1.y);

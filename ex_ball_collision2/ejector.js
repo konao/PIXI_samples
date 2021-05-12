@@ -25,7 +25,7 @@ class Ejector extends BaseSpr {
 
     setMousePos(mp) {
         let v = U.vecSub(mp, this._p);
-        let nv = U.vecNormalize(v);
+        let nv = U.vecNorm(v);
         this._v = nv;
     }
 

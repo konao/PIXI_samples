@@ -129,7 +129,7 @@ const vecDist = (v1, v2) => {
 // @return vを正規化したベクトル（長さ=1）
 // もともとゼロベクトルだった場合はそのままゼロベクトルを返す
 // -----------------------------------------------
-const vecNormalize = (v) => {
+const vecNorm = (v) => {
     const len = vecLen(v);
     if (len > 0) {
         return {
@@ -266,7 +266,7 @@ const getCrossPoint = (p, v, q1, q2) => {
             let dist = vecLen(vecSub(cp, p));
 
             // qv = q1-->q2方向の単位ベクトル
-            let qv = vecNormalize(vecSub(q2, q1));
+            let qv = vecNorm(vecSub(q2, q1));
 
             // ip = vとqvの内積
             let ip = vecInnerProd(v, qv);
@@ -275,7 +275,7 @@ const getCrossPoint = (p, v, q1, q2) => {
             let qv2 = vecScalar(qv, ip);
 
             // refv = vがcpで反射したときの方向ベクトル
-            let refv = vecNormalize(vecSub(vecScalar(qv2, 2), v));
+            let refv = vecNorm(vecSub(vecScalar(qv2, 2), v));
 
             return {
                 cp: cp,
@@ -312,7 +312,7 @@ const getCrossPoint = (p, v, q1, q2) => {
 // --------------------------------------------------------------
 const reflect = (p, v, r, q1, q2) => {
     // 方向ベクトルを正規化
-    const nv = vecNormalize(v);
+    const nv = vecNorm(v);
 
     // LとWの交点を求める
     let cpInfo = getCrossPoint(p, nv, q1, q2);
@@ -636,7 +636,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 // pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)を返す（2点あるが、pAに近い方）
 // pCが見つからなければnullを返す
 const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
-    let nv = vecNormalize(vecSub(pB, pA)); // pA --> pBの単位ベクトル
+    let nv = vecNorm(vecSub(pB, pA)); // pA --> pBの単位ベクトル
     // nvに直交するベクトル
     let nu = {
         x: nv.y,
@@ -654,7 +654,7 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
 
             // pCが線分g上にあるか確認
             // (pA-->pC方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていればOK)
-            let vAC = vecNormalize(vecSub(pC, pA));
+            let vAC = vecNorm(vecSub(pC, pA));
             if (vecInnerProd(nv, vAC) > 0) {
                 // pCは線分g上にある
                 return pC;
@@ -731,7 +731,7 @@ module.exports = {
     vecInnerProd,
     vecLen,
     vecDist,
-    vecNormalize,
+    vecNorm,
     vecRotate,
     getNearestPos,
     getCrossPoint,
