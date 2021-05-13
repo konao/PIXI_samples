@@ -474,7 +474,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
                 // let pTC = pA;
 
-                // pTCからpQを求め、それが線分lにあるかチェックする
+                // pTCからpQを求め、それが線分m上にあるかチェックする
                 pQ = calcDist_PointToLine(pTC, pu, pX, pY);
                 if (!pQ.insideSegment) {
                     // QはXY上にない
@@ -540,8 +540,8 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                         // XgまたはYgが線分g上にある場合のみpTCを求める
                         let k = (r-a)/(b-a);
                         pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
-                        // さらにpTCからQを求め、Qが線分l上にあるかもチェックする
-                        // （Qが線分lになければボールは線分lには接触しない）
+                        // さらにpTCからQを求め、Qが線分m上にあるかもチェックする
+                        // （Qが線分m上になければボールは線分mには接触しない）
                         pQ = calcDist_PointToLine(pTC, pu, pX, pY);
                         console.log(`[2-2] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
                         if (!pQ.insideSegment) {
@@ -549,33 +549,34 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                             pTC = null;
                         }
 
-                        if (pTC === null) {
-                            let pC = null;
-                            let dmin = -1;
-                            // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
-                            // ぶつかる場合は、pAからの距離が短いほうをpCとする．
-                            let pCX = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
-                            if (pCX !== null) {
-                                dmin = vecDist(pA, pCX);
-                                pC = pCX;
+                        let pCC = null;
+                        let dmin = -1;
+                        // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
+                        // ぶつかる場合は、pAからの距離が短いほうをpCとする．
+                        let pCX = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
+                        if (pCX !== null) {
+                            dmin = vecDist(pA, pCX);
+                            pCC = pCX;
+                        }
+                        let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
+                        if (pCY !== null) {
+                            dmin2 = vecDist(pA, pCY);
+                            if (dmin2 < dmin) {
+                                dmin = dmin2;
+                                pCC = pCY;
                             }
-                            let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
-                            if (pCY !== null) {
-                                dmin2 = vecDist(pA, pCY);
-                                if (dmin2 < dmin) {
-                                    dmin = dmin2;
-                                    pC = pCY;
-                                }
+                        }
+
+                        if ((pTC !== null) && (pCC !== null)) {
+                            if (dmin < pQ.dist) {
+                                pTC = pCC;
                             }
-                            
-                            if (pC !== null) {
-                                pTC = pC;
-                            }
+                        } else if (pCC !== null) {
+                            pTC = pCC;
                         }
                     }
                 }
             }
-            
     
             return {
                 dmin: (pTC !== null) ? minElem.target.dist : null,
@@ -586,48 +587,85 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     } else {
         // 直線gと直線mが垂直に交わっている場合
 
-        // pA_m, pB_mのうち、distが小さいほうをdminとする．
-        let minElem = getMinDist([{
-            target: pA_m,
-            aux: pA
-        }, {
-            target: pB_m,
-            aux: pB
-        }]);
+        if (pA_m.a * pB_m.a > 0) {
+            // console.log('[1] pA and pB are in same side');
+            // pAとpBはmの同じ側にある
+            // ---> gとmは交差しない(dmin>0)        
+            if ((pA_m.b >=0) && (pA_m.b <= 1)) {
+                // (2)
+                console.log(`[p-2]`);
+                // pA_m, pB_mのうち、distが小さいほうをdminとする．
+                let minElem = getMinDist([{
+                    target: pA_m,
+                    aux: pA
+                }, {
+                    target: pB_m,
+                    aux: pB
+                }]);
 
-        if (minElem === null) {
-            return {
-                dmin: null,
-                pTangentCenter: null,
-                pMin: null
+                if (minElem === null) {
+                    return {
+                        dmin: null,
+                        pTangentCenter: null,
+                        pMin: null
+                    }
+                } else {
+                    // pTCを求める 
+                    let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(minElem.target.pF, pA_m.pF)), r));
+
+                    // pTCが線分g上にあるかチェックする
+                    // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
+                    // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
+                    let vAB = vecSub(pB, pA);
+                    let vATC = vecSub(pTC, pA);
+                    let len_vAB = vecLen(vAB);
+                    let len_vATC = vecLen(vATC);
+                    if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
+                        // pTCは線分g上にない
+                        pTC = null;
+                    }
+
+                    return {
+                        dmin: (pTC !== null) ? minElem.target.dist : null,
+                        pTangentCenter: pTC,
+                        pMin: minElem.aux
+                    }
+                } 
+            } else {
+                // (4)
+                console.log(`[p-4]`);
             }
         } else {
-            // pTCを求める 
-            let pTC = null;
-    
-            // if (minElem.target.dist < r) {
-            //     // mへの最短距離がrより小さい = ボールがmに接触する
-            //     let a = minElem.target.dist;
-            //     let b = pA_m.dist;
-            //     if (minElem.aux === pB) {
-            //         let k = (r-a)/(b-a);
-            //         console.log(`[1] a=${a}, b=${b}, k=${k}`);
-            //         pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
-            //     } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
-            //         if (minElem.target.b > 0) {
-            //             // XgまたはYgが線分g上にある場合のみpTCを求める
-            //             let k = (r-a)/(b-a);
-            //             console.log(`[2] a=${a}, b=${b}, k=${k}`);
-            //             pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
-            //         }
-            //     }
-            // }
-            console.log(`[3]`);
-    
-            return {
-                dmin: (pTC !== null) ? minElem.target.dist : null,
-                pTangentCenter: pTC,
-                pMin: minElem.aux
+            // console.log('[2] pA and pB are in other side');
+            // pAとpBはmの反対側にある
+            // ---> gとmは交差する
+            if ((pA_m.b >=0) && (pA_m.b <= 1)) {
+                // (1)
+                console.log(`[p-1]`);
+                // 
+                // pTCを求める
+                let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(pA, pA_m.pF)), r));
+
+                // pTCが線分g上にあるかチェックする
+                // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
+                // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
+                let vAB = vecSub(pB, pA);
+                let vATC = vecSub(pTC, pA);
+                let len_vAB = vecLen(vAB);
+                let len_vATC = vecLen(vATC);
+                if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
+                    // pTCは線分g上にない
+                    pTC = null;
+                }
+
+                return {
+                    dmin: 0,
+                    pTangentCenter: pTC,
+                    pMin: pA_m.pF
+                };
+            } else {
+                // (3)
+                console.log(`[p-3]`);
             }
         }
     }
@@ -653,7 +691,7 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
             let pC = vecAdd(pX_g.pF, vecScalar(nv, -k));
 
             // pCが線分g上にあるか確認
-            // (pA-->pC方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていればOK)
+            // (pA-->pC方向のベクトルとpA-->pB方向のベクトルが同じ方向を向いていればOK)
             let vAC = vecNorm(vecSub(pC, pA));
             if (vecInnerProd(nv, vAC) > 0) {
                 // pCは線分g上にある
