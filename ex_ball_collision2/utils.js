@@ -549,32 +549,34 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                             pTC = null;
                         }
 
-                        let pCC = null;
-                        let dmin = -1;
-                        // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
-                        // ぶつかる場合は、pAからの距離が短いほうをpCとする．
-                        let pCX = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
-                        if (pCX !== null) {
-                            dmin = vecDist(pA, pCX);
-                            pCC = pCX;
-                        }
-                        let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
-                        if (pCY !== null) {
-                            dmin2 = vecDist(pA, pCY);
-                            if (dmin2 < dmin) {
-                                dmin = dmin2;
-                                pCC = pCY;
-                            }
-                        }
-
-                        if ((pTC !== null) && (pCC !== null)) {
-                            if (dmin < pQ.dist) {
-                                pTC = pCC;
-                            }
-                        } else if (pCC !== null) {
-                            pTC = pCC;
-                        }
                     }
+                }
+
+                // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
+                // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
+                // また、その時の距離をdminとする．
+                let pCC = null;
+                let dmin = -1;
+                let pCX = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
+                if (pCX !== null) {
+                    dmin = pCX.dAC;
+                    pCC = pCX;
+                }
+                let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
+                if (pCY !== null) {
+                    dmin2 = vecDist(pA, pCY);
+                    if (pCY.dAC < dmin) {
+                        dmin = pCY.dAC;
+                        pCC = pCY;
+                    }
+                }
+
+                if ((pTC !== null) && (pCC !== null)) {
+                    if (dmin < pQ.dist) {
+                        pTC = pCC.pC;
+                    }
+                } else if (pCC !== null) {
+                    pTC = pCC;
                 }
             }
     
@@ -671,8 +673,13 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     }
 }
 
-// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)を返す（2点あるが、pAに近い方）
-// pCが見つからなければnullを返す
+// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)に
+// 関する情報を返す（pCは2点求まるが、pAに近い方）
+// @return {
+//      pC: {x, y},
+//      dAC: numeric   // pAとpCの距離
+// }
+// pCが線分g上に存在しない場合はnullを返す
 const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
     let nv = vecNorm(vecSub(pB, pA)); // pA --> pBの単位ベクトル
     // nvに直交するベクトル
@@ -692,10 +699,13 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
 
             // pCが線分g上にあるか確認
             // (pA-->pC方向のベクトルとpA-->pB方向のベクトルが同じ方向を向いていればOK)
-            let vAC = vecNorm(vecSub(pC, pA));
+            let vAC = vecSub(pC, pA);
             if (vecInnerProd(nv, vAC) > 0) {
                 // pCは線分g上にある
-                return pC;
+                return {
+                    pC: pC,
+                    dAC: vecLen(vAC)
+                }
             }
         }
     }
