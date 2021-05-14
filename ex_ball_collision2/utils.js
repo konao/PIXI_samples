@@ -564,7 +564,6 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 }
                 let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
                 if (pCY !== null) {
-                    dmin2 = vecDist(pA, pCY);
                     if (pCY.dAC < dmin) {
                         dmin = pCY.dAC;
                         pCC = pCY;
