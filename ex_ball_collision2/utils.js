@@ -520,35 +520,46 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // pTCを求める 
             // （pTCは線分mに半径rで接する円の中心座標）
             let pTC = null;
+
+            if (minElem.aux === pA) {
+                // ここには来ないはず
+                return {
+                    dmin: null,
+                    pTangentCenter: null,
+                    pMin: null
+                }
+            }
     
             if (minElem.target.dist < r) {
                 // mへの最短距離がrより小さい = ボールがmに接触する
                 let a = minElem.target.dist;
                 let b = pA_m.dist;
+
                 if (minElem.aux === pB) {
                     let k = (r-a)/(b-a);
-                    pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k)));
+                    pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k))); // ★
                     
                     pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-                    console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
+                    // console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
                     if (!pQ.insideSegment) {
                         // QはXY上にない
                         pTC = null;
                     }
                 } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
-                    if ((minElem.target.b >= 0) && (minElem.target.b <= 1)) {
-                        // XgまたはYgが線分g上にある場合のみpTCを求める
-                        let k = (r-a)/(b-a);
-                        pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
-                        // さらにpTCからQを求め、Qが線分m上にあるかもチェックする
-                        // （Qが線分m上になければボールは線分mには接触しない）
-                        pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-                        console.log(`[2-2] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
-                        if (!pQ.insideSegment) {
-                            // QはXY上にない
-                            pTC = null;
-                        }
+                    let k = (r-a)/(b-a);
+                    
+                    // *** 上のpBの場合(★)とはここ↓が違う ****
+                    // PBの場合は、minElem.target.pFに入っているのはpBではなく、pB_m
+                    // よってminElemがpBの場合とそうでない場合で分けないとおかしくなる．
+                    pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
 
+                    // さらにpTCからQを求め、Qが線分m上にあるかもチェックする
+                    // （Qが線分m上になければボールは線分mには接触しない）
+                    pQ = calcDist_PointToLine(pTC, pu, pX, pY);
+                    // console.log(`[2-2] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
+                    if (!pQ.insideSegment) {
+                        // QはXY上にない
+                        pTC = null;
                     }
                 }
 
