@@ -474,36 +474,26 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
         }
     
         // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
-        let distArray = [
-            {
-                dist: pA_m.dist,
-                insideSegment: pA_m.insideSegment,
+        let minElem = getMinElem(
+            [{
+                info: pA_m,
                 pOnAB: pA,
                 pMin: pA
-            },
-            {
-                dist: pB_m.dist,
-                insideSegment: pB_m.insideSegment,
+            }, {
+                info: pB_m,
                 pOnAB: pB,
                 pMin: pB
-            },
-            {
-                dist: pX_g.dist,
-                insideSegment: pX_g.insideSegment,
+            }, {
+                info: pX_g,
                 pOnAB: pX_g.pF,
                 pMin: pX                
-            },
-            {
-                dist: pY_g.dist,
-                insideSegment: pY_g.insideSegment,
+            }, {
+                info: pY_g,
                 pOnAB: pY_g.pF,
                 pMin: pY
-            }
-        ]
-        let minElem = getMinElem(
-            distArray,
-            (x) => { return x.insideSegment; },
-            (x, y) => { return (x.dist < y.dist) }
+            }],
+            (x) => { return x.info.insideSegment; },
+            (x, y) => { return (x.info.dist < y.info.dist) }
         );
     
         if (minElem === null) {
@@ -525,9 +515,9 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 }
             }
     
-            if (minElem.dist < r) {
+            if (minElem.info.dist < r) {
                 // mへの最短距離がrより小さい = ボールがmに接触する
-                let a = minElem.dist;
+                let a = minElem.info.dist;
                 let b = pA_m.dist;
 
                 let k = (r-a)/(b-a);
@@ -561,7 +551,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             }
     
             return {
-                dmin: (pTC !== null) ? minElem.dist : null,
+                dmin: (pTC !== null) ? minElem.info.dist : null,
                 pTangentCenter: pTC,
                 pMin: minElem.pMin
             }
@@ -579,19 +569,16 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 // pA_m, pB_mのうち、distが小さいほうをdminとする．
                 let minElem = getMinElem(
                     [{
-                        dist: pA_m.dist,
-                        insideSegment: pA_m.insideSegment,
+                        info: pA_m,
                         pF: pA_m.pF,
                         pMin: pA
-                    },
-                    {
-                        dist: pB_m.dist,
-                        insideSegment: pB_m.insideSegment,
+                    }, {
+                        info: pB_m,
                         pF: pB_m.pF,
                         pMin: pB
                     }],
-                    (x) => { return x.insideSegment; },
-                    (x, y) => { return (x.dist < y.dist) }
+                    (x) => { return x.info.insideSegment; },
+                    (x, y) => { return (x.info.dist < y.info.dist) }
                 );
     
                 if (minElem === null) {
@@ -602,7 +589,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                     }
                 } else {
                     // pTCを求める 
-                    let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(minElem.pF, pA_m.pF)), r));
+                    let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(minElem.info.pF, pA_m.pF)), r));
 
                     // pTCが線分g上にあるかチェックする
                     // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
@@ -617,7 +604,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                     }
 
                     return {
-                        dmin: (pTC !== null) ? minElem.dist : null,
+                        dmin: (pTC !== null) ? minElem.info.dist : null,
                         pTangentCenter: pTC,
                         pMin: minElem.pMin
                     }
