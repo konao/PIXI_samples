@@ -703,10 +703,15 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
     }
 }
 
-// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)に
-// 関する情報を返す（pCは2点求まるが、pAに近い方）
+// 線分AB上の半径rの円が、pXで衝突するか調べる．
+// 衝突する場合は、円の中心座標pCと、pAからpCまでの距離を返す．
+//
+// ＜アルゴリズム＞
+// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)があるかで判断する．
+// （pCは2点求まるが、pAに近い方を採用）
+//
 // @return {
-//      pC: {x, y},
+//      pC: {x, y}, // 円の中心（pCを中心とした半径rの円が、pXで衝突する）
 //      dAC: numeric   // pAとpCの距離
 // }
 // pCが線分g上に存在しない場合はnullを返す
@@ -732,8 +737,7 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
             let vAC = vecSub(pC, pA);
             if (vecInnerProd(nv, vAC) > 0) {
                 // pCは線分g上にある
-                // --> pCを中心とした半径rの円が、XまたはYで
-                // 線分XYに衝突する．
+                // --> pCを中心とした半径rの円が、pXで衝突する．
                 return {
                     pC: pC,
                     dAC: vecLen(vAC)
@@ -742,7 +746,7 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
         }
     }
 
-    // 線分AB上の半径rの円が、点XまたはYにぶつかることはない
+    // 線分AB上の半径rの円が、pXで衝突することはない
     return null;
 }
 
