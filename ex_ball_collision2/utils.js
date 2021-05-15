@@ -466,14 +466,14 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
             // pTCからpQを求め、それが線分m上にあるかチェックする
             pQ = calcDist_PointToLine(pTC, pu, pX, pY);
             if (pQ.insideSegment) {
-                // QはXY上にある
+                // Qは線分XY上にある
                 return {
                     dmin: 0,
                     pTangentCenter: pTC,
                     pMin: pC.pF
                 };
             } else {
-                // QはXY上にない
+                // Qは線分XY上にない
 
                 // ボールが線分XYに接するのではなく、pX, pYに直接ぶつかる場合があるかチェック
                 // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
@@ -487,13 +487,13 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
                 )
 
                 if (pCC !== null) {
+                    // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
                     return {
                         dmin: 0,
                         pTangentCenter: pCC.pC,
                         pMin: pC.pF
                     };
                 } else {
-                    // ここには来ないはずだが一応
                     return {
                         dmin: null,
                         pTangentCenter: null,
@@ -508,7 +508,8 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
         }
     }
 
-    // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
+    // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、
+    // 最も小さい値を線分gと線分mの最短距離とする．
     let minElem = getMinElem(
         [{
             info: pA_m,
@@ -553,27 +554,25 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
             pQ = calcDist_PointToLine(pTC, pu, pX, pY);
             // console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
             if (!pQ.insideSegment) {
-                // QはXY上にない
-                pTC = null;
-            }
+                // Qは線分XY上にない
 
-            // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
-            // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
-            let pCC = getMinElem(
-                [
-                    calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
-                    calcPoint_CircCenterOnEdge(pA, pB, pY, r)
-                ],
-                (x) => { return (x != null) },
-                (x, y) => { return (x.dAC < y.dAC )}
-            )
+                // ボールが線分XYに接するのではなく、pX, pYに直接ぶつかる場合があるかチェック
+                // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
+                let pCC = getMinElem(
+                    [
+                        calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
+                        calcPoint_CircCenterOnEdge(pA, pB, pY, r)
+                    ],
+                    (x) => { return (x != null) },
+                    (x, y) => { return (x.dAC < y.dAC )}
+                )
 
-            if ((pTC !== null) && (pCC !== null)) {
-                if (pCC.dAC < pQ.dist) {
+                if (pCC !== null) {
+                    // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
                     pTC = pCC.pC;
+                } else {
+                    pTC = null;
                 }
-            } else if (pCC !== null) {
-                pTC = pCC.pC;
             }
         }
 
@@ -733,6 +732,8 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
             let vAC = vecSub(pC, pA);
             if (vecInnerProd(nv, vAC) > 0) {
                 // pCは線分g上にある
+                // --> pCを中心とした半径rの円が、XまたはYで
+                // 線分XYに衝突する．
                 return {
                     pC: pC,
                     dAC: vecLen(vAC)
@@ -741,6 +742,7 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
         }
     }
 
+    // 線分AB上の半径rの円が、点XまたはYにぶつかることはない
     return null;
 }
 
