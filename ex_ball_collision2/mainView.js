@@ -190,6 +190,10 @@ const draw = () => {
                 // console.log(`e.p1=(${e.p1.x}, ${e.p1.y})`);
                 // console.log(`e.p2=(${e.p2.x}, ${e.p2.y})`);
                 let cpInfo = U.calcLinesDist(g_pA, g_pB, e.p1, e.p2, g_ballSize);
+
+                if (!cpInfo) {
+                    throw("error!");
+                }
                 // console.log(`cpInfo.dmin=${cpInfo.dmin}`);
                 return {
                     e: e,
