@@ -360,55 +360,77 @@ $(window).on('keydown', e => {
     }
 });
 
-// test
+// +++++++++++++++++++++++++++++++++++++++
+//  getMinElem()のテスト
+// +++++++++++++++++++++++++++++++++++++++
+
+// ------------------------------
+//  test 1
+// ++++++++++++++++++++++++++++++++
 let dists;
 dists = [
-    {target: {dist: 10, insideSegment: true}, aux: 'A'},
-    {target: {dist: 7, insideSegment: false}, aux: 'B'},
-    {target: {dist: 5, insideSegment: true}, aux: 'C'},
-    {target: {dist: -3, insideSegment: false}, aux: 'D'}
+    {dist: 10, insideSegment: true, aux: 'A'},
+    {dist: 7, insideSegment: false, aux: 'B'},
+    {dist: 5, insideSegment: true, aux: 'C'},
+    {dist: -3, insideSegment: false, aux: 'D'}
 ];
-console.log(U.getMinDist(dists));
+const _isValid1 = (x) => { return x.insideSegment; }
+const _cmp1 = (x, y) => { return (x.dist < y.dist) }
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {target: {dist: -3, insideSegment: true}, aux: 'A'},
-    {target: {dist: 10, insideSegment: true}, aux: 'B'},
-    {target: {dist: 5, insideSegment: true}, aux: 'C'}
+    {dist: -3, insideSegment: true, aux: 'A'},
+    {dist: 10, insideSegment: true, aux: 'B'},
+    {dist: 5, insideSegment: true, aux: 'C'}
 ];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {target: {dist: 4, insideSegment: false}, aux: 'A'},
-    {target: {dist: 10, insideSegment: true}, aux: 'B'},
-    {target: {dist: 3, insideSegment: false}, aux: 'C'}
+    {dist: 4, insideSegment: false, aux: 'A'},
+    {dist: 10, insideSegment: true, aux: 'B'},
+    {dist: 3, insideSegment: false, aux: 'C'}
 ];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {target: {dist: 1, insideSegment: false}, aux: 'A'},
-    {target: {dist: 10, insideSegment: true}, aux: 'B'},
-    {target: {dist: 2, insideSegment: true}, aux: 'C'},
-    {target: {dist: -5, insideSegment: false}, aux: 'D'},
-    {target: {dist: 8, insideSegment: true}, aux: 'E'}
+    {dist: 1, insideSegment: false, aux: 'A'},
+    {dist: 10, insideSegment: true, aux: 'B'},
+    {dist: 2, insideSegment: true, aux: 'C'},
+    {dist: -5, insideSegment: false, aux: 'D'},
+    {dist: 8, insideSegment: true, aux: 'E'}
 ];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {target: {dist: 7, insideSegment: true}, aux: 'A'}
+    {dist: 7, insideSegment: true, aux: 'A'}
 ];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {target: {dist: 10, insideSegment: false}, aux: 'A'},
-    {target: {dist: 3, insideSegment: false}, aux: 'B'},
-    {target: {dist: 7, insideSegment: false}, aux: 'C'}
+    {dist: 10, insideSegment: false, aux: 'A'},
+    {dist: 3, insideSegment: false, aux: 'B'},
+    {dist: 7, insideSegment: false, aux: 'C'}
 ];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {target: {dist: 8, insideSegment: false}, aux: 'A'}
+    {dist: 8, insideSegment: false, aux: 'A'}
 ];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [];
-console.log(U.getMinDist(dists));
+console.log(U.getMinElem(dists, _isValid1, _cmp1));
+
+// ++++++++++++++++++++++++++++++++
+//  test 2
+// ++++++++++++++++++++++++++++++++
+dists = [
+    {dAC: 6, name: 'A'},
+    {dAC: 4, name: 'B'},
+    {dAC: 2, name: 'C'},    // 同じ値がある場合は先にあるほうが選ばれる
+    {dAC: 7, name: 'D'},
+    {dAC: 2, name: 'E'}
+];
+const _isValid2 = (x) => { return true; }
+const _cmp2 = (x, y) => { return (x.dAC < y.dAC) }
+console.log(U.getMinElem(dists, _isValid2, _cmp2));

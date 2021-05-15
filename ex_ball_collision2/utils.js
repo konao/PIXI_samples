@@ -391,11 +391,36 @@ const reflect = (p, v, r, q1, q2) => {
 //     }
 // ]);
 // ---> null
-const getMinDist = (xs) => {
+const getMinDist_old = (xs) => {
     let result = xs.reduce((prev, curr) => {
         if (!curr.target.insideSegment) {
             return prev;
         } else if ((prev === null) || (curr.target.dist < prev.target.dist)) {
+            return curr;
+        } else {
+            return prev;
+        }
+    }, null);
+    return result;
+}
+
+// @param isValid [i] 要素が「有効」か判定する関数
+// @param cmp [i] 要素の大小を比較する関数
+// @return 最終的に選ばれた要素
+//
+// isValid(x)
+// @param x [i]
+// @return true(=xは有効な比較対象), false(=xは比較対象ではない)
+//
+// cmp(x, y)
+// @param x [i] 比較対象
+// @param y [i] 被比較対象
+// @return true(=xでyを置き換える), false(=置き換えない)
+const getMinElem = (xs, isValid, cmp) => {
+    let result = xs.reduce((prev, curr) => {
+        if (!isValid(curr)) {
+            return prev;
+        } else if ((prev === null) || cmp(curr, prev)) {
             return curr;
         } else {
             return prev;
@@ -463,7 +488,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // gとmの交点を求める --> pC
             let pC = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
     
-            if ((pC.b >= 0) && (pC.b <= 1.0)) {
+            if (pC.insideSegment) {
                 // pCがm上にある --> dmin=0
                 // console.log('[2-1] cross point is on XY');
     
@@ -496,19 +521,37 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
         }
     
         // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
-        let minElem = getMinDist([{
-            target: pA_m,
-            aux: pA
-        }, {
-            target: pB_m,
-            aux: pB
-        }, {
-            target: pX_g,
-            aux: pX
-        }, {
-            target: pY_g,
-            aux: pY
-        }]);
+        let distArray = [
+            {
+                dist: pA_m.dist,
+                insideSegment: pA_m.insideSegment,
+                pOnAB: pA,
+                pMin: pA
+            },
+            {
+                dist: pB_m.dist,
+                insideSegment: pB_m.insideSegment,
+                pOnAB: pB,
+                pMin: pB
+            },
+            {
+                dist: pX_g.dist,
+                insideSegment: pX_g.insideSegment,
+                pOnAB: pX_g.pF,
+                pMin: pX                
+            },
+            {
+                dist: pY_g.dist,
+                insideSegment: pY_g.insideSegment,
+                pOnAB: pY_g.pF,
+                pMin: pY
+            }
+        ]
+        let minElem = getMinElem(
+            distArray,
+            (x) => { return x.insideSegment; },
+            (x, y) => { return (x.dist < y.dist) }
+        );
     
         if (minElem === null) {
             return {
@@ -521,79 +564,54 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // （pTCは線分mに半径rで接する円の中心座標）
             let pTC = null;
 
-            if (minElem.aux === pA) {
-                // ここには来ないはず
-                return {
-                    dmin: null,
-                    pTangentCenter: null,
-                    pMin: null
-                }
-            }
+            // if (minElem.aux === pA) {
+            //     // ここには来ないはず
+            //     return {
+            //         dmin: null,
+            //         pTangentCenter: null,
+            //         pMin: null
+            //     }
+            // }
     
-            if (minElem.target.dist < r) {
+            if (minElem.dist < r) {
                 // mへの最短距離がrより小さい = ボールがmに接触する
-                let a = minElem.target.dist;
+                let a = minElem.dist;
                 let b = pA_m.dist;
 
-                if (minElem.aux === pB) {
-                    let k = (r-a)/(b-a);
-                    pTC = vecAdd(pA, vecScalar(vecSub(pB, pA), (1-k))); // ★
-                    
-                    pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-                    // console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
-                    if (!pQ.insideSegment) {
-                        // QはXY上にない
-                        pTC = null;
-                    }
-                } else if ((minElem.aux === pX) || (minElem.aux === pY)) {
-                    let k = (r-a)/(b-a);
-                    
-                    // *** 上のpBの場合(★)とはここ↓が違う ****
-                    // PBの場合は、minElem.target.pFに入っているのはpBではなく、pB_m
-                    // よってminElemがpBの場合とそうでない場合で分けないとおかしくなる．
-                    pTC = vecAdd(pA, vecScalar(vecSub(minElem.target.pF, pA), (1-k)));
-
-                    // さらにpTCからQを求め、Qが線分m上にあるかもチェックする
-                    // （Qが線分m上になければボールは線分mには接触しない）
-                    pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-                    // console.log(`[2-2] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
-                    if (!pQ.insideSegment) {
-                        // QはXY上にない
-                        pTC = null;
-                    }
+                let k = (r-a)/(b-a);
+                pTC = vecAdd(pA, vecScalar(vecSub(minElem.pOnAB, pA), (1-k)));
+                
+                pQ = calcDist_PointToLine(pTC, pu, pX, pY);
+                // console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
+                if (!pQ.insideSegment) {
+                    // QはXY上にない
+                    pTC = null;
                 }
 
                 // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
                 // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
-                // また、その時の距離をdminとする．
-                let pCC = null;
-                let dmin = -1;
-                let pCX = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
-                if (pCX !== null) {
-                    dmin = pCX.dAC;
-                    pCC = pCX;
-                }
-                let pCY = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
-                if (pCY !== null) {
-                    if (pCY.dAC < dmin) {
-                        dmin = pCY.dAC;
-                        pCC = pCY;
-                    }
-                }
+                let pCC = getMinElem(
+                    [
+                        calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
+                        calcPoint_CircCenterOnEdge(pA, pB, pY, r)
+                    ],
+                    (x) => { return (x != null) },
+                    (x, y) => { return (x.dAC < y.dAC )}
+                )
 
                 if ((pTC !== null) && (pCC !== null)) {
-                    if (dmin < pQ.dist) {
+                    if (pCC.dAC < pQ.dist) {
                         pTC = pCC.pC;
                     }
                 } else if (pCC !== null) {
-                    pTC = pCC;
+                    pTC = pCC.pC;
                 }
             }
     
             return {
-                dmin: (pTC !== null) ? minElem.target.dist : null,
+                dmin: (pTC !== null) ? minElem.dist : null,
                 pTangentCenter: pTC,
-                pMin: minElem.aux
+                pMin: minElem.pMin
             }
         }    
     } else {
@@ -603,11 +621,11 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // console.log('[1] pA and pB are in same side');
             // pAとpBはmの同じ側にある
             // ---> gとmは交差しない(dmin>0)        
-            if ((pA_m.b >=0) && (pA_m.b <= 1)) {
+            if (pA_m.insideSegment) {
                 // (2)
                 console.log(`[p-2]`);
                 // pA_m, pB_mのうち、distが小さいほうをdminとする．
-                let minElem = getMinDist([{
+                let minElem = getMinDist_old([{
                     target: pA_m,
                     aux: pA
                 }, {
@@ -651,7 +669,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // console.log('[2] pA and pB are in other side');
             // pAとpBはmの反対側にある
             // ---> gとmは交差する
-            if ((pA_m.b >=0) && (pA_m.b <= 1)) {
+            if (pA_m.insideSegment) {
                 // (1)
                 console.log(`[p-1]`);
                 // 
@@ -794,7 +812,8 @@ module.exports = {
     getNearestPos,
     getCrossPoint,
     reflect,
-    getMinDist,
+    getMinDist_old,
+    getMinElem,
     calcLinesDist,
     calcDist_PointToLine
 }
