@@ -465,18 +465,39 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
 
             // pTCからpQを求め、それが線分m上にあるかチェックする
             pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-            if (!pQ.insideSegment) {
+            if (pQ.insideSegment) {
+                return {
+                    dmin: 0,
+                    pTangentCenter: pTC,
+                    pMin: pC.pF
+                };
+            } else {
                 // QはXY上にない
-                pTC = null;
-            }
+                // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
+                // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
+                let pCC = getMinElem(
+                    [
+                        calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
+                        calcPoint_CircCenterOnEdge(pA, pB, pY, r)
+                    ],
+                    (x) => { return (x != null) },
+                    (x, y) => { return (x.dAC < y.dAC )}
+                )
 
-            console.log(`[1] b=${b}, k=${k}, pQ.b=${pQ.b}`);
-            // console.log(`[1] b=${b}, k=${k}`);
-            return {
-                dmin: 0,
-                pTangentCenter: pTC,
-                pMin: pC.pF
-            };
+                if (pCC === null) {
+                    return {
+                        dmin: null,
+                        pTangentCenter: null,
+                        pMin: null
+                    }
+                } else {
+                    return {
+                        dmin: 0,
+                        pTangentCenter: pCC.pC,
+                        pMin: pC.pF
+                    };
+                }
+            }
         } else {
             // console.log('[2-1] cross point is outside of XY');
             // ない --> pA, pBからmへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
