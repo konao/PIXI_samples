@@ -466,6 +466,7 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
             // pTCからpQを求め、それが線分m上にあるかチェックする
             pQ = calcDist_PointToLine(pTC, pu, pX, pY);
             if (pQ.insideSegment) {
+                // QはXY上にある
                 return {
                     dmin: 0,
                     pTangentCenter: pTC,
@@ -473,7 +474,8 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
                 };
             } else {
                 // QはXY上にない
-                // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
+
+                // ボールが線分XYに接するのではなく、pX, pYに直接ぶつかる場合があるかチェック
                 // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
                 let pCC = getMinElem(
                     [
@@ -484,18 +486,19 @@ const calcLinesDist1 = (pA, pB, pX, pY, r) => {
                     (x, y) => { return (x.dAC < y.dAC )}
                 )
 
-                if (pCC === null) {
-                    return {
-                        dmin: null,
-                        pTangentCenter: null,
-                        pMin: null
-                    }
-                } else {
+                if (pCC !== null) {
                     return {
                         dmin: 0,
                         pTangentCenter: pCC.pC,
                         pMin: pC.pF
                     };
+                } else {
+                    // ここには来ないはずだが一応
+                    return {
+                        dmin: null,
+                        pTangentCenter: null,
+                        pMin: null
+                    }
                 }
             }
         } else {
