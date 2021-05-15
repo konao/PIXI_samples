@@ -492,11 +492,11 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 pOnAB: pY_g.pF,
                 pMin: pY
             }],
-            (x) => { return x.info.insideSegment; },
-            (x, y) => { return (x.info.dist < y.info.dist) }
+            (x) => { return x.info.insideSegment; },    // isValid(x)
+            (x, y) => { return (x.info.dist < y.info.dist) }    // cmp(x, y)
         );
     
-        if (minElem === null) {
+        if ((minElem === null) || (minElem.pOnAB === pA)) {
             return {
                 dmin: null,
                 pTangentCenter: null,
@@ -506,14 +506,6 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
             // pTCを求める 
             // （pTCは線分mに半径rで接する円の中心座標）
             let pTC = null;
-
-            if (minElem.pOnAB === pA) {
-                return {
-                    dmin: null,
-                    pTangentCenter: null,
-                    pMin: null
-                }
-            }
     
             if (minElem.info.dist < r) {
                 // mへの最短距離がrより小さい = ボールがmに接触する
