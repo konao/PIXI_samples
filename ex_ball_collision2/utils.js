@@ -357,56 +357,9 @@ const reflect = (p, v, r, q1, q2) => {
 // オブジェクトのdistメンバーの値が最小の要素を配列から検索する
 //
 // @param xs [i] 距離情報の配列 (=[x])
-// 各要素(=x)は、targetとauxメンバを持つ．
-// targetにセットされているオブジェクトのdistメンバの値を比較し、
-// それが最小のxを返す．
-// auxには任意のオブジェクトをセットできる．（=補助情報）
-//
-// @return distの最小値を含む要素．全要素のdistがnullの場合はnullが返る
-//
-// @example
-// getMinDist([
-//     {
-//         target: {dist: 3},
-//         aux: 'A'
-//     },
-//     {
-//         target: {dist: null},
-//         aux: 'B'
-//     },
-//     {
-//         target: {dist: 2},
-//         aux: 'C'
-//     }
-// ]);
-// --> {
-//     target: {dist: 2},
-//     aux: 'C'
-// }
-//
-// getMinDist([
-//     {
-//         target: {dist: null},
-//         aux: 'A'
-//     }
-// ]);
-// ---> null
-const getMinDist_old = (xs) => {
-    let result = xs.reduce((prev, curr) => {
-        if (!curr.target.insideSegment) {
-            return prev;
-        } else if ((prev === null) || (curr.target.dist < prev.target.dist)) {
-            return curr;
-        } else {
-            return prev;
-        }
-    }, null);
-    return result;
-}
-
 // @param isValid [i] 要素が「有効」か判定する関数
 // @param cmp [i] 要素の大小を比較する関数
-// @return 最終的に選ばれた要素
+// @return 最終的に選ばれた要素．条件を満たす要素が一つもない場合はnullが返る．
 //
 // isValid(x)
 // @param x [i]
@@ -624,14 +577,23 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                 // (2)
                 console.log(`[p-2]`);
                 // pA_m, pB_mのうち、distが小さいほうをdminとする．
-                let minElem = getMinDist_old([{
-                    target: pA_m,
-                    aux: pA
-                }, {
-                    target: pB_m,
-                    aux: pB
-                }]);
-
+                let minElem = getMinElem(
+                    [{
+                        dist: pA_m.dist,
+                        insideSegment: pA_m.insideSegment,
+                        pF: pA_m.pF,
+                        pMin: pA
+                    },
+                    {
+                        dist: pB_m.dist,
+                        insideSegment: pB_m.insideSegment,
+                        pF: pB_m.pF,
+                        pMin: pB
+                    }],
+                    (x) => { return x.insideSegment; },
+                    (x, y) => { return (x.dist < y.dist) }
+                );
+    
                 if (minElem === null) {
                     return {
                         dmin: null,
@@ -640,7 +602,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                     }
                 } else {
                     // pTCを求める 
-                    let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(minElem.target.pF, pA_m.pF)), r));
+                    let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(minElem.pF, pA_m.pF)), r));
 
                     // pTCが線分g上にあるかチェックする
                     // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
@@ -655,9 +617,9 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
                     }
 
                     return {
-                        dmin: (pTC !== null) ? minElem.target.dist : null,
+                        dmin: (pTC !== null) ? minElem.dist : null,
                         pTangentCenter: pTC,
-                        pMin: minElem.aux
+                        pMin: minElem.pMin
                     }
                 } 
             } else {
@@ -811,7 +773,6 @@ module.exports = {
     getNearestPos,
     getCrossPoint,
     reflect,
-    getMinDist_old,
     getMinElem,
     calcLinesDist,
     calcDist_PointToLine
