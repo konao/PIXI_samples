@@ -1,7 +1,7 @@
 // *******************************************************
 //  ユーティリティ関数群
 // *******************************************************
-const EPSILON = 1e-5;
+const EPSILON = 1e-7;
 
 // =================================================
 // 乱数生成
@@ -404,7 +404,21 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pMin: Vec  // 最短距離を与える点 (dmin>0のとき：pA, pB, pX, pYのいずれか)
 //               // gとmの交点(dmin==0のとき)
 // }
+
 const calcLinesDist = (pA, pB, pX, pY, r) => {
+    let v = vecSub(pB, pA);
+    let u = vecSub(pY, pX);
+    if (!isEqual(vecInnerProd(v, u), 0)) {
+        // vとuは直交しない
+        return calcLinesDist1(pA, pB, pX, pY, r);
+    } else {
+        // vとuは直交する
+        return calcLinesDist2(pA, pB, pX, pY, r);
+    }
+}
+
+// 直線mと直線lが垂直に交わっていない場合
+const calcLinesDist1 = (pA, pB, pX, pY, r) => {
     // mの方向ベクトル
     let u =  vecSub(pY, pX);
 
@@ -425,220 +439,204 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
 
     // pYを通ってmに垂直な直線とgの交点への距離 --> pY_g
     let pY_g = calcDist_PointToLine(pY, pu, pA, pB);
-    
-    if ((pX_g !== null) && (pY_g !== null)) {
-        // 直線mと直線lが垂直に交わっていない場合
 
-        if (pA_m.a * pB_m.a > 0) {
-            // console.log('[1] pA and pB are in same side');
-            // pAとpBはmの同じ側にある
-            // ---> gとmは交差しない(dmin>0)        
-        } else {
-            // console.log('[2] pA and pB are in other side');
-            // pAとpBはmの反対側にある
-            // ---> gとmは交差する
-    
-            // gとmの交点を求める --> pC
-            let pC = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
-    
-            if (pC.insideSegment) {
-                // pCがm上にある --> dmin=0
-                // console.log('[2-1] cross point is on XY');
-    
-                // pTCを求める
-                let b = pA_m.dist;
-                let k = r/b;
-                // console.log(`[0] b=${b}, k=${k}`);
-                let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
-                // let pTC = pA;
-
-                // pTCからpQを求め、それが線分m上にあるかチェックする
-                pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-                if (!pQ.insideSegment) {
-                    // QはXY上にない
-                    pTC = null;
-                }
-
-                console.log(`[1] b=${b}, k=${k}, pQ.b=${pQ.b}`);
-                // console.log(`[1] b=${b}, k=${k}`);
-                return {
-                    dmin: 0,
-                    pTangentCenter: pTC,
-                    pMin: pC.pF
-                };
-            } else {
-                // console.log('[2-1] cross point is outside of XY');
-                // ない --> pA, pBからmへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
-                // のうちの、最も小さい値をdminとする．
-            }
-        }
-    
-        // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
-        let minElem = getMinElem(
-            [{
-                info: pA_m,
-                pOnAB: pA,
-                pMin: pA
-            }, {
-                info: pB_m,
-                pOnAB: pB,
-                pMin: pB
-            }, {
-                info: pX_g,
-                pOnAB: pX_g.pF,
-                pMin: pX                
-            }, {
-                info: pY_g,
-                pOnAB: pY_g.pF,
-                pMin: pY
-            }],
-            (x) => { return x.info.insideSegment; },    // isValid(x)
-            (x, y) => { return (x.info.dist < y.info.dist) }    // cmp(x, y)
-        );
-    
-        if ((minElem === null) || (minElem.pOnAB === pA)) {
-            return {
-                dmin: null,
-                pTangentCenter: null,
-                pMin: null
-            }
-        } else {
-            // pTCを求める 
-            // （pTCは線分mに半径rで接する円の中心座標）
-            let pTC = null;
-    
-            if (minElem.info.dist < r) {
-                // mへの最短距離がrより小さい = ボールがmに接触する
-                let a = minElem.info.dist;
-                let b = pA_m.dist;
-
-                let k = (r-a)/(b-a);
-                pTC = vecAdd(pA, vecScalar(vecSub(minElem.pOnAB, pA), (1-k)));
-                
-                pQ = calcDist_PointToLine(pTC, pu, pX, pY);
-                // console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
-                if (!pQ.insideSegment) {
-                    // QはXY上にない
-                    pTC = null;
-                }
-
-                // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
-                // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
-                let pCC = getMinElem(
-                    [
-                        calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
-                        calcPoint_CircCenterOnEdge(pA, pB, pY, r)
-                    ],
-                    (x) => { return (x != null) },
-                    (x, y) => { return (x.dAC < y.dAC )}
-                )
-
-                if ((pTC !== null) && (pCC !== null)) {
-                    if (pCC.dAC < pQ.dist) {
-                        pTC = pCC.pC;
-                    }
-                } else if (pCC !== null) {
-                    pTC = pCC.pC;
-                }
-            }
-    
-            return {
-                dmin: (pTC !== null) ? minElem.info.dist : null,
-                pTangentCenter: pTC,
-                pMin: minElem.pMin
-            }
-        }    
+    if (pA_m.a * pB_m.a > 0) {
+        // console.log('[1] pA and pB are in same side');
+        // pAとpBはmの同じ側にある
+        // ---> gとmは交差しない(dmin>0)        
     } else {
-        // 直線gと直線mが垂直に交わっている場合
+        // console.log('[2] pA and pB are in other side');
+        // pAとpBはmの反対側にある
+        // ---> gとmは交差する
 
-        if (pA_m.a * pB_m.a > 0) {
-            // console.log('[1] pA and pB are in same side');
-            // pAとpBはmの同じ側にある
-            // ---> gとmは交差しない(dmin>0)        
-            if (pA_m.insideSegment) {
-                // (2)
-                console.log(`[p-2]`);
-                // pA_m, pB_mのうち、distが小さいほうをdminとする．
-                let minElem = getMinElem(
-                    [{
-                        info: pA_m,
-                        pF: pA_m.pF,
-                        pMin: pA
-                    }, {
-                        info: pB_m,
-                        pF: pB_m.pF,
-                        pMin: pB
-                    }],
-                    (x) => { return x.info.insideSegment; },
-                    (x, y) => { return (x.info.dist < y.info.dist) }
-                );
-    
-                if (minElem === null) {
-                    return {
-                        dmin: null,
-                        pTangentCenter: null,
-                        pMin: null
-                    }
-                } else {
-                    // pTCを求める 
-                    let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(minElem.info.pF, pA_m.pF)), r));
+        // gとmの交点を求める --> pC
+        let pC = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
 
-                    // pTCが線分g上にあるかチェックする
-                    // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
-                    // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
-                    let vAB = vecSub(pB, pA);
-                    let vATC = vecSub(pTC, pA);
-                    let len_vAB = vecLen(vAB);
-                    let len_vATC = vecLen(vATC);
-                    if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
-                        // pTCは線分g上にない
-                        pTC = null;
-                    }
+        if (pC.insideSegment) {
+            // pCがm上にある --> dmin=0
+            // console.log('[2-1] cross point is on XY');
 
-                    return {
-                        dmin: (pTC !== null) ? minElem.info.dist : null,
-                        pTangentCenter: pTC,
-                        pMin: minElem.pMin
-                    }
-                } 
-            } else {
-                // (4)
-                console.log(`[p-4]`);
+            // pTCを求める
+            let b = pA_m.dist;
+            let k = r/b;
+            // console.log(`[0] b=${b}, k=${k}`);
+            let pTC = vecAdd(pA, vecScalar(vecSub(pC.pF, pA), (1-k)));
+            // let pTC = pA;
+
+            // pTCからpQを求め、それが線分m上にあるかチェックする
+            pQ = calcDist_PointToLine(pTC, pu, pX, pY);
+            if (!pQ.insideSegment) {
+                // QはXY上にない
+                pTC = null;
             }
+
+            console.log(`[1] b=${b}, k=${k}, pQ.b=${pQ.b}`);
+            // console.log(`[1] b=${b}, k=${k}`);
+            return {
+                dmin: 0,
+                pTangentCenter: pTC,
+                pMin: pC.pF
+            };
         } else {
-            // console.log('[2] pA and pB are in other side');
-            // pAとpBはmの反対側にある
-            // ---> gとmは交差する
-            if (pA_m.insideSegment) {
-                // (1)
-                console.log(`[p-1]`);
-                // 
-                // pTCを求める
-                let pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(pA, pA_m.pF)), r));
-
-                // pTCが線分g上にあるかチェックする
-                // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
-                // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
-                let vAB = vecSub(pB, pA);
-                let vATC = vecSub(pTC, pA);
-                let len_vAB = vecLen(vAB);
-                let len_vATC = vecLen(vATC);
-                if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
-                    // pTCは線分g上にない
-                    pTC = null;
-                }
-
-                return {
-                    dmin: 0,
-                    pTangentCenter: pTC,
-                    pMin: pA_m.pF
-                };
-            } else {
-                // (3)
-                console.log(`[p-3]`);
-            }
+            // console.log('[2-1] cross point is outside of XY');
+            // ない --> pA, pBからmへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
+            // のうちの、最も小さい値をdminとする．
         }
     }
+
+    // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、最も小さい値を最短距離とする．
+    let minElem = getMinElem(
+        [{
+            info: pA_m,
+            pOnAB: pA,
+            pMin: pA
+        }, {
+            info: pB_m,
+            pOnAB: pB,
+            pMin: pB
+        }, {
+            info: pX_g,
+            pOnAB: pX_g.pF,
+            pMin: pX                
+        }, {
+            info: pY_g,
+            pOnAB: pY_g.pF,
+            pMin: pY
+        }],
+        (x) => { return x.info.insideSegment; },    // isValid(x)
+        (x, y) => { return (x.info.dist < y.info.dist) }    // cmp(x, y)
+    );
+
+    if ((minElem === null) || (minElem.pOnAB === pA)) {
+        return {
+            dmin: null,
+            pTangentCenter: null,
+            pMin: null
+        }
+    } else {
+        // pTCを求める 
+        // （pTCは線分mに半径rで接する円の中心座標）
+        let pTC = null;
+
+        if (minElem.info.dist < r) {
+            // mへの最短距離がrより小さい = ボールがmに接触する
+            let a = minElem.info.dist;
+            let b = pA_m.dist;
+
+            let k = (r-a)/(b-a);
+            pTC = vecAdd(pA, vecScalar(vecSub(minElem.pOnAB, pA), (1-k)));
+            
+            pQ = calcDist_PointToLine(pTC, pu, pX, pY);
+            // console.log(`[2-1] a=${a}, b=${b}, k=${k}, pQ.b=${pQ.b}`);
+            if (!pQ.insideSegment) {
+                // QはXY上にない
+                pTC = null;
+            }
+
+            // ボールがpX, pYに接するのではなくぶつかる場合があるかチェック
+            // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
+            let pCC = getMinElem(
+                [
+                    calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
+                    calcPoint_CircCenterOnEdge(pA, pB, pY, r)
+                ],
+                (x) => { return (x != null) },
+                (x, y) => { return (x.dAC < y.dAC )}
+            )
+
+            if ((pTC !== null) && (pCC !== null)) {
+                if (pCC.dAC < pQ.dist) {
+                    pTC = pCC.pC;
+                }
+            } else if (pCC !== null) {
+                pTC = pCC.pC;
+            }
+        }
+
+        return {
+            dmin: (pTC !== null) ? minElem.info.dist : null,
+            pTangentCenter: pTC,
+            pMin: minElem.pMin
+        }
+    }    
+}
+
+// 直線gと直線mが垂直に交わっている場合
+const calcLinesDist2 = (pA, pB, pX, pY, r) => {
+    // gの方向ベクトルと長さ
+    let vAB = vecSub(pB, pA);
+    let len_vAB = vecLen(vAB);
+
+    // pAからAB方向の直線と線分mの交点を求める
+    let pA_m = calcDist_PointToLine(pA, vAB, pX, pY);
+
+    if ((pA_m.b >= 0) && (pA_m.b <= 1)) {
+        let pTC = null;
+        let minDist = 0;
+        let pMin = null;
+        if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
+            // (1)
+            console.log(`[p-1]`);
+            // 
+            // pTCを求める
+            pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(pA, pA_m.pF)), r));
+            minDist = 0;
+            pMin = pTC.pF;
+        } else {
+            // (2)
+            console.log(`[p-2]`);
+
+            if (pA_m.a < 0) {
+                // Aは線分mの向こう側にある
+                return {
+                    dmin: null,
+                    pTangentCenter: null,
+                    pMin: null
+                }
+            } else {
+                // Aは線分mのこちら側にある
+                // pTCを求める 
+                pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(pA, pA_m.pF)), r));
+
+                // pBからAB方向の直線と線分mの交点を求める
+                let pB_m = calcDist_PointToLine(pB, vAB, pX, pY);
+
+                minDist = pB_m.dist;    // 最小距離はBからmまでの距離
+                pMin = pB;  // 最小点はB
+            }
+
+            // pTCが線分g上にあるかチェックする
+            // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
+            // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
+            
+            let vATC = vecSub(pTC, pA);
+            let len_vATC = vecLen(vATC);
+            if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
+                // pTCは線分g上にない
+                pTC = null;
+            }
+
+            return {
+                dmin: (pTC !== null) ? minDist : null,
+                pTangentCenter: pTC,
+                pMin: pMin
+            }
+        }
+    } else {
+        return {
+            dmin: null,
+            pTangentCenter: null,
+            pMin: null
+        }
+
+        // if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
+        //     // (3)
+        //     console.log(`[p-3]`);
+        // } else {
+        //     // (4)
+        //     console.log(`[p-4]`);
+        // }        
+    } 
 }
 
 // pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)に
