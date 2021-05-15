@@ -570,73 +570,101 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
     // pAからAB方向の直線と線分mの交点を求める
     let pA_m = calcDist_PointToLine(pA, vAB, pX, pY);
 
-    if ((pA_m.b >= 0) && (pA_m.b <= 1)) {
-        let pTC = null;
-        let minDist = 0;
-        let pMin = null;
-        if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
-            // (1)
-            console.log(`[p-1]`);
-            // 
-            // pTCを求める
-            pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(pA, pA_m.pF)), r));
-            minDist = 0;
-            pMin = pTC.pF;
-        } else {
-            // (2)
-            console.log(`[p-2]`);
-
-            if (pA_m.a < 0) {
-                // Aは線分mの向こう側にある
-                return {
-                    dmin: null,
-                    pTangentCenter: null,
-                    pMin: null
-                }
-            } else {
-                // Aは線分mのこちら側にある
-                // pTCを求める 
-                pTC = vecAdd(pA_m.pF, vecScalar(vecNorm(vecSub(pA, pA_m.pF)), r));
-
-                // pBからAB方向の直線と線分mの交点を求める
-                let pB_m = calcDist_PointToLine(pB, vAB, pX, pY);
-
-                minDist = pB_m.dist;    // 最小距離はBからmまでの距離
-                pMin = pB;  // 最小点はB
-            }
-
-            // pTCが線分g上にあるかチェックする
-            // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
-            // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
-            
-            let vATC = vecSub(pTC, pA);
-            let len_vATC = vecLen(vATC);
-            if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
-                // pTCは線分g上にない
-                pTC = null;
-            }
-
-            return {
-                dmin: (pTC !== null) ? minDist : null,
-                pTangentCenter: pTC,
-                pMin: pMin
-            }
-        }
-    } else {
+    if (pA_m.a < 0) {
+        // gとmの交差点は、pAからAB方向に伸びる半直線上にはない
         return {
             dmin: null,
             pTangentCenter: null,
             pMin: null
         }
+    } else {
+        let pTC = null;
+        let minDist = 0;
+        let pMin = null;
 
-        // if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
-        //     // (3)
-        //     console.log(`[p-3]`);
-        // } else {
-        //     // (4)
-        //     console.log(`[p-4]`);
-        // }        
-    } 
+        if ((pA_m.b >= 0) && (pA_m.b <= 1)) {
+            if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
+                // (1)
+
+                // pTCを求める
+                let w = vecNorm(vecSub(pA, pA_m.pF));
+                pTC = vecAdd(pA_m.pF, vecScalar(w, r));
+                minDist = 0;
+                pMin = pTC.pF;
+            } else {
+                // (2)
+                
+                // Aは線分mのこちら側にある
+                // pTCを求める 
+                let w = vecNorm(vecSub(pA, pA_m.pF));
+                pTC = vecAdd(pA_m.pF, vecScalar(w, r));
+
+                // minDistとpMinを求めるために、
+                // pBからAB方向の直線と線分mの交点を求める
+                let pB_m = calcDist_PointToLine(pB, vAB, pX, pY);
+
+                minDist = pB_m.dist;    // 最小距離はBからmまでの距離
+                pMin = pB;  // 最小点はB
+    
+                // pTCが線分g上にあるかチェックする
+                // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
+                // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
+                
+                let vATC = vecSub(pTC, pA);
+                let len_vATC = vecLen(vATC);
+                if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
+                    // pTCは線分g上にない
+                    pTC = null;
+                }    
+            }
+        } else {
+            // (3)または(4)
+            // pTCを求める
+            let vXY = vecSub(pY, pX);
+            let pCloseToAB = getMinElem(
+                [{
+                    info: calcDist_PointToLine(pX, vXY, pA, pB), 
+                    pMin: pX
+                }, {
+                    info: calcDist_PointToLine(pY, vXY, pA, pB),
+                    pMin: pY
+                }],
+                (x) => { return true },
+                (x, y) => { return (x.info.dist < y.info.dist )}
+            );
+
+            let d = pCloseToAB.dist;
+            if (d <= r) {
+                let k = Math.sqrt(r*r-d*d);
+                let w = vecNorm(vecSub(pA, pCloseToAB.pF));
+                pTC = vecAdd(pA_mpCloseToAB.pF, vecScalar(w, k));
+            } else {
+                // gとmは交わらない（dが接触円の半径rより大きい）
+                return {
+                    dmin: null,
+                    pTangentCenter: null,
+                    pMin: null
+                }
+            }
+
+            // minDistとpMinを求める
+            if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
+                // (3)
+                minDist = 0;
+                pMin = pCloseToAB.pMin;
+            } else {
+                // (4)
+                minDist = vecDist(pB, pCloseToAB.pMin);
+                pMin = pB;
+            }        
+        }
+
+        return {
+            dmin: (pTC !== null) ? minDist : null,
+            pTangentCenter: pTC,
+            pMin: pMin
+        }
+    }
 }
 
 // pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)に
