@@ -417,7 +417,7 @@ const calcLinesDist = (pA, pB, pX, pY, r) => {
     }
 }
 
-// 直線mと直線lが垂直に交わっていない場合
+// 直線gと直線mが垂直に交わっていない場合
 const calcLinesDist1 = (pA, pB, pX, pY, r) => {
     // mの方向ベクトル
     let u =  vecSub(pY, pX);
@@ -571,18 +571,21 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
     let pA_m = calcDist_PointToLine(pA, vAB, pX, pY);
 
     if (pA_m.a < 0) {
-        // gとmの交差点は、pAからAB方向に伸びる半直線上にはない
+        // gとmの交点は、pAからAB方向に伸びる半直線上にはない
+        // (=ボールはmには衝突しない)
         return {
             dmin: null,
             pTangentCenter: null,
             pMin: null
         }
     } else {
-        let pTC = null;
-        let minDist = 0;
-        let pMin = null;
+        let pTC = null; // 接触円の中心
+        let minDist = 0;    // ABとXYの最短距離
+        let pMin = null;    // 最短距離を与える点
 
         if ((pA_m.b >= 0) && (pA_m.b <= 1)) {
+            // 直線gは線分m(=XY)上で交わる
+
             if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
                 // (1)
 
@@ -618,6 +621,8 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
                 }    
             }
         } else {
+            // 直線gは線分m(=XY)上で交わらない
+
             // (3)または(4)
             // pTCを求める
             let vXY = vecSub(pY, pX);
@@ -639,7 +644,7 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
                 let w = vecNorm(vecSub(pA, pCloseToAB.pF));
                 pTC = vecAdd(pA_mpCloseToAB.pF, vecScalar(w, k));
             } else {
-                // gとmは交わらない（dが接触円の半径rより大きい）
+                // dが接触円の半径rより大きい（円はXYには衝突しない）
                 return {
                     dmin: null,
                     pTangentCenter: null,
