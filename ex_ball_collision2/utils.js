@@ -602,23 +602,21 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
                 let w = vecNorm(vecSub(pA, pA_m.pF));
                 pTC = vecAdd(pA_m.pF, vecScalar(w, r));
 
-                // minDistとpMinを求めるために、
-                // pBからAB方向の直線と線分mの交点を求める
-                let pB_m = calcDist_PointToLine(pB, vAB, pX, pY);
-
-                minDist = pB_m.dist;    // 最小距離はBからmまでの距離
-                pMin = pB;  // 最小点はB
-    
                 // pTCが線分g上にあるかチェックする
                 // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
                 // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
-                
                 let vATC = vecSub(pTC, pA);
                 let len_vATC = vecLen(vATC);
                 if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
                     // pTCは線分g上にない
                     pTC = null;
                 }    
+
+                // minDistとpMinを求めるために、
+                // pBからAB方向の直線と線分mの交点を求める
+                let pB_m = calcDist_PointToLine(pB, vAB, pX, pY);
+                minDist = pB_m.dist;    // 最小距離はBからmまでの距離
+                pMin = pB;  // 最小点はB
             }
         } else {
             // 直線gは線分m(=XY)上で交わらない
@@ -643,6 +641,16 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
                 let k = Math.sqrt(r*r-d*d);
                 let w = vecNorm(vecSub(pA, pCloseToAB.pF));
                 pTC = vecAdd(pA_mpCloseToAB.pF, vecScalar(w, k));
+
+                // pTCが線分g上にあるかチェックする
+                // (pA-->pB方向のベクトルとpA-->pTC方向のベクトルが同じ方向を向いていて、
+                // かつvATCの長さがvABの長さ以下ならpTCは線分g上にある）
+                let vATC = vecSub(pTC, pA);
+                let len_vATC = vecLen(vATC);
+                if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
+                    // pTCは線分g上にない
+                    pTC = null;
+                }    
             } else {
                 // dが接触円の半径rより大きい（円はXYには衝突しない）
                 return {
