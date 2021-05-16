@@ -589,8 +589,9 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
                     pCm = pCC.base;
 
                     // pRefBを計算する
+                    // （ボールが辺でなく点と衝突した場合）
                     let CB = vecSub(pB, pC);
-                    let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
+                    let nu = vecNorm(vecSub(pCm, pC));    // pC-->pCmに直交するベクトル(=接線ベクトル)
                     let CH = vecScalar(nu, vecInnerProd(CB, nu));
                     pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
                 } else {
@@ -650,8 +651,9 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 pCm = pA_m.pF;
 
                 // pRefBを計算する
+                // （ボールが辺でなく点と衝突した場合）
                 let CB = vecSub(pB, pC);
-                let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
+                let nu = vecNorm(vecSub(pCm, pC));    // pC-->pCmに直交するベクトル(=接線ベクトル)
                 let CH = vecScalar(nu, vecInnerProd(CB, nu));
                 pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
                 
@@ -693,8 +695,9 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 pCm = pCloseToAB.pMin;
 
                 // pRefBを計算する
+                // （ボールが辺でなく点と衝突した場合）
                 let CB = vecSub(pB, pC);
-                let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
+                let nu = vecNorm(vecSub(pCm, pC));    // pC-->pCmに直交するベクトル(=接線ベクトル)
                 let CH = vecScalar(nu, vecInnerProd(CB, nu));
                 pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
 
