@@ -72,6 +72,20 @@ const vecSub = (v1, v2) => {
 }
 
 // -----------------------------------------------
+// 直交ベクトル
+//
+// @param v {x, y} [i] ベクトル
+//
+// @return vに直交するベクトルを返す
+// -----------------------------------------------
+const vecCross = (v) => {
+    return {
+        x: v.y,
+        y: -v.x
+    };
+}
+
+// -----------------------------------------------
 // スカラー倍
 //
 // @param v {x, y} [i] ベクトル
@@ -414,10 +428,7 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
     let u =  vecSub(pY, pX);
 
     // mの垂線のベクトル
-    let pu = {
-        x: u.y,
-        y: -u.x
-    }
+    let pu = vecCross(u);
 
     // pAからmへの垂線の足を計算 --> pA_m
     let pA_m = calcDist_PointToLine(pA, pu, pX, pY);
@@ -591,7 +602,7 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
                     // pRefBを計算する
                     // （ボールが辺でなく点と衝突した場合）
                     let CB = vecSub(pB, pC);
-                    let nu = vecNorm(vecSub(pCm, pC));    // pC-->pCmに直交するベクトル(=接線ベクトル)
+                    let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
                     let CH = vecScalar(nu, vecInnerProd(CB, nu));
                     pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
                 } else {
@@ -653,7 +664,7 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 // pRefBを計算する
                 // （ボールが辺でなく点と衝突した場合）
                 let CB = vecSub(pB, pC);
-                let nu = vecNorm(vecSub(pCm, pC));    // pC-->pCmに直交するベクトル(=接線ベクトル)
+                let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
                 let CH = vecScalar(nu, vecInnerProd(CB, nu));
                 pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
                 
@@ -697,7 +708,7 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 // pRefBを計算する
                 // （ボールが辺でなく点と衝突した場合）
                 let CB = vecSub(pB, pC);
-                let nu = vecNorm(vecSub(pCm, pC));    // pC-->pCmに直交するベクトル(=接線ベクトル)
+                let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
                 let CH = vecScalar(nu, vecInnerProd(CB, nu));
                 pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
 
@@ -744,11 +755,9 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
 // pCが線分g上に存在しない場合はnullを返す
 const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
     let nv = vecNorm(vecSub(pB, pA)); // pA --> pBの単位ベクトル
+
     // nvに直交するベクトル
-    let nu = {
-        x: nv.y,
-        y: -nv.x
-    }
+    let nu = vecCross(nv);
 
     // pXから線分gへの垂線の足(pX_g)を求める
     let pX_g = calcDist_PointToLine(pX, nu, pA, pB);
@@ -840,6 +849,7 @@ module.exports = {
     d2r,
     vecAdd,
     vecSub,
+    vecCross,
     vecScalar,
     vecInnerProd,
     vecLen,
