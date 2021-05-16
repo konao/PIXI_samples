@@ -616,7 +616,7 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
                 let w = vecNorm(vecSub(pA, pA_m.pF));
                 pTC = vecAdd(pA_m.pF, vecScalar(w, r));
                 minDist = 0;
-                pMin = pTC.pF;
+                pMin = pA_m.pF;
             } else {
                 // (2)
                 
@@ -673,7 +673,7 @@ const calcLinesDist2 = (pA, pB, pX, pY, r) => {
                 if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
                     // pTCは線分g上にない
                     pTC = null;
-                }    
+                }
             } else {
                 // dが接触円の半径rより大きい（円はXYには衝突しない）
                 return {
