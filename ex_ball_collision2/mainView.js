@@ -189,12 +189,11 @@ const draw = () => {
             let edgeInfos = edgeList.map(e => {
                 // console.log(`e.p1=(${e.p1.x}, ${e.p1.y})`);
                 // console.log(`e.p2=(${e.p2.x}, ${e.p2.y})`);
-                let cpInfo = U.calcLinesDist(g_pA, g_pB, e.p1, e.p2, g_ballSize);
+                let cpInfo = U.calcContactPoint(g_pA, g_pB, e.p1, e.p2, g_ballSize);
 
                 if (!cpInfo) {
                     throw("error!");
                 }
-                // console.log(`cpInfo.dmin=${cpInfo.dmin}`);
                 return {
                     e: e,
                     cpInfo: cpInfo
@@ -203,8 +202,8 @@ const draw = () => {
 
             // cpInfosの中から、pから接触点までの距離が最も小さい辺を選ぶ
             edgeInfos.forEach(ei => {
-                if ((ei.cpInfo !== null) && (ei.cpInfo.pTangentCenter !== null)) {
-                    let dist = U.vecDist(g_pA, ei.cpInfo.pTangentCenter);
+                if ((ei.cpInfo !== null) && (ei.cpInfo.pC !== null)) {
+                    let dist = U.vecDist(g_pA, ei.cpInfo.pC);
                     if ((minDist < 0) || (dist < minDist)) {
                         minDist = dist
                         nearestEdge = ei;
@@ -223,23 +222,23 @@ const draw = () => {
 
             let di = nearestEdge.cpInfo;
             if (di !== null) {
-                if (di.dmin !== null) {
-                    g_Msg.setText(`dmin=${di.dmin}`);
-                } else {
-                    g_Msg.setText(`dmin=null`);
-                }
+                // if (di.dmin !== null) {
+                //     g_Msg.setText(`dmin=${di.dmin}`);
+                // } else {
+                //     g_Msg.setText(`dmin=null`);
+                // }
 
-                if (di.pMin !== null) {
+                if (di.pCm !== null) {
                     g_G.lineStyle(1, 0x00ffff, 1);
                     g_G.beginFill(0x00ffff);
-                    g_G.drawEllipse(di.pMin.x, di.pMin.y, 7, 7);
+                    g_G.drawEllipse(di.pCm.x, di.pCm.y, 7, 7);
                     g_G.endFill();
                 }
 
-                if (di.pTangentCenter !== null) {
+                if (di.pC !== null) {
                     g_G.lineStyle(1, 0xffffff, 1);
                     g_G.beginFill(0x008000);
-                    g_G.drawEllipse(di.pTangentCenter.x, di.pTangentCenter.y, g_ballSize, g_ballSize);
+                    g_G.drawEllipse(di.pC.x, di.pC.y, g_ballSize, g_ballSize);
                     g_G.endFill();
                 }
             }
