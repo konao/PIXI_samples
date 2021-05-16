@@ -556,6 +556,12 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
 
             let k = (r-a)/(b-a);
             pC = vecAdd(pA, vecScalar(vecSub(minElem.pOnAB, pA), (1-k)));
+
+            // pRefBを計算する
+            let CB = vecSub(pB, pC);
+            let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
+            let CH = vecScalar(nu, vecInnerProd(CB, nu));
+            pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
             
             let pQ = calcDist_PointToLine(pC, pu, pX, pY);
             pCm = pQ.pF;
