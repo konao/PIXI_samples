@@ -395,18 +395,7 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pC : Vec  // ボールが線分mと衝突する時の円の中心座標(衝突しない場合はnull）
 //    pCm : Vec // ボールが線分mと衝突する点(線分m上の点)
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
-//
-//    dmin : number, // 最短距離
-//    (1) dmin==0: 線分gと線分mは交差する
-//    (2) dmin>0: 線分gと線分mは交差しない
-//    (3) dmin==null:gとmは接触しない
-//    注）(1)(2)は共に直線gが線分mに交わる場合．ただし(1)は線分gが線分mに交わるが、(2)は交わらない場合
-//        (3)は直線gが線分mに交わらない場合．
-//
-//    pMin: Vec  // 最短距離を与える点 (dmin>0のとき：pA, pB, pX, pYのいずれか)
-//               // gとmの交点(dmin==0のとき)
 // }
-
 const calcContactPoint = (pA, pB, pX, pY, r) => {
     let v = vecSub(pB, pA);
     let u = vecSub(pY, pX);
@@ -471,8 +460,6 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
                     pC: pC,
                     pCm: pQ.pF,
                     pRefB: null
-                    // dmin: 0,
-                    // pMin: pCross.pF
                 };
             } else {
                 // Qは線分XY上にない
@@ -498,16 +485,12 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
                         pC: pCC.info.pC,
                         pCm: pCC.base,
                         pRefB: null
-                        // dmin: 0,
-                        // pMin: pCross.pF
                     };
                 } else {
                     return {
                         pC: null,
                         pCm: null,
                         pRefB: null
-                        // dmin: null,
-                        // pMin: null
                     }
                 }
             }
@@ -523,20 +506,16 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
     let minElem = getMinElem(
         [{
             info: pA_m,
-            pOnAB: pA,
-            pMin: pA
+            pOnAB: pA
         }, {
             info: pB_m,
-            pOnAB: pB,
-            pMin: pB
+            pOnAB: pB
         }, {
             info: pX_g,
-            pOnAB: pX_g.pF,
-            pMin: pX                
+            pOnAB: pX_g.pF
         }, {
             info: pY_g,
-            pOnAB: pY_g.pF,
-            pMin: pY
+            pOnAB: pY_g.pF
         }],
         (x) => { return x.info.insideSegment; },    // isValid(x)
         (x, y) => { return (x.info.dist < y.info.dist) }    // cmp(x, y)
@@ -547,8 +526,6 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
             pC: null,
             pCm: null,
             pRefB: null
-            // dmin: null,
-            // pMin: null
         }
     } else {
         // pCを求める 
@@ -600,8 +577,6 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
             pC: pC,
             pCm: pCm,
             pRefB: pRefB
-            // dmin: (pC !== null) ? minElem.info.dist : null,
-            // pMin: minElem.pMin
         }
     }    
 }
@@ -622,15 +597,11 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
             pC: null,
             pCm: null,
             pRefB: null
-            // dmin: null,
-            // pMin: null
         }
     } else {
         let pC = null; // 接触円の中心
         let pCm = null; // 接触円のm上の接触点
         let pRefB = null;
-        // let minDist = 0;    // ABとXYの最短距離
-        // let pMin = null;    // 最短距離を与える点
 
         if ((pA_m.b >= 0) && (pA_m.b <= 1)) {
             // 直線gは線分m(=XY)上で交わる
@@ -642,8 +613,6 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 let w = vecNorm(vecSub(pA, pA_m.pF));
                 pC = vecAdd(pA_m.pF, vecScalar(w, r));
                 pCm = pA_m.pF;
-                // minDist = 0;
-                // pMin = pA_m.pF;
             } else {
                 // (2)
                 
@@ -663,12 +632,6 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                     pC = null;
                     pCm = null;
                 }    
-
-                // minDistとpMinを求めるために、
-                // pBからAB方向の直線と線分mの交点を求める
-                // let pB_m = calcDist_PointToLine(pB, vAB, pX, pY);
-                // minDist = pB_m.dist;    // 最小距離はBからmまでの距離
-                // pMin = pB;  // 最小点はB
             }
         } else {
             // 直線gは線分m(=XY)上で交わらない
@@ -711,29 +674,14 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                     pC: null,
                     pCm: null,
                     pRefB: null
-                    // dmin: null,
-                    // pMin: null
                 }
             }
-
-            // minDistとpMinを求める
-            // if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
-            //     // (3)
-            //     minDist = 0;
-            //     // pMin = pCloseToAB.pMin;
-            // } else {
-            //     // (4)
-            //     minDist = vecDist(pB, pCloseToAB.pMin);
-            //     // pMin = pB;
-            // }        
         }
 
         return {
             pC: pC,
             pCm: pCm,
             pRefB: pRefB
-            // dmin: (pC !== null) ? minDist : null,
-            // pMin: pMin
         }
     }
 }
