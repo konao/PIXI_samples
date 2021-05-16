@@ -325,45 +325,23 @@ const getCrossPoint = (p, v, q1, q2) => {
 // （bReflect=falseになるまで再帰的にreflectを呼ぶ必要がある）
 // --------------------------------------------------------------
 const reflect = (p, v, r, q1, q2) => {
-    // 方向ベクトルを正規化
-    const nv = vecNorm(v);
+    let pB = vecAdd(p, v);
+    let cpInfo = calcContactPoint(p, pB, q1, q2, r);
 
-    // LとWの交点を求める
-    let cpInfo = getCrossPoint(p, nv, q1, q2);
-    if (cpInfo === null) {
-        // 交点なし
-        // pをv方向へ進める
-        let p2 = vecAdd(p, v);
+    if ((cpInfo !== null) && (cpInfo.pC !== null)) {
+        let newP = cpInfo.pRefB;
+        let newV = vecSub(newP, cpInfo.pC);
         return {
-            p: p2,
+            p: newP,
+            v: newV,
+            bReflect: true
+        };
+    } else {
+        return {
+            p: pB,
             v: v,
             bReflect: false
-        }
-    } else {
-        // 交点あり
-        let d = vecLen(v);   // 移動距離
-        let dist = cpInfo.dist; // pからLとWの交点までの距離
-        if (dist-d > r) {
-            // 衝突していない
-            let p2 = vecAdd(p, v);
-            return {
-                p: p2,
-                v: v,
-                bReflect: false
-            }    
-        } else {
-            // 衝突した
-            // pを更新
-            let cp = cpInfo.cp; // 交点
-            let refp = vecAdd(p, vecAdd(vecSub(cp, p), vecScalar(nv, -r))); // 反射点
-            let d2 = d-dist+r;
-            let refv = vecScalar(cpInfo.refv, d2); // 反射後の方向ベクトル
-            return {
-                p: refp,
-                v: refv,
-                bReflect: true
-            };
-        }
+        };
     }
 }
 

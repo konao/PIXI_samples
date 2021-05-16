@@ -16,6 +16,8 @@ let g_w = 0;
 let g_h = 0;
 let g_bPause = false;
 let g_ballSize = 20; // ボールのサイズ
+let g_ballSpeed = 5;    // ボールのスピード
+let g_nBalls = 0;   // ボールの個数
 
 let g_ballList = [];
 let g_wallList = [];
@@ -122,7 +124,7 @@ $(window).on('load', () => {
 
         g_infoText = new Text()
             .initSprite(PIXI, app.stage)
-            .setText(`size: ${g_ballSize}`)
+            .setText(`balls: ${g_nBalls}  size: ${g_ballSize}  speed: ${g_ballSpeed}`)
             .setPos(10, 30)
             .setFontSize(20)
             .setColor('cyan');
@@ -130,12 +132,6 @@ $(window).on('load', () => {
         // [TEST]
         g_G = new PIXI.Graphics();
         app.stage.addChild(g_G);
-        g_Msg = new Text()
-            .initSprite(PIXI, app.stage)
-            .setText(`dist`)
-            .setPos(10, 850)
-            .setFontSize(20)
-            .setColor('cyan');
 
         draw();
 
@@ -145,9 +141,9 @@ $(window).on('load', () => {
                 g_wallList.forEach(wall => {
                     wall.update();
                 });
-                // g_ballList.forEach(ball => {
-                //     ball.update(g_wallList);
-                // });
+                g_ballList.forEach(ball => {
+                    ball.update(g_wallList);
+                });
 
                 if (g_arrowDragging > 0) {
                     draw();
@@ -222,12 +218,6 @@ const draw = () => {
 
             let di = nearestEdge.cpInfo;
             if (di !== null) {
-                // if (di.dmin !== null) {
-                //     g_Msg.setText(`dmin=${di.dmin}`);
-                // } else {
-                //     g_Msg.setText(`dmin=null`);
-                // }
-
                 if (di.pCm !== null) {
                     g_G.lineStyle(1, 0x00ffff, 1);
                     g_G.beginFill(0x00ffff);
@@ -271,7 +261,7 @@ const draw = () => {
 
 const showStatus = () => {
     if (g_infoText) {
-        g_infoText.setText(`size: ${g_ballSize}`);
+        g_infoText.setText(`balls: ${g_nBalls}  size: ${g_ballSize}  speed: ${g_ballSpeed}`);
     }
 }
 
@@ -306,17 +296,11 @@ $(window).on('mousemove', e => {
 // [TEST]
 let g_pA = {x: 200, y: 750};
 let g_pB = {x: 700, y: 750};
-// let g_pA = {x: 400, y: 350};
-// let g_pB = {x: 800, y: 350};
 let g_focus = null;
 let g_arrowDragging = 0;    // 1=始点、2=終点
-let g_pA_pB_updated = true;
 let g_G = null;
-let g_Msg = null;
 
 $(window).on('mousedown', e => {
-    // console.log(`x=${e.clientX}, y=${e.clientY}`);
-    // console.log(e);
     if (e.which === 1) {
         // 左ボタンクリック
         let mousePressPos = {
@@ -337,8 +321,22 @@ $(window).on('mousedown', e => {
             g_arrowDragging = 0;
             g_focus = null;
         }
+    } else if (e.which === 3) {
+        // 右ボタンクリック
+        let ejPos = g_pA;
+        let ejVec = U.vecNorm(U.vecSub(g_pB, g_pA));
+        ejVec = U.vecScalar(ejVec, g_ballSpeed);
 
-        
+        // ボールを生成
+        let newBall = new Ball();
+        newBall.setRadius(g_ballSize)
+            .setBallPos(ejPos)
+            .setVec(ejVec);
+        newBall.init(PIXI, app.stage, g_w, g_h);
+
+        g_ballList.push(newBall);
+        g_nBalls++;
+        showStatus();
     }
 });
 
@@ -373,6 +371,24 @@ $(window).on('keydown', e => {
                 g_ballSize++;
                 showStatus();
                 draw();
+            }
+            break;
+        }
+        case 38:    // up
+        {
+            // ボールスピードアップ
+            if (g_ballSpeed < 50) {
+                g_ballSpeed++;
+                showStatus();
+            }
+            break;
+        }
+        case 40:    // down
+        {
+            // ボールスピードダウン
+            if (g_ballSpeed > 1) {
+                g_ballSpeed--;
+                showStatus();
             }
             break;
         }
