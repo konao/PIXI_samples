@@ -79,6 +79,11 @@ $(window).on('load', () => {
             {x: 1100, y: 150},
             {x: 1000, y: 500}
         ]);
+        // w2.setWallPoints([
+        //     {x: 200, y: 100},
+        //     {x: 400, y: 150},
+        //     {x: 300, y: 500}
+        // ]);
         w2.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w2);
 
@@ -106,6 +111,11 @@ $(window).on('load', () => {
         w6.genCircleWallPoints(900, 700, 50);
         w6.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w6);
+
+        let w7 = new Wall();
+        w7.genCircleWallPoints(100, 800, 50);
+        w7.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w7);
 
         // 操作説明
         new Text()
@@ -352,6 +362,16 @@ $(window).on('keydown', e => {
         case 32:    // space
         {
             g_bPause = !g_bPause;
+            break;
+        }
+        case 78:    // N
+        {
+            if (g_bPause) {
+                g_ballList.forEach(ball => {
+                    ball.update(g_wallList);
+                });
+                draw();
+            }
             break;
         }
         case 37:    // left

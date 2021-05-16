@@ -421,7 +421,7 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
     let pY_g = calcDist_PointToLine(pY, pu, pA, pB);
 
     if (pA_m.a * pB_m.a > 0) {
-        // console.log('[1] pA and pB are in same side');
+        console.log('[1] pA and pB are in same side');
         // pAとpBはmの同じ側にある
         // ---> gとmは交差しない(dmin>0)        
     } else {
@@ -432,7 +432,7 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
         // gとmの交点を求める --> pCross
         let pCross = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
 
-        if (pCross.insideSegment) {
+        if ((pCross !== null) && (pCross.insideSegment)) {
             // 交点がm上にある --> dmin=0
             // console.log('[2-1] cross point is on XY');
 

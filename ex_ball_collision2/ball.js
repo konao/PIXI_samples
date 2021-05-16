@@ -107,16 +107,19 @@ class Ball extends BaseSpr {
             let edgeInfos = edgeList.map(e => {
                 return {
                     e: e,
-                    cpInfo: U.getCrossPoint(p, v, e.p1, e.p2)
+                    cpInfo: U.calcContactPoint(p, U.vecAdd(p, v), e.p1, e.p2, this._r)
                 };
             });
-            // cpInfosの中から、最もdistの小さいもの(=pに最も近い交点)を選ぶ
+
+            // cpInfosの中から、pから接触点までの距離が最も小さい辺を選ぶ
             edgeInfos.forEach(ei => {
-                if (ei.cpInfo !== null) {
-                    if ((minDist < 0) || (ei.cpInfo.dist < minDist)) {
-                        minDist = ei.cpInfo.dist;
-                        nearestEdge = ei.e
-                    }
+                if ((ei.cpInfo !== null) && (ei.cpInfo.pC !== null)) {
+                    let dist = U.vecDist(p, ei.cpInfo.pC);
+                    if ((minDist < 0) || (dist < minDist)) {
+                        minDist = dist
+                        nearestEdge = ei.e;
+                        // console.log(`minDist=${minDist}`);
+                    }    
                 }
             });
         });
@@ -140,6 +143,8 @@ class Ball extends BaseSpr {
                 // （反射しなくなるまで）
                 this.updateSub(wallList);
             }
+        } else {
+            this._p = U.vecAdd(this._p, this._v);
         }
     }
 }
