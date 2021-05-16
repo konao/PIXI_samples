@@ -15,7 +15,7 @@ const { Text } = require('./text');
 let g_w = 0;
 let g_h = 0;
 let g_bPause = false;
-let g_ballSize = 10; // ボールのサイズ
+let g_ballSize = 20; // ボールのサイズ
 
 let g_ballList = [];
 let g_wallList = [];
@@ -240,6 +240,22 @@ const draw = () => {
                     g_G.beginFill(0x008000);
                     g_G.drawEllipse(di.pC.x, di.pC.y, g_ballSize, g_ballSize);
                     g_G.endFill();
+                }
+
+                if (di.pRefB !== null) {
+                    // pCからpRefBへの線を引く
+                    g_G.lineStyle(1, 0xffff00, 0.5);  // 黄色
+                    g_G.moveTo(di.pC.x, di.pC.y);
+                    g_G.lineTo(di.pRefB.x, di.pRefB.y);
+
+                    // 矢印を描く
+                    let rv = U.vecScalar(U.vecNorm(U.vecSub(di.pC, di.pRefB)), 20);
+                    let pB1 = U.vecAdd(di.pRefB, U.vecRotate(rv, 30));
+                    g_G.moveTo(di.pRefB.x, di.pRefB.y);
+                    g_G.lineTo(pB1.x, pB1.y);
+                    let pB2 = U.vecAdd(di.pRefB, U.vecRotate(rv, -30));
+                    g_G.moveTo(di.pRefB.x, di.pRefB.y);
+                    g_G.lineTo(pB2.x, pB2.y);
                 }
             }
         }

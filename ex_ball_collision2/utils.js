@@ -456,10 +456,17 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
             let pQ = calcDist_PointToLine(pC, pu, pX, pY);
             if (pQ.insideSegment) {
                 // Qは線分XY上にある
+
+                // pRefBを計算する
+                let CB = vecSub(pB, pC);
+                let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
+                let CH = vecScalar(nu, vecInnerProd(CB, nu));
+                let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
+
                 return {
                     pC: pC,
                     pCm: pQ.pF,
-                    pRefB: null
+                    pRefB: pRefB
                 };
             } else {
                 // Qは線分XY上にない
@@ -481,10 +488,18 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
 
                 if (pCC !== null) {
                     // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
+                    let pC = pCC.info.pC;
+
+                    // pRefBを計算する
+                    let CB = vecSub(pB, pC);
+                    let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
+                    let CH = vecScalar(nu, vecInnerProd(CB, nu));
+                    let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
+
                     return {
-                        pC: pCC.info.pC,
+                        pC: pC,
                         pCm: pCC.base,
-                        pRefB: null
+                        pRefB: pRefB
                     };
                 } else {
                     return {
@@ -566,6 +581,12 @@ const calcContactPoint1 = (pA, pB, pX, pY, r) => {
                     // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
                     pC = pCC.info.pC;
                     pCm = pCC.base;
+
+                    // pRefBを計算する
+                    let CB = vecSub(pB, pC);
+                    let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
+                    let CH = vecScalar(nu, vecInnerProd(CB, nu));
+                    pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
                 } else {
                     pC = null;
                     pCm = null;
@@ -622,6 +643,12 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 pC = vecAdd(pA_m.pF, vecScalar(w, r));
                 pCm = pA_m.pF;
 
+                // pRefBを計算する
+                let CB = vecSub(pB, pC);
+                let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
+                let CH = vecScalar(nu, vecInnerProd(CB, nu));
+                pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
+                
                 // pCが線分g上にあるかチェックする
                 // (pA-->pB方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていて、
                 // かつvATCの長さがvABの長さ以下ならpCは線分g上にある）
@@ -631,6 +658,7 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                     // pCは線分g上にない
                     pC = null;
                     pCm = null;
+                    pRefB = null;
                 }    
             }
         } else {
@@ -658,6 +686,12 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                 pC = vecAdd(pCloseToAB.pF, vecScalar(w, k));
                 pCm = pCloseToAB.pMin;
 
+                // pRefBを計算する
+                let CB = vecSub(pB, pC);
+                let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
+                let CH = vecScalar(nu, vecInnerProd(CB, nu));
+                pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
+
                 // pCが線分g上にあるかチェックする
                 // (pA-->pB方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていて、
                 // かつvATCの長さがvABの長さ以下ならpCは線分g上にある）
@@ -667,6 +701,7 @@ const calcContactPoint2 = (pA, pB, pX, pY, r) => {
                     // pCは線分g上にない
                     pC = null;
                     pCm = null;
+                    pRefB = null;
                 }
             } else {
                 // dが接触円の半径rより大きい（円はXYには衝突しない）
