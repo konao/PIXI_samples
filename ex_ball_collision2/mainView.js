@@ -107,10 +107,10 @@ $(window).on('load', () => {
         w5.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w5);
 
-        let w6 = new Wall();
-        w6.genCircleWallPoints(900, 700, 50);
-        w6.init(PIXI, app.stage, g_w, g_h);
-        g_wallList.push(w6);
+        // let w6 = new Wall();
+        // w6.genCircleWallPoints(900, 700, 50);
+        // w6.init(PIXI, app.stage, g_w, g_h);
+        // g_wallList.push(w6);
 
         let w7 = new Wall();
         w7.genCircleWallPoints(100, 800, 50);
@@ -127,7 +127,7 @@ $(window).on('load', () => {
     
         new Text()
             .initSprite(PIXI, app.stage)
-            .setText('mouse left click and drag: move arrow')
+            .setText('left click and drag: move arrow / right click: eject ball')
             .setPos(g_w-530, 10)
             .setFontSize(20)
             .setColor('cyan');
