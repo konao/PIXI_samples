@@ -326,7 +326,7 @@ const getCrossPoint = (p, v, q1, q2) => {
 // --------------------------------------------------------------
 const reflect = (p, v, r, q1, q2) => {
     let pB = vecAdd(p, v);
-    let cpInfo = calcContactPoint(p, pB, q1, q2, r);
+    let cpInfo = calcCollisionPoint(p, pB, q1, q2, r);
 
     if ((cpInfo !== null) && (cpInfo.pC !== null)) {
         let newP = cpInfo.pRefB;
@@ -388,373 +388,93 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pCm : Vec // ボールが線分mと衝突する点(線分m上の点)
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
 // }
-const calcContactPoint = (pA, pB, pX, pY, r) => {
+const calcCollisionPoint = (pA, pB, pX, pY, r) => {
+    let cps = [];
+
+    // (1) pX, pY中心で半径rの円と、線分lの交点（のうち、pAに近い方）を求める
+    let pX_C = calcPoint_CircCenterOnEdge(pA, pB, pX, r);
+    if (pX_C !== null) {
+        cps.push({
+            pC: pX_C.pC,
+            pCm: pX,
+            dist: vecDist(pA, pX_C.pC),
+            vRefLine: vecCross(vecNorm(vecSub(pX, pX_C.pC)))
+        });
+    }
+
+    let pY_C = calcPoint_CircCenterOnEdge(pA, pB, pY, r);
+    if (pY_C !== null) {
+        cps.push({
+            pC: pY_C.pC,
+            pCm: pY,
+            dist: vecDist(pA, pY_C.pC),
+            vRefLine: vecCross(vecNorm(vecSub(pY, pY_C.pC)))
+        });
+    }
+
+    // (2) 線分mに平行で、距離r離れている線分(線分m1, m2)と線分lの交点(2点)を求める
+    let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
+    let pnu1 = vecCross(nu);   // uに直交するベクトル
+    let pu1 = vecScalar(pnu1, r);   // pnu1方向の長さrのベクトル
+    let pnu2 = vecScalar(pnu1, -1);   // pnu1の反対方向
+    let pu2 = vecScalar(pnu2, r);   // pnu2方向の長さrのベクトル
+
+    // pX1-->pY1（線分m1）
+    let pX1 = vecAdd(pX, pu1);
+    let pY1 = vecAdd(pY, pu1);
+    // pX2-->pY2（線分m2）
+    let pX2 = vecAdd(pX, pu2);
+    let pY2 = vecAdd(pY, pu2);
+
     let v = vecSub(pB, pA);
-    let u = vecSub(pY, pX);
-    if (!isEqual(vecInnerProd(v, u), 0)) {
-        // vとuは直交しない
-        return calcContactPoint1(pA, pB, pX, pY, r);
-    } else {
-        // vとuは直交する
-        return calcContactPoint2(pA, pB, pX, pY, r);
-    }
-}
 
-// 直線gと直線mが垂直に交わっていない場合
-const calcContactPoint1 = (pA, pB, pX, pY, r) => {
-    // mの方向ベクトル
-    let u =  vecSub(pY, pX);
-
-    // mの垂線のベクトル
-    let pu = vecCross(u);
-
-    // pAからmへの垂線の足を計算 --> pA_m
-    let pA_m = calcDist_PointToLine(pA, pu, pX, pY);
-
-    // pBからmへの垂線の足を計算 --> pB_m
-    let pB_m = calcDist_PointToLine(pB, pu, pX, pY);
-
-    // pXを通ってmに垂直な直線とgの交点への距離 --> pX_g
-    let pX_g = calcDist_PointToLine(pX, pu, pA, pB);
-
-    // pYを通ってmに垂直な直線とgの交点への距離 --> pY_g
-    let pY_g = calcDist_PointToLine(pY, pu, pA, pB);
-
-    // gとmの交点を求める --> pCross
-    let pCross = calcDist_PointToLine(pA, vecSub(pB, pA), pX, pY);
-    if (pCross === null) {
-        // gとmは平行
-        return {
-            pC: null,
-            pCm: null,
-            pRefB: null
-        };
+    let pA_m1 = calcDist_PointToLine(pA, v, pX1, pY1);
+    if ((pA_m1 !== null) && (pA_m1.on_sAB) && (pA_m1.on_sXY)) {
+        cps.push({
+            pC: pA_m1.pF,   // 衝突した時のボールの中心
+            pCm: vecAdd(pA_m1.pF, vecScalar(pu1, -1)),  // 衝突点(線分m1上)
+            dist: vecDist(pA, pA_m1.pF),    // pAとボールの中心間の距離
+            vRefLine: nu // ボールが反射する直線の方向ベクトル
+        });
     }
 
-    if (pCross.insideSegment && ((pCross.a >= 0) && (pCross.a <= 1))) {
-        // 交点が線分m上かつ線分g上にある
-        // console.log('[2-1] cross point is on XY and on AB');
-
-        // pCを求める
-        let b = pA_m.dist;
-        let k = r/b;
-        let pC = vecAdd(pA, vecScalar(vecSub(pCross.pF, pA), (1-k)));
-
-        // pCからpQを求め、それが線分m上にあるかチェックする
-        let pQ = calcDist_PointToLine(pC, pu, pX, pY);
-        if (pQ.insideSegment) {
-            // Qは線分XY上にある
-            // (=ボールは中心がpCのときに、線分XYにQで接する)
-
-            // pRefBを計算する
-            let CB = vecSub(pB, pC);
-            let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
-            let CH = vecScalar(nu, vecInnerProd(CB, nu));
-            let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-
-            return {
-                pC: pC,
-                pCm: pQ.pF,
-                pRefB: pRefB
-            };
-        }
-    
-        // Qは線分XY上にない
-
-        // ボールが線分XYに接するのではなく、pX, pYに直接ぶつかる場合があるかチェック
-        // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
-        let pCC = getMinElem(
-            [{
-                info: calcPoint_CircCenterOnEdge(pA, pB, pX, r), 
-                base: pX
-            }, 
-            {
-                info: calcPoint_CircCenterOnEdge(pA, pB, pY, r),
-                base: pY
-            }],
-            (x) => { return (x.info != null) },
-            (x, y) => { return (x.info.dAC < y.info.dAC )}
-        )
-
-        if (pCC !== null) {
-            // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
-            let pC = pCC.info.pC;
-
-            // pRefBを計算する
-            let CB = vecSub(pB, pC);
-            let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
-            let CH = vecScalar(nu, vecInnerProd(CB, nu));
-            let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-
-            return {
-                pC: pC,
-                pCm: pCC.base,
-                pRefB: pRefB
-            };
-        } else {
-            return {
-                pC: null,
-                pCm: null,
-                pRefB: null
-            }
-        }            
-    } else {
-        // console.log('[2-1] cross point is outside of XY');
-        // ない --> pA, pBからmへの垂線の距離と、pX, pYからgへの直線の交点までの距離（計4つ）
-        // のうちの、最も小さい値をdminとする．
+    let pA_m2 = calcDist_PointToLine(pA, v, pX2, pY2);
+    if ((pA_m2 !== null) && (pA_m2.on_sAB) && (pA_m2.on_sXY)) {
+        cps.push({
+            pC: pA_m2.pF,
+            pCm: vecAdd(pA_m2.pF, vecScalar(pu2, -1)),
+            dist: vecDist(pA, pA_m2.pF),
+            vRefLine: nu
+        });
     }
 
-    // pA_m.dist, pB_m.dist, pX_g.dist, pY_g.distのうちで、
-    // 最も小さい値を線分gと線分mの最短距離とする．
-    let minElem = getMinElem(
-        [{
-            info: pA_m,
-            pOnAB: pA
-        }, {
-            info: pB_m,
-            pOnAB: pB
-        }, {
-            info: pX_g,
-            pOnAB: pX_g.pF
-        }, {
-            info: pY_g,
-            pOnAB: pY_g.pF
-        }],
-        (x) => { return x.info.insideSegment; },    // isValid(x)
-        (x, y) => { return (x.info.dist < y.info.dist) }    // cmp(x, y)
+    // (3) cpsに含まれる点の内、pAに最も近い点が、ボールと線分mの衝突点
+    let minCp = getMinElem(
+        cps,
+        (x) => { return true },
+        (x, y) => { return (x.dist < y.dist )}
     );
 
-    if (minElem == null) {
-        // ボールが線分XYに接するのではなく、pX, pYに直接ぶつかる場合があるかチェック
-        // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
-        let pC = null;
-        let pCm = null;
-        let pRefB = null;
+    if (minCp !== null) {
+        // 衝突点があった
 
-        let pCC = getMinElem(
-            [{
-                info: calcPoint_CircCenterOnEdge(pA, pB, pX, r),
-                base: pX
-            },
-            {
-                info: calcPoint_CircCenterOnEdge(pA, pB, pY, r),
-                base: pY
-            }],
-            (x) => { return (x.info != null) },
-            (x, y) => { return (x.info.dAC < y.info.dAC )}
-        )
-
-        if (pCC !== null) {
-            // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
-            pC = pCC.info.pC;
-            pCm = pCC.base;
-
-            // pRefBを計算する
-            // （ボールが辺でなく点と衝突した場合）
-            let CB = vecSub(pB, pC);
-            let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
-            let CH = vecScalar(nu, vecInnerProd(CB, nu));
-            pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-        }
+        // pRefBを計算する
+        let CB = vecSub(pB, minCp.pC);
+        let CH = vecScalar(minCp.vRefLine, vecInnerProd(CB, minCp.vRefLine));
+        let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
 
         return {
-            pC: pC,
-            pCm: pCm,
+            pC: minCp.pC,
+            pCm: minCp.pCm,
             pRefB: pRefB
         };
-    }
-
-    if (minElem.pOnAB === pA) {
+    } else {
+        // 衝突点はなかった
         return {
             pC: null,
             pCm: null,
             pRefB: null
         };
-    } else {
-        // pCを求める 
-        // （pCは線分mに半径rで接する円の中心座標）
-        let pC = null;
-        let pCm = null;
-        let pRefB = null;
-
-        if (minElem.info.dist < r) {
-            // mへの最短距離がrより小さい = ボールがmに接触する
-            let a = minElem.info.dist;
-            let b = pA_m.dist;
-
-            let k = (r-a)/(b-a);
-            pC = vecAdd(pA, vecScalar(vecSub(minElem.pOnAB, pA), (1-k)));
-
-            // pRefBを計算する
-            let CB = vecSub(pB, pC);
-            let nu = vecNorm(u);    // pX-->pY方向の単位ベクトル
-            let CH = vecScalar(nu, vecInnerProd(CB, nu));
-            pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-            
-            let pQ = calcDist_PointToLine(pC, pu, pX, pY);
-            pCm = pQ.pF;
-            if (!pQ.insideSegment) {
-                // Qは線分XY上にない
-
-                // ボールが線分XYに接するのではなく、pX, pYに直接ぶつかる場合があるかチェック
-                // ぶつかる場合は、pAからの距離が短いほうをpCCとする．
-                let pCC = getMinElem(
-                    [{
-                        info: calcPoint_CircCenterOnEdge(pA, pB, pX, r),
-                        base: pX
-                    },
-                    {
-                        info: calcPoint_CircCenterOnEdge(pA, pB, pY, r),
-                        base: pY
-                    }],
-                    (x) => { return (x.info != null) },
-                    (x, y) => { return (x.info.dAC < y.info.dAC )}
-                )
-
-                if (pCC !== null) {
-                    // ボールがXまたはYにぶつかり、かつ円の中心が線分AB上にある．
-                    pC = pCC.info.pC;
-                    pCm = pCC.base;
-
-                    // pRefBを計算する
-                    // （ボールが辺でなく点と衝突した場合）
-                    let CB = vecSub(pB, pC);
-                    let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
-                    let CH = vecScalar(nu, vecInnerProd(CB, nu));
-                    pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-                } else {
-                    pC = null;
-                    pCm = null;
-                }
-            }
-        }
-
-        return {
-            pC: pC,
-            pCm: pCm,
-            pRefB: pRefB
-        };
-    }
-}
-
-// 直線gと直線mが垂直に交わっている場合
-const calcContactPoint2 = (pA, pB, pX, pY, r) => {
-    // gの方向ベクトルと長さ
-    let vAB = vecSub(pB, pA);
-    let len_vAB = vecLen(vAB);
-
-    // pAからAB方向の直線と線分mの交点を求める
-    let pA_m = calcDist_PointToLine(pA, vAB, pX, pY);
-
-    if (pA_m.a < 0) {
-        // gとmの交点は、pAからAB方向に伸びる半直線上にはない
-        // (=ボールはmには衝突しない)
-        return {
-            pC: null,
-            pCm: null,
-            pRefB: null
-        }
-    } else {
-        let pC = null; // 接触円の中心
-        let pCm = null; // 接触円のm上の接触点
-        let pRefB = null;
-
-        if ((pA_m.b >= 0) && (pA_m.b <= 1)) {
-            // 直線gは線分m(=XY)上で交わる
-
-            if ((pA_m.a >= 0) && (pA_m.a <= 1)) {
-                // (1)
-
-                // pCを求める
-                let w = vecNorm(vecSub(pA, pA_m.pF));
-                pC = vecAdd(pA_m.pF, vecScalar(w, r));
-                pCm = pA_m.pF;
-            } else {
-                // (2)
-                
-                // Aは線分mのこちら側にある
-                // pCを求める 
-                let w = vecNorm(vecSub(pA, pA_m.pF));
-                pC = vecAdd(pA_m.pF, vecScalar(w, r));
-                pCm = pA_m.pF;
-
-                // pRefBを計算する
-                // （ボールが辺でなく点と衝突した場合）
-                let CB = vecSub(pB, pC);
-                let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
-                let CH = vecScalar(nu, vecInnerProd(CB, nu));
-                pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-                
-                // pCが線分g上にあるかチェックする
-                // (pA-->pB方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていて、
-                // かつvATCの長さがvABの長さ以下ならpCは線分g上にある）
-                let vATC = vecSub(pC, pA);
-                let len_vATC = vecLen(vATC);
-                if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
-                    // pCは線分g上にない
-                    pC = null;
-                    pCm = null;
-                    pRefB = null;
-                }    
-            }
-        } else {
-            // 直線gは線分m(=XY)上で交わらない
-
-            // (3)または(4)
-            // pCを求める
-            let vXY = vecSub(pY, pX);
-            let pCloseToAB = getMinElem(
-                [{
-                    info: calcDist_PointToLine(pX, vXY, pA, pB), 
-                    pMin: pX
-                }, {
-                    info: calcDist_PointToLine(pY, vXY, pA, pB),
-                    pMin: pY
-                }],
-                (x) => { return true },
-                (x, y) => { return (x.info.dist < y.info.dist )}
-            );
-
-            let d = pCloseToAB.dist;
-            if (d <= r) {
-                let k = Math.sqrt(r*r-d*d);
-                let w = vecNorm(vecSub(pA, pCloseToAB.pF));
-                pC = vecAdd(pCloseToAB.pF, vecScalar(w, k));
-                pCm = pCloseToAB.pMin;
-
-                // pRefBを計算する
-                // （ボールが辺でなく点と衝突した場合）
-                let CB = vecSub(pB, pC);
-                let nu = vecCross(vecNorm(vecSub(pCm, pC)));    // pC-->pCmに直交するベクトル(=接線ベクトル)
-                let CH = vecScalar(nu, vecInnerProd(CB, nu));
-                pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-
-                // pCが線分g上にあるかチェックする
-                // (pA-->pB方向のベクトルとpA-->pC方向のベクトルが同じ方向を向いていて、
-                // かつvATCの長さがvABの長さ以下ならpCは線分g上にある）
-                let vATC = vecSub(pC, pA);
-                let len_vATC = vecLen(vATC);
-                if ((vecInnerProd(vAB, vATC) < 0) || (len_vATC > len_vAB)) {
-                    // pCは線分g上にない
-                    pC = null;
-                    pCm = null;
-                    pRefB = null;
-                }
-            } else {
-                // dが接触円の半径rより大きい（円はXYには衝突しない）
-                return {
-                    pC: null,
-                    pCm: null,
-                    pRefB: null
-                }
-            }
-        }
-
-        return {
-            pC: pC,
-            pCm: pCm,
-            pRefB: pRefB
-        }
     }
 }
 
@@ -819,6 +539,8 @@ const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
 //    pF: {x, y},   // lとmの交点
 //    dist: number,  // pからpFまでの距離(>=0)
 //    insideSegment: boolean,   // true=pFが線分m上にある, false=ない
+//    on_sAB: boolean  // true=pFが線分AB上にある, false=ない
+//    on_sXY: boolean  // true=pFが線分XY上にある, false=ない
 //    a: number,    // pFにおける線分lのパラメータ
 //    b: number     // pFにおける線分mのパラメータ
 // }
@@ -850,12 +572,17 @@ const calcDist_PointToLine = (p, v, pX, pY) => {
         // Fが線分m上にあるか？
         let insideSegment = ((0 <= b) && (b <= 1)) ? true : false;
 
+        let on_sAB = ((0 <= a) && (a <= 1)) ? true : false;
+        let on_sXY = ((0 <= b) && (b <= 1)) ? true : false;
+
         return {
             dist: dist,
             pF: pF,
             insideSegment: insideSegment,
             a: a,
-            b: b
+            b: b,
+            on_sAB: on_sAB,
+            on_sXY: on_sXY
         };
     }
 }
@@ -879,6 +606,6 @@ module.exports = {
     getCrossPoint,
     reflect,
     getMinElem,
-    calcContactPoint,
+    calcCollisionPoint,
     calcDist_PointToLine
 }

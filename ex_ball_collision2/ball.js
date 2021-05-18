@@ -107,7 +107,7 @@ class Ball extends BaseSpr {
             let edgeInfos = edgeList.map(e => {
                 return {
                     e: e,
-                    cpInfo: U.calcContactPoint(p, U.vecAdd(p, v), e.p1, e.p2, this._r)
+                    cpInfo: U.calcCollisionPoint(p, U.vecAdd(p, v), e.p1, e.p2, this._r)
                 };
             });
 

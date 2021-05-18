@@ -87,15 +87,15 @@ $(window).on('load', () => {
         w2.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w2);
 
-        // let w3 = new Wall();
-        // w3.setWallPoints([
-        //     {x: 1200, y: 400},
-        //     {x: 1300, y: 800},
-        //     {x: 800, y: 800},
-        //     {x: 1000, y: 700}
-        // ]);
-        // w3.init(PIXI, app.stage, g_w, g_h);
-        // g_wallList.push(w3);    
+        let w3 = new Wall();
+        w3.setWallPoints([
+            {x: 1200, y: 400},
+            {x: 1300, y: 800},
+            {x: 800, y: 800},
+            {x: 1000, y: 700}
+        ]);
+        w3.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w3);    
 
         // let w4 = new Wall();
         // w4.genCircleWallPoints(1200, 150, 50);
@@ -195,7 +195,7 @@ const draw = () => {
             let edgeInfos = edgeList.map(e => {
                 // console.log(`e.p1=(${e.p1.x}, ${e.p1.y})`);
                 // console.log(`e.p2=(${e.p2.x}, ${e.p2.y})`);
-                let cpInfo = U.calcContactPoint(g_pA, g_pB, e.p1, e.p2, g_ballSize);
+                let cpInfo = U.calcCollisionPoint(g_pA, g_pB, e.p1, e.p2, g_ballSize);
 
                 if (!cpInfo) {
                     throw("error!");
