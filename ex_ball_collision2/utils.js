@@ -389,6 +389,20 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
 // }
 const calcCollisionPoint = (pA, pB, pX, pY, r) => {
+    let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
+    if (dist_pA_m <= r) {
+        // pAと線分mの距離がボールの半径以下
+        // --> 衝突判定はしない
+        // （何かの拍子で線分mから距離rの領域内にボールが入り込んでしまうと、
+        // 内側の壁に反射されて、領域から出ていかなくなってしまう．
+        // この現象を回避するために追加）
+        return {
+            pC: null,
+            pCm: null,
+            pRefB: null
+        };
+    }
+
     let cps = [];
 
     // (1) pX, pY中心で半径rの円と、線分lの交点（のうち、pAに近い方）を求める
@@ -478,53 +492,6 @@ const calcCollisionPoint = (pA, pB, pX, pY, r) => {
     }
 }
 
-// 線分AB上の半径rの円が、pXで衝突するか調べる．
-// 衝突する場合は、円の中心座標pCと、pAからpCまでの距離を返す．
-//
-// ＜アルゴリズム＞
-// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)があるかで判断する．
-// （pCは2点求まるが、pAに近い方を採用）
-//
-// @return {
-//      pC: {x, y}, // 円の中心（pCを中心とした半径rの円が、pXで衝突する）
-//      dAC: numeric   // pAとpCの距離
-// }
-// pCが線分g上に存在しない場合はnullを返す
-const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
-    let nv = vecNorm(vecSub(pB, pA)); // pA --> pBの単位ベクトル
-
-    // nvに直交するベクトル
-    let nu = vecCross(nv);
-
-    // pXから線分gへの垂線の足(pX_g)を求める
-    let pX_g = calcDist_PointToLine(pX, nu, pA, pB);
-    if (pX_g !== null) {
-        let d = pX_g.dist;  // pXからpX_gまでの距離
-        if (r > d) {
-            let k = Math.sqrt(r*r-d*d);
-            // pC=求める円の中心
-            let pC = vecAdd(pX_g.pF, vecScalar(nv, -k));
-
-            // pCが線分g上にあるか確認
-            // (pA-->pC方向のベクトルとpA-->pB方向のベクトルが同じ方向を向いていればOK)
-            let vAC = vecSub(pC, pA);
-            let lenAC = vecLen(vAC);
-            let lenAB = vecDist(pA, pB);
-            if ((vecInnerProd(nv, vAC) > 0) && (lenAC <= lenAB)) {
-                // pCは線分g上にある
-                // --> pCを中心とした半径rの円が、pXで衝突する．
-                return {
-                    pC: pC,
-                    dAC: lenAC
-                }
-            }
-        }
-    }
-
-    // 線分AB上の半径rの円が、pXで衝突することはない
-    return null;
-}
-
 // pを通って方向ベクトルvの直線lと線分m(pX-->pY)の交点pFを求める．
 // pからpFまでの距離他の情報を返す．
 // lとmが平行の場合はnullを返す．
@@ -585,6 +552,78 @@ const calcDist_PointToLine = (p, v, pX, pY) => {
             on_sXY: on_sXY
         };
     }
+}
+
+// pから線分m(pX-->pY)までの距離を計算する
+//
+// @param p [i] 基準点
+// @param pX [i] 線分mの端点1
+// @param pY [i] 線分mの端点2
+//
+// @return pから線分mまでの距離
+const calcDist_PointToSeg = (p, pX, pY) => {
+    let nu = vecNorm(vecSub(pY, pX));    // pX --> pYへの単位ベクトル
+    let pnu = vecCross(nu);
+
+    // pを通って線分mに直交する直線と線分mの交点を求める
+    let pH = calcDist_PointToLine(p, pnu, pX, pY);
+
+    if ((pH !== null) && (pH.on_sXY)) {
+        // 交点が線分m上にある --> pから交点までの距離
+        return pH.dist;
+    } else {
+        // 交点が線分m上にない --> pからXまたはYの距離のうち、短いほうを求める
+        dist_X = vecDist(p, pX);
+        dist_Y = vecDist(p, pY);
+        return (dist_X < dist_Y) ? dist_X : dist_Y;
+    }
+}
+
+// 線分AB上の半径rの円が、pXで衝突するか調べる．
+// 衝突する場合は、円の中心座標pCと、pAからpCまでの距離を返す．
+//
+// ＜アルゴリズム＞
+// pXが中心で半径rの円が、線分g(pA-->pB)上で交わる点(pC)があるかで判断する．
+// （pCは2点求まるが、pAに近い方を採用）
+//
+// @return {
+//      pC: {x, y}, // 円の中心（pCを中心とした半径rの円が、pXで衝突する）
+//      dAC: numeric   // pAとpCの距離
+// }
+// pCが線分g上に存在しない場合はnullを返す
+const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
+    let nv = vecNorm(vecSub(pB, pA)); // pA --> pBの単位ベクトル
+
+    // nvに直交するベクトル
+    let nu = vecCross(nv);
+
+    // pXから線分gへの垂線の足(pX_g)を求める
+    let pX_g = calcDist_PointToLine(pX, nu, pA, pB);
+    if (pX_g !== null) {
+        let d = pX_g.dist;  // pXからpX_gまでの距離
+        if (r > d) {
+            let k = Math.sqrt(r*r-d*d);
+            // pC=求める円の中心
+            let pC = vecAdd(pX_g.pF, vecScalar(nv, -k));
+
+            // pCが線分g上にあるか確認
+            // (pA-->pC方向のベクトルとpA-->pB方向のベクトルが同じ方向を向いていればOK)
+            let vAC = vecSub(pC, pA);
+            let lenAC = vecLen(vAC);
+            let lenAB = vecDist(pA, pB);
+            if ((vecInnerProd(nv, vAC) > 0) && (lenAC <= lenAB)) {
+                // pCは線分g上にある
+                // --> pCを中心とした半径rの円が、pXで衝突する．
+                return {
+                    pC: pC,
+                    dAC: lenAC
+                }
+            }
+        }
+    }
+
+    // 線分AB上の半径rの円が、pXで衝突することはない
+    return null;
 }
 
 module.exports = {
