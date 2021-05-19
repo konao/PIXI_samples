@@ -424,52 +424,52 @@ $(window).on('keydown', e => {
 // ++++++++++++++++++++++++++++++++
 let dists;
 dists = [
-    {dist: 10, insideSegment: true, aux: 'A'},
-    {dist: 7, insideSegment: false, aux: 'B'},
-    {dist: 5, insideSegment: true, aux: 'C'},
-    {dist: -3, insideSegment: false, aux: 'D'}
+    {dist: 10, on_sXY: true, aux: 'A'},
+    {dist: 7, on_sXY: false, aux: 'B'},
+    {dist: 5, on_sXY: true, aux: 'C'},
+    {dist: -3, on_sXY: false, aux: 'D'}
 ];
-const _isValid1 = (x) => { return x.insideSegment; }
+const _isValid1 = (x) => { return x.on_sXY; }
 const _cmp1 = (x, y) => { return (x.dist < y.dist) }
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {dist: -3, insideSegment: true, aux: 'A'},
-    {dist: 10, insideSegment: true, aux: 'B'},
-    {dist: 5, insideSegment: true, aux: 'C'}
+    {dist: -3, on_sXY: true, aux: 'A'},
+    {dist: 10, on_sXY: true, aux: 'B'},
+    {dist: 5, on_sXY: true, aux: 'C'}
 ];
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {dist: 4, insideSegment: false, aux: 'A'},
-    {dist: 10, insideSegment: true, aux: 'B'},
-    {dist: 3, insideSegment: false, aux: 'C'}
+    {dist: 4, on_sXY: false, aux: 'A'},
+    {dist: 10, on_sXY: true, aux: 'B'},
+    {dist: 3, on_sXY: false, aux: 'C'}
 ];
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {dist: 1, insideSegment: false, aux: 'A'},
-    {dist: 10, insideSegment: true, aux: 'B'},
-    {dist: 2, insideSegment: true, aux: 'C'},
-    {dist: -5, insideSegment: false, aux: 'D'},
-    {dist: 8, insideSegment: true, aux: 'E'}
+    {dist: 1, on_sXY: false, aux: 'A'},
+    {dist: 10, on_sXY: true, aux: 'B'},
+    {dist: 2, on_sXY: true, aux: 'C'},
+    {dist: -5, on_sXY: false, aux: 'D'},
+    {dist: 8, on_sXY: true, aux: 'E'}
 ];
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {dist: 7, insideSegment: true, aux: 'A'}
+    {dist: 7, on_sXY: true, aux: 'A'}
 ];
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {dist: 10, insideSegment: false, aux: 'A'},
-    {dist: 3, insideSegment: false, aux: 'B'},
-    {dist: 7, insideSegment: false, aux: 'C'}
+    {dist: 10, on_sXY: false, aux: 'A'},
+    {dist: 3, on_sXY: false, aux: 'B'},
+    {dist: 7, on_sXY: false, aux: 'C'}
 ];
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 
 dists = [
-    {dist: 8, insideSegment: false, aux: 'A'}
+    {dist: 8, on_sXY: false, aux: 'A'}
 ];
 console.log(U.getMinElem(dists, _isValid1, _cmp1));
 

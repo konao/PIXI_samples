@@ -382,7 +382,7 @@ const getMinElem = (xs, isValid, cmp) => {
 // @param pY [i] 線分mの端点2
 // @param r [i] ボールの半径
 //
-// @return 距離情報（フォーマットは以下）
+// @return 衝突情報（フォーマットは以下）
 // {
 //    pC : Vec  // ボールが線分mと衝突する時の円の中心座標(衝突しない場合はnull）
 //    pCm : Vec // ボールが線分mと衝突する点(線分m上の点)
@@ -465,8 +465,8 @@ const calcCollisionPoint = (pA, pB, pX, pY, r) => {
     // (3) cpsに含まれる点の内、pAに最も近い点が、ボールと線分mの衝突点
     let minCp = getMinElem(
         cps,
-        (x) => { return true },
-        (x, y) => { return (x.dist < y.dist )}
+        (x) => { return true }, // isValid
+        (x, y) => { return (x.dist < y.dist )}  // cmp
     );
 
     if (minCp !== null) {
@@ -505,7 +505,6 @@ const calcCollisionPoint = (pA, pB, pX, pY, r) => {
 // {
 //    pF: {x, y},   // lとmの交点
 //    dist: number,  // pからpFまでの距離(>=0)
-//    insideSegment: boolean,   // true=pFが線分m上にある, false=ない
 //    on_sAB: boolean  // true=pFが線分AB上にある, false=ない
 //    on_sXY: boolean  // true=pFが線分XY上にある, false=ない
 //    a: number,    // pFにおける線分lのパラメータ
@@ -536,16 +535,12 @@ const calcDist_PointToLine = (p, v, pX, pY) => {
         let pF = vecAdd(p, vecScalar(v, a));
         let dist = vecDist(p, pF);    // pからpF(垂線の足)までの距離
 
-        // Fが線分m上にあるか？
-        let insideSegment = ((0 <= b) && (b <= 1)) ? true : false;
-
         let on_sAB = ((0 <= a) && (a <= 1)) ? true : false;
         let on_sXY = ((0 <= b) && (b <= 1)) ? true : false;
 
         return {
             dist: dist,
             pF: pF,
-            insideSegment: insideSegment,
             a: a,
             b: b,
             on_sAB: on_sAB,
