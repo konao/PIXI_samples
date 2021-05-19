@@ -107,6 +107,11 @@ $(window).on('load', () => {
         w5.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w5);
 
+        let w5_2 = new Wall();
+        w5_2.genCircleWallPoints(450, 400, 100);
+        w5_2.init(PIXI, app.stage, g_w, g_h);
+        g_wallList.push(w5_2);
+
         // let w6 = new Wall();
         // w6.genCircleWallPoints(900, 700, 50);
         // w6.init(PIXI, app.stage, g_w, g_h);
