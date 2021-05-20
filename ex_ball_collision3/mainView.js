@@ -1,7 +1,9 @@
 // *******************************************************
-//  ピンボール作成のための実験(2) メインビュー
+//  ピンボール作成のための実験(3) メインビュー
 //
-//  2021/5/5 konao
+//  ボールの残像付き
+//
+//  2021/5/20 konao
 // *******************************************************
 
 const PIXI = require('pixi.js');
@@ -18,6 +20,8 @@ let g_bPause = false;
 let g_ballSize = 20; // ボールのサイズ
 let g_ballSpeed = 5;    // ボールのスピード
 let g_nBalls = 0;   // ボールの個数
+
+const N_BALL_TRACE = 10;    // ボールの残像の個数
 
 let g_ballList = [];
 let g_wallList = [];
@@ -347,7 +351,7 @@ $(window).on('mousedown', e => {
         newBall.setRadius(g_ballSize)
             .setBallPos(ejPos)
             .setVec(ejVec);
-        newBall.init(PIXI, app.stage, g_w, g_h);
+        newBall.init(PIXI, app.stage, g_w, g_h, N_BALL_TRACE);
 
         g_ballList.push(newBall);
         g_nBalls++;
