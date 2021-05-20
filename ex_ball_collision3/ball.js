@@ -27,6 +27,15 @@ class Ball extends BaseSpr {
     
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;
+
+        // 残像描画用位置保存リスト
+        this._traces = [];
+
+        // 残像個数
+        this._nTraces = 0;
+
+        // 現在の残像開始インデックス
+        this._currTraceInd = 0;
     }
 
     setBallPos(mp) {
@@ -51,7 +60,7 @@ class Ball extends BaseSpr {
         return this;
     }
 
-    init(PIXI, container, w, h) {
+    init(PIXI, container, w, h, nTraces) {
         this._w = w;
         this._h = h;
 
@@ -64,6 +73,37 @@ class Ball extends BaseSpr {
         this._spr = cont;
 
         container.addChild(cont);
+
+        // 残像用データ初期化
+        this._traces = [];
+        for (let i=0; i<nTraces; i++) {
+            this._traces.push(null);
+        }
+        this._nTraces = nTraces;
+        this._currTraceInd = 0;
+    }
+
+    saveCurrPos() {
+        // インデックスを更新
+        this._currTraceInd++;
+        if (this._currTraceInd >= this._nTraces) {
+            this._currTraceInd = 0;
+        }
+
+        // 現在の位置をセーブ
+        this._traces[this._currTraceInd] = {
+            x: this._p.x,
+            y: this._p.y
+        };
+    }
+
+    // @param i [i] インデックス. 0=最新、-1=一つ前の位置, -2=二つ前の位置, ...
+    getInd(i) {
+        let i2 = ((this._currTraceInd + i) % this._nTraces);
+        if (i2 < 0) {
+            i2 += this._nTraces;
+        }
+        return i2;
     }
 
     update(wallList) {
@@ -76,15 +116,31 @@ class Ball extends BaseSpr {
         let vOrigSpeed = U.vecScalar(U.vecNorm(this._v), speed);
         this._v = vOrigSpeed;
 
+        this.saveCurrPos();  // 現在の位置をトレースリストにセーブ
+
         if (this._g) {
             // ----------------------------------------
             //  スプライトの再描画（画像イメージの更新）
             // ----------------------------------------
             this._g.clear();
-            this._g.beginFill(0x0088ff);
-            this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
-            this._g.drawEllipse(this._p.x, this._p.y, this._r, this._r);  // 中心(cx, cy), 半径(rx, ry)
-            this._g.endFill();
+            // this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
+
+            // 昔ものから描いていく
+            for (let i=-this._nTraces; i<=0; i++) {
+                let p = this._traces[this.getInd(i)];
+                if (p !== null) {
+                    let ratio = (i + this._nTraces) / this._nTraces;    // 0<=ratio<=1.0（新しいものほど値が大きい）
+                    ratio = ratio * ratio;  // 2次曲線
+                    let r = 0;
+                    let g = Math.floor(0x80 * ratio);
+                    let b = Math.floor(0xff * ratio);
+                    let color = (r << 16) + (g << 8) + b;
+                    // console.log(`i=${i}, ratio=${ratio}, color=${color}`);
+                    this._g.beginFill(color, ratio);    // 第2引数はalpha値(0以上1以下 - デフォルト1)
+                    this._g.drawEllipse(p.x, p.y, this._r, this._r);  // 中心(cx, cy), 半径(rx, ry)
+                    this._g.endFill();
+                }
+            }
         }
     }
 
