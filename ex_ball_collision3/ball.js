@@ -106,7 +106,14 @@ class Ball extends BaseSpr {
         return i2;
     }
 
+    applyGravity() {
+        const G_RATIO = 0.02;
+        this._v.y += (9.8 * G_RATIO);
+    }
+
     update(wallList) {
+        this.applyGravity();
+
         let speed = U.vecLen(this._v);
 
         this.updateSub(wallList);

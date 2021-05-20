@@ -389,6 +389,8 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
 // }
 const calcCollisionPoint = (pA, pB, pX, pY, r) => {
+    const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
+
     let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
     if (dist_pA_m <= r) {
         // pAと線分mの距離がボールの半径以下
@@ -413,6 +415,8 @@ const calcCollisionPoint = (pA, pB, pX, pY, r) => {
             // 今ボールのいる位置(=pA)で直ちに反射させる．
             // （つまりpC=pA）
             let CB = vecSub(pB, pA);
+            CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
+            pB = vecAdd(pA, CB);  // pBの位置補正
             let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
             let CH = vecScalar(nu, vecInnerProd(CB, nu));
             let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
@@ -503,9 +507,13 @@ const calcCollisionPoint = (pA, pB, pX, pY, r) => {
     
             // pRefBを計算する
             let CB = vecSub(pB, minCp.pC);
+
+            CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
+            pB = vecAdd(minCp.pC, CB);  // pBの位置補正
+
             let CH = vecScalar(minCp.vRefLine, vecInnerProd(CB, minCp.vRefLine));
             let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
-    
+
             return {
                 pC: minCp.pC,
                 pCm: minCp.pCm,
