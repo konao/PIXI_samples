@@ -136,7 +136,7 @@ class Ball extends BaseSpr {
                     let b = Math.floor(0xff * ratio);
                     let color = (r << 16) + (g << 8) + b;
                     // console.log(`i=${i}, ratio=${ratio}, color=${color}`);
-                    this._g.beginFill(color, ratio);
+                    this._g.beginFill(color, ratio);    // 第2引数はalpha値(0以上1以下 - デフォルト1)
                     this._g.drawEllipse(p.x, p.y, this._r, this._r);  // 中心(cx, cy), 半径(rx, ry)
                     this._g.endFill();
                 }
