@@ -112,7 +112,7 @@ class Ball extends BaseSpr {
     }
 
     update(wallList) {
-        this.applyGravity();
+        // this.applyGravity();
 
         let speed = U.vecLen(this._v);
 

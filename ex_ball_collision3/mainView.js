@@ -64,67 +64,8 @@ $(window).on('load', () => {
         w0.init(PIXI, app.stage, g_w, g_h);
         g_wallList.push(w0);
 
-        // let w1 = new Wall();
-        // w1.setWallPoints([
-        //     {x: 100, y: 200},
-        //     {x: 300, y: 100},
-        //     {x: 400, y: 400},
-        //     {x: 700, y: 600},
-        //     {x: 1000, y: 300},
-        //     {x: 900, y: 600},
-        //     {x: 500, y: 800}
-        // ]);
-        // w1.init(PIXI, app.stage, g_w, g_h);
-        // g_wallList.push(w1);
-
-        let w2 = new Wall();
-        w2.setWallPoints([
-            {x: 800, y: 100},
-            {x: 1100, y: 150},
-            {x: 1000, y: 500}
-        ]);
-        // w2.setWallPoints([
-        //     {x: 200, y: 100},
-        //     {x: 400, y: 150},
-        //     {x: 300, y: 500}
-        // ]);
-        w2.init(PIXI, app.stage, g_w, g_h);
-        g_wallList.push(w2);
-
-        let w3 = new Wall();
-        w3.setWallPoints([
-            {x: 1200, y: 400},
-            {x: 1300, y: 800},
-            {x: 800, y: 800},
-            {x: 1000, y: 700}
-        ]);
-        w3.init(PIXI, app.stage, g_w, g_h);
-        g_wallList.push(w3);    
-
-        // let w4 = new Wall();
-        // w4.genCircleWallPoints(1200, 150, 50);
-        // w4.init(PIXI, app.stage, g_w, g_h);
-        // g_wallList.push(w4);
-
-        let w5 = new Wall();
-        w5.genCircleWallPoints(450, 400, 300);
-        w5.init(PIXI, app.stage, g_w, g_h);
-        g_wallList.push(w5);
-
-        let w5_2 = new Wall();
-        w5_2.genCircleWallPoints(450, 400, 100);
-        w5_2.init(PIXI, app.stage, g_w, g_h);
-        g_wallList.push(w5_2);
-
-        // let w6 = new Wall();
-        // w6.genCircleWallPoints(900, 700, 50);
-        // w6.init(PIXI, app.stage, g_w, g_h);
-        // g_wallList.push(w6);
-
-        let w7 = new Wall();
-        w7.genCircleWallPoints(100, 800, 50);
-        w7.init(PIXI, app.stage, g_w, g_h);
-        g_wallList.push(w7);
+        // buildScene1(g_wallList);
+        buildScene2(g_wallList);
 
         // 操作説明
         new Text()
@@ -171,6 +112,97 @@ $(window).on('load', () => {
         });
     });
 });
+
+const buildScene1 = (wallList) => {
+    // let w1 = new Wall();
+    // w1.setWallPoints([
+    //     {x: 100, y: 200},
+    //     {x: 300, y: 100},
+    //     {x: 400, y: 400},
+    //     {x: 700, y: 600},
+    //     {x: 1000, y: 300},
+    //     {x: 900, y: 600},
+    //     {x: 500, y: 800}
+    // ]);
+    // w1.init(PIXI, app.stage, g_w, g_h);
+    // wallList.push(w1);
+
+    let w2 = new Wall();
+    w2.setWallPoints([
+        {x: 800, y: 100},
+        {x: 1100, y: 150},
+        {x: 1000, y: 500}
+    ]);
+    // w2.setWallPoints([
+    //     {x: 200, y: 100},
+    //     {x: 400, y: 150},
+    //     {x: 300, y: 500}
+    // ]);
+    w2.init(PIXI, app.stage, g_w, g_h);
+    wallList.push(w2);
+
+    let w3 = new Wall();
+    w3.setWallPoints([
+        {x: 1200, y: 400},
+        {x: 1300, y: 800},
+        {x: 800, y: 800},
+        {x: 1000, y: 700}
+    ]);
+    w3.init(PIXI, app.stage, g_w, g_h);
+    wallList.push(w3);    
+
+    // let w4 = new Wall();
+    // w4.genCircleWallPoints(1200, 150, 50);
+    // w4.init(PIXI, app.stage, g_w, g_h);
+    // wallList.push(w4);
+
+    let w5 = new Wall();
+    w5.genCircleWallPoints(450, 400, 300);
+    w5.init(PIXI, app.stage, g_w, g_h);
+    wallList.push(w5);
+
+    let w5_2 = new Wall();
+    w5_2.genCircleWallPoints(450, 400, 100);
+    w5_2.init(PIXI, app.stage, g_w, g_h);
+    wallList.push(w5_2);
+
+    // let w6 = new Wall();
+    // w6.genCircleWallPoints(900, 700, 50);
+    // w6.init(PIXI, app.stage, g_w, g_h);
+    // wallList.push(w6);
+
+    let w7 = new Wall();
+    w7.genCircleWallPoints(100, 800, 50);
+    w7.init(PIXI, app.stage, g_w, g_h);
+    wallList.push(w7);
+}
+
+const buildScene2 = (wallList) => {
+    const BLOCK_WIDTH = 20;
+    const BLOCK_HEIGHT = 10;
+    const SPACE_WIDTH = 80;
+
+    let x = 50;
+    let y = 80;
+    while (y < 700) {
+        while (x < (g_w - (BLOCK_WIDTH + 50))) {
+            let block = new Wall();
+
+            block.setWallPoints([
+                {x: x, y: y},
+                {x: x+BLOCK_WIDTH, y: y},
+                {x: x+BLOCK_WIDTH, y: y+BLOCK_HEIGHT},
+                {x: x, y: y+BLOCK_HEIGHT}
+            ]);
+            block.init(PIXI, app.stage, g_w, g_h);
+            wallList.push(block);
+
+            x += (BLOCK_WIDTH + SPACE_WIDTH);
+        }
+        x = 50;
+        y += (BLOCK_HEIGHT + SPACE_WIDTH);
+    }
+}
 
 const draw = () => {
     g_G.clear();
