@@ -13,6 +13,7 @@ const U = require('./utils');
 const { Ball } = require('./ball');
 const { Wall } = require('./wall');
 const { Text } = require('./text');
+const { Spline } = require('./spline');
 
 let g_w = 0;
 let g_h = 0;
@@ -65,7 +66,8 @@ $(window).on('load', () => {
         g_wallList.push(w0);
 
         // buildScene1(g_wallList);
-        buildScene2(g_wallList);
+        // buildScene2(g_wallList);
+        buildScene3(g_wallList);
 
         // 操作説明
         new Text()
@@ -202,6 +204,47 @@ const buildScene2 = (wallList) => {
         x = 50;
         y += (BLOCK_HEIGHT + SPACE_WIDTH);
     }
+}
+
+// スプライン関数を使って壁を生成する
+const buildScene3 = (wallList) => {
+    let sp = new Spline();
+
+    let fx = (x) => {
+        return x*g_w;
+    }
+    let fy = (y) => {
+        return y*g_h;
+    }
+
+    sp.addPoint(fx(0.75), fy(0.15));
+    sp.addPoint(fx(0.82), fy(0.3));
+    sp.addPoint(fx(0.81), fy(0.4));
+    sp.addPoint(fx(0.8), fy(0.47));
+    sp.addPoint(fx(0.78), fy(0.5));
+    sp.addPoint(fx(0.7), fy(0.46));
+    sp.addPoint(fx(0.63), fy(0.4));
+    sp.addPoint(fx(0.56), fy(0.32));
+    sp.addPoint(fx(0.54), fy(0.25));
+    sp.addPoint(fx(0.58), fy(0.2));
+    sp.addPoint(fx(0.64), fy(0.17));
+
+    let status = sp.genSpline();
+    console.log(status);
+
+    pts = [];
+    for (let t=0.0; t<1.0; t+=0.01) {
+        let pt = sp.interp(t);
+        pts.push({
+            x: pt.x,
+            y: pt.y
+        });
+    }
+
+    let block = new Wall();
+    block.setWallPoints(pts);
+    block.init(PIXI, app.stage, g_w, g_h);
+    wallList.push(block);
 }
 
 const draw = () => {
