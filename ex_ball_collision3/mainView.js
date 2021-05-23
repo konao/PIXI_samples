@@ -104,7 +104,7 @@ $(window).on('load', () => {
                     wall.update();
                 });
                 g_ballList.forEach(ball => {
-                    ball.update(g_wallList);
+                    ball.update(g_wallList, g_ballList);
                 });
 
                 if (g_arrowDragging > 0) {
@@ -370,7 +370,7 @@ const draw = () => {
             let edgeInfos = edgeList.map(e => {
                 // console.log(`e.p1=(${e.p1.x}, ${e.p1.y})`);
                 // console.log(`e.p2=(${e.p2.x}, ${e.p2.y})`);
-                let cpInfo = U.calcCollisionPoint(g_pA, g_pB, e.p1, e.p2, g_ballSize);
+                let cpInfo = U.calcCollisionPoint1(g_pA, g_pB, e.p1, e.p2, g_ballSize);
 
                 if (!cpInfo) {
                     throw("error!");

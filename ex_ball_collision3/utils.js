@@ -326,7 +326,7 @@ const getCrossPoint = (p, v, q1, q2) => {
 // --------------------------------------------------------------
 const reflect = (p, v, r, q1, q2) => {
     let pB = vecAdd(p, v);
-    let cpInfo = calcCollisionPoint(p, pB, q1, q2, r);
+    let cpInfo = calcCollisionPoint1(p, pB, q1, q2, r);
 
     if ((cpInfo !== null) && (cpInfo.pC !== null)) {
         let newP = cpInfo.pRefB;
@@ -345,7 +345,7 @@ const reflect = (p, v, r, q1, q2) => {
     }
 }
 
-// calcContactPoint用の補助関数．
+// calcCollisionPoint用の補助関数．
 // オブジェクトのdistメンバーの値が最小の要素を配列から検索する
 //
 // @param xs [i] 距離情報の配列 (=[x])
@@ -374,6 +374,65 @@ const getMinElem = (xs, isValid, cmp) => {
     return result;
 }
 
+// pAからpBに移動する半径r1のボール1が、他のボール2(中心pX, 半径r2)に衝突する点を計算する
+//
+// @param pA [i] ボール1の始点(線分gの端点1)
+// @param pB [i] ボール1の終点(線分gの端点2)
+// @param r1 [i] ボール1の半径
+// @param pX [i] ボール2の中心
+// @param r2 [i] ボール2の半径
+//
+// @return 衝突情報（フォーマットは以下）
+// {
+//    pC : Vec  // ボール1がボール2と衝突する時の、ボール1の中心座標
+//    pCm : Vec // ボール1がボール2と衝突する点(ボール1, 2の周上の点)
+//    pRefB: Vec // ボール1がpCで反射した場合の到達点(=更新後のpB)
+// }
+// 衝突しない場合はnullが返る
+const calcCollisionPoint2 = (pA, pB, r1, pX, r2) => {
+    // 線分gとpXまでの距離 --> d
+
+    let nu = vecNorm(vecSub(pB, pA));    // pA --> pBへの単位ベクトル
+    let pnu = vecCross(nu);
+
+    // pXを通って線分gに直交する直線と線分gの交点を求める
+    let pH = calcDist_PointToLine(pX, pnu, pA, pB);
+    if (pH !== null) {
+        let d = pH.dist;
+        if (d < (r1+r2)) {
+            // ボール1はボール2に衝突する
+            let k = Math.sqrt((r1+r2)*(r1+r2)-(d*d));
+            let pC = vecAdd(pH.pF, vecScalar(nu, -k));
+
+            // pCが線分g上にあるかチェック
+            // (pA-->pC方向のベクトルとpA-->pB方向のベクトルが同じ方向を向いていればOK)
+            let vAC = vecSub(pC, pA);
+            let lenAC = vecLen(vAC);
+            let lenAB = vecDist(pA, pB);
+            if ((vecInnerProd(nu, vAC) > 0) && (lenAC <= lenAB)) {
+                // pCは線分g上にある
+                // --> pCを中心とした半径r1の円が、ボール2に衝突する．
+                let CX = vecSub(pX, pC);
+                let nh = vecNorm(vecCross(CX));
+
+                let CB = vecSub(pB, pC);
+                let CG = vecScalar(nh, vecInnerProd(CB, nh));
+                let pRefB = vecAdd(pB, vecScalar(vecSub(CG, CB), 2));
+
+                let pCm = vecAdd(pC, vecScalar(CX, r1/(r1+r2)));
+
+                return {
+                    pC: pC,
+                    pCm: pCm,
+                    pRefB: pRefB
+                };
+            }
+        }
+    }
+
+    return null;
+}
+
 // pAからpBに移動する半径rのボールが、線分m(pX-->pY)に衝突する点を計算する
 //
 // @param pA [i] ボールの始点(線分gの端点1)
@@ -388,7 +447,7 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pCm : Vec // ボールが線分mと衝突する点(線分m上の点)
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
 // }
-const calcCollisionPoint = (pA, pB, pX, pY, r) => {
+const calcCollisionPoint1 = (pA, pB, pX, pY, r) => {
     // const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
     const REFLECT_RATIO = 1.0;
 
@@ -544,8 +603,8 @@ const calcCollisionPoint = (pA, pB, pX, pY, r) => {
 // {
 //    pF: {x, y},   // lとmの交点
 //    dist: number,  // pからpFまでの距離(>=0)
-//    on_sAB: boolean  // true=pFが線分AB上にある, false=ない
-//    on_sXY: boolean  // true=pFが線分XY上にある, false=ない
+//    on_sAB: boolean  // true=pFが線分l上にある, false=ない
+//    on_sXY: boolean  // true=pFが線分m上にある, false=ない
 //    a: number,    // pFにおける線分lのパラメータ
 //    b: number     // pFにおける線分mのパラメータ
 // }
@@ -679,6 +738,7 @@ module.exports = {
     getCrossPoint,
     reflect,
     getMinElem,
-    calcCollisionPoint,
+    calcCollisionPoint1,
+    calcCollisionPoint2,
     calcDist_PointToLine
 }

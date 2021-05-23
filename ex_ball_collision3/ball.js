@@ -45,6 +45,10 @@ class Ball extends BaseSpr {
         return this;
     }
 
+    getBallPos() {
+        return this._p;
+    }
+
     getVec() {
         return this._v;
     }
@@ -58,6 +62,10 @@ class Ball extends BaseSpr {
     setRadius(r) {
         this._r = r;
         return this;
+    }
+
+    getRadius() {
+        return this._r;
     }
 
     init(PIXI, container, w, h, nTraces) {
@@ -111,11 +119,30 @@ class Ball extends BaseSpr {
         this._v.y += (9.8 * G_RATIO);
     }
 
-    update(wallList) {
+    update(wallList, ballList) {
         // this.applyGravity();
-
         let speed = U.vecLen(this._v);
 
+        // ----------------------------------------
+        // 他のボールとの衝突計算
+        // ----------------------------------------
+        ballList.forEach(ball2 => {
+            if (ball2 !== this) {
+                // ball2が自分自身でなければ衝突計算
+                let cpInfo = U.calcCollisionPoint2(this._p, U.vecAdd(this._p, this._v), this._r, ball2.getBallPos(), ball2.getRadius());
+                if (cpInfo !== null) {
+                    // 衝突した
+                    let newP = cpInfo.pRefB;
+                    let newV = U.vecSub(newP, cpInfo.pC);
+                    this._p = newP;
+                    this._v = newV;
+                }
+            }
+        });
+
+        // ----------------------------------------
+        // 壁との衝突計算
+        // ----------------------------------------
         this.updateSub(wallList);
 
         // [TODO] **** 後で修正 ****
@@ -170,7 +197,7 @@ class Ball extends BaseSpr {
             let edgeInfos = edgeList.map(e => {
                 return {
                     e: e,
-                    cpInfo: U.calcCollisionPoint(p, U.vecAdd(p, v), e.p1, e.p2, this._r)
+                    cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r)
                 };
             });
 
