@@ -216,7 +216,25 @@ const buildScene3 = (wallList) => {
     let fy = (y) => {
         return y*g_h;
     }
+    let addBlock = (sp) => {
+        sp.genSpline();
 
+        pts = [];
+        for (let t=0.0; t<1.0; t+=0.03) {
+            let pt = sp.interp(t);
+            pts.push({
+                x: pt.x,
+                y: pt.y
+            });
+        }
+    
+        let block = new Wall();
+        block.setWallPoints(pts);
+        block.init(PIXI, app.stage, g_w, g_h);
+        wallList.push(block);    
+    }
+
+    sp.clear();
     sp.addPoint(fx(0.75), fy(0.15));
     sp.addPoint(fx(0.82), fy(0.3));
     sp.addPoint(fx(0.81), fy(0.4));
@@ -228,23 +246,64 @@ const buildScene3 = (wallList) => {
     sp.addPoint(fx(0.54), fy(0.25));
     sp.addPoint(fx(0.58), fy(0.2));
     sp.addPoint(fx(0.64), fy(0.17));
+    sp.addPoint(fx(0.75), fy(0.15));
+    addBlock(sp);
 
-    let status = sp.genSpline();
-    console.log(status);
+    // (2)
+    sp.clear();
+    sp.addPoint(fx(0.3), fy(0.45));
+    sp.addPoint(fx(0.41), fy(0.41));
+    sp.addPoint(fx(0.5), fy(0.43));
+    sp.addPoint(fx(0.52), fy(0.48));
+    sp.addPoint(fx(0.5), fy(0.52));
+    sp.addPoint(fx(0.46), fy(0.55));
+    sp.addPoint(fx(0.35), fy(0.59));
+    sp.addPoint(fx(0.25), fy(0.61));
+    sp.addPoint(fx(0.2), fy(0.6));
+    sp.addPoint(fx(0.22), fy(0.5));
+    sp.addPoint(fx(0.3), fy(0.45));
+    addBlock(sp);    
 
-    pts = [];
-    for (let t=0.0; t<1.0; t+=0.01) {
-        let pt = sp.interp(t);
-        pts.push({
-            x: pt.x,
-            y: pt.y
-        });
-    }
+    // (3)
+    sp.clear();
+    sp.addPoint(fx(0.17), fy(0.3));
+    sp.addPoint(fx(0.15), fy(0.4));
+    sp.addPoint(fx(0.1), fy(0.42));
+    sp.addPoint(fx(0.08), fy(0.4));
+    sp.addPoint(fx(0.07), fy(0.3));
+    sp.addPoint(fx(0.1), fy(0.23));
+    sp.addPoint(fx(0.14), fy(0.17));
+    sp.addPoint(fx(0.18), fy(0.16));
+    sp.addPoint(fx(0.2), fy(0.18));
+    sp.addPoint(fx(0.17), fy(0.3));
+    addBlock(sp);    
 
-    let block = new Wall();
-    block.setWallPoints(pts);
-    block.init(PIXI, app.stage, g_w, g_h);
-    wallList.push(block);
+    // (4)
+    sp.clear();
+    sp.addPoint(fx(0.31), fy(0.84));
+    sp.addPoint(fx(0.37), fy(0.92));
+    sp.addPoint(fx(0.25), fy(0.93));
+    sp.addPoint(fx(0.21), fy(0.92));
+    sp.addPoint(fx(0.2), fy(0.9));
+    sp.addPoint(fx(0.18), fy(0.8));
+    sp.addPoint(fx(0.17), fy(0.73));
+    sp.addPoint(fx(0.21), fy(0.74));
+    sp.addPoint(fx(0.31), fy(0.84));
+    addBlock(sp);    
+
+    // (5)
+    sp.clear();
+    sp.addPoint(fx(0.82), fy(0.72));
+    sp.addPoint(fx(0.73), fy(0.81));
+    sp.addPoint(fx(0.68), fy(0.8));
+    sp.addPoint(fx(0.66), fy(0.76));
+    sp.addPoint(fx(0.72), fy(0.7));
+    sp.addPoint(fx(0.8), fy(0.6));
+    sp.addPoint(fx(0.84), fy(0.5));
+    sp.addPoint(fx(0.86), fy(0.53));
+    sp.addPoint(fx(0.85), fy(0.6));
+    sp.addPoint(fx(0.82), fy(0.72));
+    addBlock(sp);    
 }
 
 const draw = () => {
