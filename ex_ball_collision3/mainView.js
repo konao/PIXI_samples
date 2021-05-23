@@ -220,14 +220,19 @@ const buildScene3 = (wallList) => {
         sp.genSpline();
 
         pts = [];
-        for (let t=0.0; t<1.0; t+=0.03) {
+        for (let t=0.0; t<1.0; t+=0.02) {
             let pt = sp.interp(t);
             pts.push({
                 x: pt.x,
                 y: pt.y
             });
         }
-    
+        let pt = sp.interp(1.0);
+        pts.push({
+            x: pt.x,
+            y: pt.y
+        });
+
         let block = new Wall();
         block.setWallPoints(pts);
         block.init(PIXI, app.stage, g_w, g_h);
@@ -235,7 +240,7 @@ const buildScene3 = (wallList) => {
     }
 
     sp.clear();
-    sp.addPoint(fx(0.75), fy(0.15));
+    sp.addPoint(fx(0.75), fy(0.17));
     sp.addPoint(fx(0.82), fy(0.3));
     sp.addPoint(fx(0.81), fy(0.4));
     sp.addPoint(fx(0.8), fy(0.47));
@@ -246,7 +251,7 @@ const buildScene3 = (wallList) => {
     sp.addPoint(fx(0.54), fy(0.25));
     sp.addPoint(fx(0.58), fy(0.2));
     sp.addPoint(fx(0.64), fy(0.17));
-    sp.addPoint(fx(0.75), fy(0.15));
+    sp.addPoint(fx(0.74), fy(0.16));
     addBlock(sp);
 
     // (2)
@@ -261,8 +266,8 @@ const buildScene3 = (wallList) => {
     sp.addPoint(fx(0.25), fy(0.61));
     sp.addPoint(fx(0.2), fy(0.6));
     sp.addPoint(fx(0.22), fy(0.5));
-    sp.addPoint(fx(0.3), fy(0.45));
-    addBlock(sp);    
+    sp.addPoint(fx(0.29), fy(0.46));
+    addBlock(sp);
 
     // (3)
     sp.clear();
@@ -275,8 +280,8 @@ const buildScene3 = (wallList) => {
     sp.addPoint(fx(0.14), fy(0.17));
     sp.addPoint(fx(0.18), fy(0.16));
     sp.addPoint(fx(0.2), fy(0.18));
-    sp.addPoint(fx(0.17), fy(0.3));
-    addBlock(sp);    
+    sp.addPoint(fx(0.18), fy(0.27));
+    addBlock(sp);
 
     // (4)
     sp.clear();
@@ -288,8 +293,8 @@ const buildScene3 = (wallList) => {
     sp.addPoint(fx(0.18), fy(0.8));
     sp.addPoint(fx(0.17), fy(0.73));
     sp.addPoint(fx(0.21), fy(0.74));
-    sp.addPoint(fx(0.31), fy(0.84));
-    addBlock(sp);    
+    sp.addPoint(fx(0.30), fy(0.83));
+    addBlock(sp);
 
     // (5)
     sp.clear();
@@ -302,7 +307,34 @@ const buildScene3 = (wallList) => {
     sp.addPoint(fx(0.84), fy(0.5));
     sp.addPoint(fx(0.86), fy(0.53));
     sp.addPoint(fx(0.85), fy(0.6));
-    sp.addPoint(fx(0.82), fy(0.72));
+    sp.addPoint(fx(0.83), fy(0.7));
+    addBlock(sp);
+
+    // (5)
+    sp.clear();
+    sp.addPoint(fx(0.14), fy(0.99));
+    sp.addPoint(fx(0.09), fy(0.8));
+    sp.addPoint(fx(0.03), fy(0.4));
+    sp.addPoint(fx(0.03), fy(0.3));
+    sp.addPoint(fx(0.05), fy(0.2));
+    sp.addPoint(fx(0.12), fy(0.1));
+    sp.addPoint(fx(0.2), fy(0.07));
+    sp.addPoint(fx(0.25), fy(0.1));
+    sp.addPoint(fx(0.26), fy(0.2));
+    sp.addPoint(fx(0.24), fy(0.28));
+    sp.addPoint(fx(0.25), fy(0.3));
+    sp.addPoint(fx(0.3), fy(0.3));
+    sp.addPoint(fx(0.39), fy(0.2));
+    sp.addPoint(fx(0.5), fy(0.05));
+    sp.addPoint(fx(0.6), fy(0.02));
+    sp.addPoint(fx(0.7), fy(0.03));
+    sp.addPoint(fx(0.85), fy(0.1));
+    sp.addPoint(fx(0.92), fy(0.2));
+    sp.addPoint(fx(0.95), fy(0.4));
+    sp.addPoint(fx(0.94), fy(0.6));
+    sp.addPoint(fx(0.92), fy(0.8));
+    sp.addPoint(fx(0.85), fy(0.99));
+    // sp.addPoint(fx(0.84), fy(0.99));
     addBlock(sp);    
 }
 

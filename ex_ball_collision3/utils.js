@@ -389,7 +389,8 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
 // }
 const calcCollisionPoint = (pA, pB, pX, pY, r) => {
-    const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
+    // const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
+    const REFLECT_RATIO = 1.0;
 
     let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
     if (dist_pA_m <= r) {
