@@ -141,10 +141,13 @@ class Ball extends BaseSpr {
             let newY = cpInfo.pRefY;
             let newV1 = U.vecScalar(U.vecNorm(U.vecSub(newB, cpInfo.pC1)), speed1);
             let newV2 = U.vecScalar(U.vecNorm(U.vecSub(newY, cpInfo.pC2)), speed2);
-            console.log(`len(newV1)=${U.vecLen(newV1)}, len(newV2)=${U.vecLen(newV2)}`);
+            // console.log(`len(newV1)=${U.vecLen(newV1)}, len(newV2)=${U.vecLen(newV2)}`);
 
+            // このボールの位置と移動ベクトルを修正
             this._p = newB;
             this._v = newV1;
+
+            // 他のボールの位置と移動ベクトルを修正
             ball2.setBallPos(newY);
             ball2.setVec(newV2);
         }
