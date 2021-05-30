@@ -386,65 +386,6 @@ const getMinElem = (xs, isValid, cmp) => {
     return result;
 }
 
-// pAからpBに移動する半径r1のボール1が、他のボール2(中心pX, 半径r2)に衝突する点を計算する
-//
-// @param pA [i] ボール1の始点(線分gの端点1)
-// @param pB [i] ボール1の終点(線分gの端点2)
-// @param r1 [i] ボール1の半径
-// @param pX [i] ボール2の中心
-// @param r2 [i] ボール2の半径
-//
-// @return 衝突情報（フォーマットは以下）
-// {
-//    pC : Vec  // ボール1がボール2と衝突する時の、ボール1の中心座標
-//    pCm : Vec // ボール1がボール2と衝突する点(ボール1, 2の周上の点)
-//    pRefB: Vec // ボール1がpCで反射した場合の到達点(=更新後のpB)
-// }
-// 衝突しない場合はnullが返る
-const calcCollisionPoint2_ = (pA, pB, r1, pX, r2) => {
-    // 線分gとpXまでの距離 --> d
-
-    let nu = vecNorm(vecSub(pB, pA));    // pA --> pBへの単位ベクトル
-    let pnu = vecCross(nu);
-
-    // pXを通って線分gに直交する直線と線分gの交点を求める
-    let pH = calcDist_PointToLine(pX, pnu, pA, pB);
-    if (pH !== null) {
-        let d = pH.dist;
-        if (d < (r1+r2)) {
-            // ボール1はボール2に衝突する
-            let k = Math.sqrt((r1+r2)*(r1+r2)-(d*d));
-            let pC = vecAdd(pH.pF, vecScalar(nu, -k));
-
-            // pCが線分g上にあるかチェック
-            // (pA-->pC方向のベクトルとpA-->pB方向のベクトルが同じ方向を向いていればOK)
-            let vAC = vecSub(pC, pA);
-            let lenAC = vecLen(vAC);
-            let lenAB = vecDist(pA, pB);
-            if ((vecInnerProd(nu, vAC) > 0) && (lenAC <= lenAB)) {
-                // pCは線分g上にある
-                // --> pCを中心とした半径r1の円が、ボール2に衝突する．
-                let CX = vecSub(pX, pC);
-                let nh = vecNorm(vecCross(CX));
-
-                let CB = vecSub(pB, pC);
-                let CG = vecScalar(nh, vecInnerProd(CB, nh));
-                let pRefB = vecAdd(pB, vecScalar(vecSub(CG, CB), 2));
-
-                let pCm = vecAdd(pC, vecScalar(CX, r1/(r1+r2)));
-
-                return {
-                    pC: pC,
-                    pCm: pCm,
-                    pRefB: pRefB
-                };
-            }
-        }
-    }
-
-    return null;
-}
-
 // pAからpBに移動する半径r1のボール1が、
 // pXからpYに移動する半径r2のボール2に衝突する点を計算する
 //
