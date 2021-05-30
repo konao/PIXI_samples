@@ -49,6 +49,11 @@ class Ball extends BaseSpr {
         return this._p;
     }
 
+    getBallDestPos() {
+        let dest = U.vecAdd(this._p, this._v);
+        return dest;
+    }
+
     getVec() {
         return this._v;
     }
@@ -119,31 +124,40 @@ class Ball extends BaseSpr {
         this._v.y += (9.8 * G_RATIO);
     }
 
-    update(wallList, ballList) {
+    // ----------------------------------------
+    // 他のボールとの衝突計算
+    // ----------------------------------------
+    update1(ball2) {
+        // this.applyGravity();
+        let speed1 = U.vecLen(this._v);
+        let speed2 = U.vecLen(ball2.getVec());
+
+        let pB = this.getBallDestPos();
+        let pY = ball2.getBallDestPos();
+        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, ball2.getBallPos(), pY, ball2.getRadius());
+        if (cpInfo !== null) {
+            // 衝突した
+            let newB = cpInfo.pRefB;
+            let newY = cpInfo.pRefY;
+            let newV1 = U.vecScalar(U.vecNorm(U.vecSub(newB, cpInfo.pC1)), speed1);
+            let newV2 = U.vecScalar(U.vecNorm(U.vecSub(newY, cpInfo.pC2)), speed2);
+            console.log(`len(newV1)=${U.vecLen(newV1)}, len(newV2)=${U.vecLen(newV2)}`);
+
+            this._p = newB;
+            this._v = newV1;
+            ball2.setBallPos(newY);
+            ball2.setVec(newV2);
+        }
+    }
+
+    // ----------------------------------------
+    // 壁との衝突計算
+    // ----------------------------------------
+    update2(wallList) {
         // this.applyGravity();
         let speed = U.vecLen(this._v);
 
-        // ----------------------------------------
-        // 他のボールとの衝突計算
-        // ----------------------------------------
-        ballList.forEach(ball2 => {
-            if (ball2 !== this) {
-                // ball2が自分自身でなければ衝突計算
-                let cpInfo = U.calcCollisionPoint2(this._p, U.vecAdd(this._p, this._v), this._r, ball2.getBallPos(), ball2.getRadius());
-                if (cpInfo !== null) {
-                    // 衝突した
-                    let newP = cpInfo.pRefB;
-                    let newV = U.vecSub(newP, cpInfo.pC);
-                    this._p = newP;
-                    this._v = newV;
-                }
-            }
-        });
-
-        // ----------------------------------------
-        // 壁との衝突計算
-        // ----------------------------------------
-        this.updateSub(wallList);
+        this.update2Sub(wallList);
 
         // [TODO] **** 後で修正 ****
         // this._vを元のスピードに戻す
@@ -178,7 +192,7 @@ class Ball extends BaseSpr {
         }
     }
 
-    updateSub(wallList) {
+    update2Sub(wallList) {
         let p = this._p;
         let v = this._v;
 
@@ -231,7 +245,7 @@ class Ball extends BaseSpr {
                 // 反射した
                 // 再度反射の判定を再帰的に行う
                 // （反射しなくなるまで）
-                this.updateSub(wallList);
+                this.update2Sub(wallList);
             }
         } else {
             this._p = U.vecAdd(this._p, this._v);
