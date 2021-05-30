@@ -18,7 +18,7 @@ const { Spline } = require('./spline');
 let g_w = 0;
 let g_h = 0;
 let g_bPause = false;
-let g_ballSize = 20; // ボールのサイズ
+let g_ballSize = 30; // ボールのサイズ
 let g_ballSpeed = 5;    // ボールのスピード
 let g_nBalls = 0;   // ボールの個数
 
@@ -340,7 +340,7 @@ const buildScene3 = (wallList) => {
 
 const draw = () => {
     g_G.clear();
-    if ((g_pA !== null) && (g_pB !== null)) {
+    if ((g_pA !== null) && (g_pB !== null) && (g_pX !== null) && (g_pY !== null)) {
         // AからBへの線を引く
         g_G.lineStyle(1, 0xffff00, 1);  // 黄色
         g_G.moveTo(g_pA.x, g_pA.y);
@@ -354,6 +354,24 @@ const draw = () => {
         let pB2 = U.vecAdd(g_pB, U.vecRotate(rv, -30));
         g_G.moveTo(g_pB.x, g_pB.y);
         g_G.lineTo(pB2.x, pB2.y);
+
+        // XからYへの線を引く
+        g_G.lineStyle(1, 0x00ff00, 1);  // 緑
+        g_G.moveTo(g_pX.x, g_pX.y);
+        g_G.lineTo(g_pY.x, g_pY.y);
+
+        // 矢印を描く
+        let ru = U.vecScalar(U.vecNorm(U.vecSub(g_pX, g_pY)), 20);
+        let pY1 = U.vecAdd(g_pY, U.vecRotate(ru, 30));
+        g_G.moveTo(g_pY.x, g_pY.y);
+        g_G.lineTo(pY1.x, pY1.y);
+        let pY2 = U.vecAdd(g_pY, U.vecRotate(ru, -30));
+        g_G.moveTo(g_pY.x, g_pY.y);
+        g_G.lineTo(pY2.x, pY2.y);
+
+        // --------------------------------
+        // ボールと壁の衝突計算テスト
+        // --------------------------------
 
         // pをv方向に移動したときに交差する最も近い辺を求める --> nearestEdge
         let nearestEdge = null;
@@ -434,6 +452,63 @@ const draw = () => {
                 }
             }
         }
+
+        // --------------------------------
+        // ボール同士の衝突計算テスト
+        // --------------------------------
+        let r2 = 10;    // 固定
+        let cpInfo2 = U.calcCollisionPoint2(g_pA, g_pB, g_ballSize, g_pX, g_pY, r2);
+        if (cpInfo2) {
+            console.log(`pA=(${g_pA.x}, ${g_pA.y})`);
+            console.log(`pB=(${g_pB.x}, ${g_pB.y})`);
+            console.log(`pX=(${g_pX.x}, ${g_pX.y})`);
+            console.log(`pY=(${g_pY.x}, ${g_pY.y})`);
+
+            // 衝突する
+            if (cpInfo2.pC1 !== null) {
+                g_G.lineStyle(1, 0xffffff, 1);
+                g_G.beginFill(0x008000);
+                g_G.drawEllipse(cpInfo2.pC1.x, cpInfo2.pC1.y, g_ballSize, g_ballSize);
+                g_G.endFill();
+            }
+
+            if (cpInfo2.pC2 !== null) {
+                g_G.lineStyle(1, 0xffffff, 1);
+                g_G.beginFill(0x008000);
+                g_G.drawEllipse(cpInfo2.pC2.x, cpInfo2.pC2.y, r2, r2);
+                g_G.endFill();
+            }
+
+            if (cpInfo2.pCm !== null) {
+                g_G.lineStyle(1, 0xffffff, 1);
+                g_G.beginFill(0x004040);
+                g_G.drawEllipse(cpInfo2.pCm.x, cpInfo2.pCm.y, 5, 5);
+                g_G.endFill();
+            }
+
+            if (cpInfo2.pRefB !== null) {
+                // pC1からpRefBへの線を引く
+                g_G.lineStyle(1, 0xffff00, 0.5);  // 黄色
+                g_G.moveTo(cpInfo2.pC1.x, cpInfo2.pC1.y);
+                g_G.lineTo(cpInfo2.pRefB.x, cpInfo2.pRefB.y);
+
+                // 矢印を描く
+                // let rv = U.vecScalar(U.vecNorm(U.vecSub(di.pC, di.pRefB)), 20);
+                // let pB1 = U.vecAdd(di.pRefB, U.vecRotate(rv, 30));
+                // g_G.moveTo(di.pRefB.x, di.pRefB.y);
+                // g_G.lineTo(pB1.x, pB1.y);
+                // let pB2 = U.vecAdd(di.pRefB, U.vecRotate(rv, -30));
+                // g_G.moveTo(di.pRefB.x, di.pRefB.y);
+                // g_G.lineTo(pB2.x, pB2.y);
+            }
+
+            if (cpInfo2.pRefY !== null) {
+                // pC1からpRefBへの線を引く
+                g_G.lineStyle(1, 0x00ff00, 0.5);  // 緑
+                g_G.moveTo(cpInfo2.pC2.x, cpInfo2.pC2.y);
+                g_G.lineTo(cpInfo2.pRefY.x, cpInfo2.pRefY.y);
+            }
+        }
     }
 
     if (g_focus) {
@@ -473,16 +548,24 @@ $(window).on('mousemove', e => {
                 case 2:
                     g_pB = mousePos;
                     break;
+                case 3:
+                    g_pX = mousePos;
+                    break;
+                case 4:
+                    g_pY = mousePos;
+                    break;
             }
         }
     }
 });
 
 // [TEST]
-let g_pA = {x: 200, y: 750};
-let g_pB = {x: 700, y: 750};
+let g_pA = {x: 430, y: 650};
+let g_pB = {x: 750, y: 650};
+let g_pX = {x: 500, y: 550};
+let g_pY = {x: 645, y: 800};
 let g_focus = null;
-let g_arrowDragging = 0;    // 1=始点、2=終点
+let g_arrowDragging = 0;    // 1=pA, 2=pB, 3=pX, 4=pY
 let g_G = null;
 
 $(window).on('mousedown', e => {
@@ -495,6 +578,8 @@ $(window).on('mousedown', e => {
 
         let r1 = U.vecDist(mousePressPos, g_pA);
         let r2 = U.vecDist(mousePressPos, g_pB);
+        let r3 = U.vecDist(mousePressPos, g_pX);
+        let r4 = U.vecDist(mousePressPos, g_pY);
         const CLOSE_DIST = 20;
         if (r1 < CLOSE_DIST) {
             g_arrowDragging = 1;
@@ -502,6 +587,12 @@ $(window).on('mousedown', e => {
         } else if (r2 < CLOSE_DIST) {
             g_arrowDragging = 2;
             g_focus = g_pB;
+        } else if (r3 < CLOSE_DIST) {
+            g_arrowDragging = 3;
+            g_focus = g_pX;
+        } else if (r4 < CLOSE_DIST) {
+            g_arrowDragging = 4;
+            g_focus = g_pY;
         } else {
             g_arrowDragging = 0;
             g_focus = null;
