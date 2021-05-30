@@ -493,13 +493,13 @@ const draw = () => {
                 g_G.lineTo(cpInfo2.pRefB.x, cpInfo2.pRefB.y);
 
                 // 矢印を描く
-                // let rv = U.vecScalar(U.vecNorm(U.vecSub(di.pC, di.pRefB)), 20);
-                // let pB1 = U.vecAdd(di.pRefB, U.vecRotate(rv, 30));
-                // g_G.moveTo(di.pRefB.x, di.pRefB.y);
-                // g_G.lineTo(pB1.x, pB1.y);
-                // let pB2 = U.vecAdd(di.pRefB, U.vecRotate(rv, -30));
-                // g_G.moveTo(di.pRefB.x, di.pRefB.y);
-                // g_G.lineTo(pB2.x, pB2.y);
+                let rv1 = U.vecScalar(U.vecNorm(U.vecSub(cpInfo2.pC1, cpInfo2.pRefB)), 20);
+                let pB1 = U.vecAdd(cpInfo2.pRefB, U.vecRotate(rv1, 30));
+                g_G.moveTo(cpInfo2.pRefB.x, cpInfo2.pRefB.y);
+                g_G.lineTo(pB1.x, pB1.y);
+                let pB2 = U.vecAdd(cpInfo2.pRefB, U.vecRotate(rv1, -30));
+                g_G.moveTo(cpInfo2.pRefB.x, cpInfo2.pRefB.y);
+                g_G.lineTo(pB2.x, pB2.y);
             }
 
             if (cpInfo2.pRefY !== null) {
@@ -507,6 +507,15 @@ const draw = () => {
                 g_G.lineStyle(1, 0x00ff00, 0.5);  // 緑
                 g_G.moveTo(cpInfo2.pC2.x, cpInfo2.pC2.y);
                 g_G.lineTo(cpInfo2.pRefY.x, cpInfo2.pRefY.y);
+
+                // 矢印を描く
+                let rv1 = U.vecScalar(U.vecNorm(U.vecSub(cpInfo2.pC2, cpInfo2.pRefY)), 20);
+                let pY1 = U.vecAdd(cpInfo2.pRefY, U.vecRotate(rv1, 30));
+                g_G.moveTo(cpInfo2.pRefY.x, cpInfo2.pRefY.y);
+                g_G.lineTo(pY1.x, pY1.y);
+                let pY2 = U.vecAdd(cpInfo2.pRefY, U.vecRotate(rv1, -30));
+                g_G.moveTo(cpInfo2.pRefY.x, cpInfo2.pRefY.y);
+                g_G.lineTo(pY2.x, pY2.y);
             }
         }
     }

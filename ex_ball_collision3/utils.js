@@ -480,12 +480,30 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
         let t1 = (-b+Math.sqrt(D))/a;
         let t2 = (-b-Math.sqrt(D))/a;
         console.log(`t1=${t1}, t2=${t2}`);
+        let bt1Valid = false;
+        let bt2Valid = false;
         if ((t1>=0) && (t1<=1)) {
             // t1で衝突
+            bt1Valid = true;
+        }
+        if ((t2>=0) && (t2<=1)) {
+            // t2で衝突
+            bt2Valid = true;
+        }
+
+        if (bt1Valid && bt2Valid) {
+            bCollided = true;
+            if (t1 < t2) {
+                t = t1;
+            } else {
+                t = t2;
+            }
+        }
+        else if (bt1Valid) {
             bCollided = true;
             t = t1;
-        } else if ((t2>=0) && (t2<=1)) {
-            // t2で衝突
+        }
+        else if (bt2Valid) {
             bCollided = true;
             t = t2;
         }
@@ -499,13 +517,19 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
         let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
         let calcRefVec = (pQ, pC, pH) => {
-            let nw = vecNorm(pH, pC);
+            let nw = vecNorm(vecSub(pH, pC));
             let pnw = vecCross(nw);
             // let pnw = vecScalar(vecCross(nw), -1);
             let vCQ = vecSub(pQ, pC);
             let k = vecInnerProd(vCQ, pnw);
+            // if (k<0) {
+            //     k = -k;
+            //     pnw = vecScalar(pnw, -1);
+            // }
+
             // let vCQRef = vecAdd(vCQ, vecScalar(vecSub(vecScalar(pnw, k), vCQ), 2));
             let vCQRef = vecSub(vecScalar(pnw, 2*k), vCQ);
+            // let vCQRef = vecScalar(vecSub(vecScalar(pnw, 2*k), vCQ), -1);
             let pQRef = vecAdd(pC, vCQRef);
             return pQRef;
         }
