@@ -529,6 +529,10 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
 
         let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
+        // 反射後の方向ベクトル計算
+        //
+        // 互いに相手のボールの方向に入れ替わる．
+        // ただし反射後の方向ベクトルの長さは元のベクトルの長さのまま
         let vC1B = vecSub(pB, pC1);
         let len_VC1B = vecLen(vC1B);
         let vC2Y = vecSub(pY, pC2);
