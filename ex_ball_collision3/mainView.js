@@ -459,12 +459,12 @@ const draw = () => {
         let r2 = 20;    // 固定
         let cpInfo2 = U.calcCollisionPoint2(g_pA, g_pB, g_ballSize, g_pX, g_pY, r2);
         if (cpInfo2) {
-            console.log(`pA=(${g_pA.x}, ${g_pA.y})`);
-            console.log(`pB=(${g_pB.x}, ${g_pB.y})`);
-            console.log(`pX=(${g_pX.x}, ${g_pX.y})`);
-            console.log(`pY=(${g_pY.x}, ${g_pY.y})`);
-
             // 衝突する
+            // console.log(`pA=(${g_pA.x}, ${g_pA.y})`);
+            // console.log(`pB=(${g_pB.x}, ${g_pB.y})`);
+            // console.log(`pX=(${g_pX.x}, ${g_pX.y})`);
+            // console.log(`pY=(${g_pY.x}, ${g_pY.y})`);
+
             if (cpInfo2.pC1 !== null) {
                 g_G.lineStyle(1, 0xffffff, 1);
                 g_G.beginFill(0x008000);
@@ -500,21 +500,6 @@ const draw = () => {
                 let pB2 = U.vecAdd(cpInfo2.pRefB, U.vecRotate(rv1, -30));
                 g_G.moveTo(cpInfo2.pRefB.x, cpInfo2.pRefB.y);
                 g_G.lineTo(pB2.x, pB2.y);
-
-                // vCQ, vCQRefを描く
-                g_G.lineStyle(1, 0xffff00, 0.3);  // 黄色
-                g_G.moveTo(cpInfo2.pCm.x, cpInfo2.pCm.y);
-                let pCQ = U.vecAdd(cpInfo2.pCm, cpInfo2.vCQB);
-                g_G.lineTo(pCQ.x, pCQ.y);
-
-                g_G.moveTo(cpInfo2.pCm.x, cpInfo2.pCm.y);
-                let pCQRef = U.vecAdd(cpInfo2.pCm, cpInfo2.vCQRefB);
-                g_G.lineTo(pCQRef.x, pCQRef.y);
-
-                let pH1 = U.vecAdd(cpInfo2.pCm, U.vecScalar(cpInfo2.pnw, 1000));
-                let pH2 = U.vecAdd(cpInfo2.pCm, U.vecScalar(cpInfo2.pnw, -1000));
-                g_G.moveTo(pH1.x, pH1.y);
-                g_G.lineTo(pH2.x, pH2.y);
             }
 
             if (cpInfo2.pRefY !== null) {
@@ -531,16 +516,6 @@ const draw = () => {
                 let pY2 = U.vecAdd(cpInfo2.pRefY, U.vecRotate(rv1, -30));
                 g_G.moveTo(cpInfo2.pRefY.x, cpInfo2.pRefY.y);
                 g_G.lineTo(pY2.x, pY2.y);
-
-                // vCQ, vCQRefを描く
-                g_G.lineStyle(1, 0x00ff00, 0.3);  // 緑
-                g_G.moveTo(cpInfo2.pCm.x, cpInfo2.pCm.y);
-                let pCQ = U.vecAdd(cpInfo2.pCm, cpInfo2.vCQY);
-                g_G.lineTo(pCQ.x, pCQ.y);
-
-                g_G.moveTo(cpInfo2.pCm.x, cpInfo2.pCm.y);
-                let pCQRef = U.vecAdd(cpInfo2.pCm, cpInfo2.vCQRefY);
-                g_G.lineTo(pCQRef.x, pCQRef.y);
             }
         }
     }

@@ -475,11 +475,12 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
     let bCollided = false;
     let t = 0;
     let D = b*b-a*c;    // 判別式
-    console.log(`D=${D}`);
+    // console.log(`D=${D}`);
     if (D>=0 && !isEqual(a, 0)) {
         let t1 = (-b+Math.sqrt(D))/a;
         let t2 = (-b-Math.sqrt(D))/a;
-        console.log(`t1=${t1}, t2=${t2}`);
+        // console.log(`t1=${t1}, t2=${t2}`);
+
         let bt1Valid = false;
         let bt2Valid = false;
         if ((t1>=0) && (t1<=1)) {
@@ -516,44 +517,17 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
 
         let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
-        let calcRefVec = (pQ, pC, pH) => {
-            let nw = vecNorm(vecSub(pH, pC));
-            let pnw = vecCross(nw);
-            // let pnw = vecScalar(vecCross(nw), -1);
-            let vCQ = vecSub(pQ, pC);
-            let k = vecInnerProd(vCQ, pnw);
-            // if (k<0) {
-            //     k = -k;
-            //     pnw = vecScalar(pnw, -1);
-            // }
-
-            // let vCQRef = vecAdd(vCQ, vecScalar(vecSub(vecScalar(pnw, k), vCQ), 2));
-            let vCQRef = vecSub(vecScalar(pnw, 2*k), vCQ);
-            // let vCQRef = vecScalar(vecSub(vecScalar(pnw, 2*k), vCQ), -1);
-            let pQRef = vecAdd(pC, vCQRef);
-            // return pQRef;
-            return {
-                pQRef: pQRef,
-                vCQ: vCQ,
-                vCQRef: vCQRef,
-                pnw: pnw
-            };
-        }
-        // pRefBを計算する
-        let rvB = calcRefVec(pB, pC1, pCm);
-        let rvY = calcRefVec(pY, pC2, pCm);
+        let vC1B = vecSub(pB, pC1);
+        let vC2Y = vecSub(pY, pC2);
+        let pRefB = vecAdd(pC1, vC2Y);
+        let pRefY = vecAdd(pC2, vC1B);
 
         return {
             pC1: pC1,
             pC2: pC2,
             pCm: pCm,
-            pRefB: rvB.pQRef,
-            pRefY: rvY.pQRef,
-            pnw: rvB.pnw,
-            vCQB: rvB.vCQ,
-            vCQRefB: rvB.vCQRef,
-            vCQY: rvY.vCQ,
-            vCQRefY: rvY.vCQRef
+            pRefB: pRefB,
+            pRefY: pRefY
         }
     } else {
         // 衝突しなかった
