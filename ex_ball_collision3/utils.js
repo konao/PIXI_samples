@@ -136,6 +136,18 @@ const vecDist = (v1, v2) => {
 }
 
 // -----------------------------------------------
+// 長さを変更する
+//
+// @param v {x, y} [i] ベクトル
+// @param newLen [i] 変更後の長さ
+//
+// @retutrn vと方向は同じで長さがnewLenのベクトル
+// -----------------------------------------------
+const vecLenChange = (v, newLen) => {
+    return vecScalar(vecNorm(v), newLen);
+}
+
+// -----------------------------------------------
 // 正規化する
 //
 // @param v {x, y} [i] ベクトル
@@ -518,9 +530,11 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
         let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
         let vC1B = vecSub(pB, pC1);
+        let len_VC1B = vecLen(vC1B);
         let vC2Y = vecSub(pY, pC2);
-        let pRefB = vecAdd(pC1, vC2Y);
-        let pRefY = vecAdd(pC2, vC1B);
+        let len_VC2Y = vecLen(vC2Y);
+        let pRefB = vecAdd(pC1, vecLenChange(vC2Y, len_VC1B));
+        let pRefY = vecAdd(pC2, vecLenChange(vC1B, len_VC2Y));
 
         return {
             pC1: pC1,
@@ -834,6 +848,7 @@ module.exports = {
     vecInnerProd,
     vecLen,
     vecDist,
+    vecLenChange,
     vecNorm,
     vecRotate,
     getNearestPos,

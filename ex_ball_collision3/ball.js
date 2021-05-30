@@ -128,6 +128,12 @@ class Ball extends BaseSpr {
     // 他のボールとの衝突計算
     // ----------------------------------------
     update1(ball2) {
+        // 最初にこのボールとball2の距離dを計算
+        // dがr1+r2より小さければ衝突判定はしないで帰る
+        let d = U.vecDist(this._p, ball2.getBallPos());
+        let R = this._r + ball2.getRadius();
+        if (d<R) return;
+
         // this.applyGravity();
         let speed1 = U.vecLen(this._v);
         let speed2 = U.vecLen(ball2.getVec());
@@ -139,8 +145,8 @@ class Ball extends BaseSpr {
             // 衝突した
             let newB = cpInfo.pRefB;
             let newY = cpInfo.pRefY;
-            let newV1 = U.vecScalar(U.vecNorm(U.vecSub(newB, cpInfo.pC1)), speed1);
-            let newV2 = U.vecScalar(U.vecNorm(U.vecSub(newY, cpInfo.pC2)), speed2);
+            let newV1 = U.vecLenChange(U.vecSub(newB, cpInfo.pC1), speed1);
+            let newV2 = U.vecLenChange(U.vecSub(newY, cpInfo.pC2), speed2);
             // console.log(`len(newV1)=${U.vecLen(newV1)}, len(newV2)=${U.vecLen(newV2)}`);
 
             // このボールの位置と移動ベクトルを修正
