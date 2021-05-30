@@ -531,18 +531,29 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
             let vCQRef = vecSub(vecScalar(pnw, 2*k), vCQ);
             // let vCQRef = vecScalar(vecSub(vecScalar(pnw, 2*k), vCQ), -1);
             let pQRef = vecAdd(pC, vCQRef);
-            return pQRef;
+            // return pQRef;
+            return {
+                pQRef: pQRef,
+                vCQ: vCQ,
+                vCQRef: vCQRef,
+                pnw: pnw
+            };
         }
         // pRefBを計算する
-        let pRefB = calcRefVec(pB, pC1, pCm);
-        let pRefY = calcRefVec(pY, pC2, pCm);
+        let rvB = calcRefVec(pB, pC1, pCm);
+        let rvY = calcRefVec(pY, pC2, pCm);
 
         return {
             pC1: pC1,
             pC2: pC2,
             pCm: pCm,
-            pRefB: pRefB,
-            pRefY: pRefY
+            pRefB: rvB.pQRef,
+            pRefY: rvY.pQRef,
+            pnw: rvB.pnw,
+            vCQB: rvB.vCQ,
+            vCQRefB: rvB.vCQRef,
+            vCQY: rvY.vCQ,
+            vCQRefY: rvY.vCQRef
         }
     } else {
         // 衝突しなかった
