@@ -472,14 +472,15 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
 
         // 反射後の方向ベクトル計算
         //
-        // 互いに相手のボールの方向に入れ替わる．
-        // ただし反射後の方向ベクトルの長さは元のベクトルの長さのまま
+        // 完全弾性衝突として計算する
         let vC1B = vecSub(pB, pC1);
-        let len_VC1B = vecLen(vC1B);
         let vC2Y = vecSub(pY, pC2);
-        let len_VC2Y = vecLen(vC2Y);
-        let pRefB = vecAdd(pC1, vecLenChange(vC2Y, len_VC1B));
-        let pRefY = vecAdd(pC2, vecLenChange(vC1B, len_VC2Y));
+        let m1=r1*r1;   // 質量は半径の2乗とする
+        let m2=r2*r2;
+        let vC1B_ = vecScalar(vecAdd(vecScalar(vC1B, m1-m2), vecScalar(vC2Y, 2*m2)), 1/(m1+m2));
+        let vC2Y_ = vecScalar(vecAdd(vecScalar(vC1B, 2*m1), vecScalar(vC2Y, m2-m1)), 1/(m1+m2));
+        let pRefB = vecAdd(pC1, vC1B_);
+        let pRefY = vecAdd(pC2, vC2Y_);
 
         return {
             pC1: pC1,

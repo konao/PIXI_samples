@@ -30,6 +30,8 @@ class Ball extends BaseSpr {
             x: 0.0,
             y: 0.0
         }
+
+        this._m = 0;    // 質量(=半径の2乗*定数係数、とする)
     
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;
@@ -72,11 +74,16 @@ class Ball extends BaseSpr {
 
     setRadius(r) {
         this._r = r;
+        this._m = r*r;
         return this;
     }
 
     getRadius() {
         return this._r;
+    }
+
+    getMass() {
+        return this._m;
     }
 
     init(PIXI, container, w, h, nTraces) {
