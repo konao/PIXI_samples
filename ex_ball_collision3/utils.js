@@ -386,26 +386,31 @@ const getMinElem = (xs, isValid, cmp) => {
     return result;
 }
 
-// pAからpBに移動する半径r1のボール1が、
-// pXからpYに移動する半径r2のボール2に衝突する点を計算する
+// ボール同士の衝突計算
+//
+// pAからpBに移動する半径r1, 質量m1のボール1が、
+// pXからpYに移動する半径r2, 質量m2のボール2に衝突するか？を計算する．
+// 衝突する場合は、衝突時の位置、衝突後の到達点等を返す．
 //
 // @param pA [i] ボール1の始点(線分gの端点1)
 // @param pB [i] ボール1の終点(線分gの端点2)
 // @param r1 [i] ボール1の半径
+// @param m1 [i] ボール1の質量
 // @param pX [i] ボール2の始点(線分mの端点1)
 // @param pY [i] ボール2の終点(線分mの端点2)
 // @param r2 [i] ボール2の半径
+// @param m2 [i] ボール2の質量
 //
-// @return 衝突情報（フォーマットは以下）
+// @return 衝突情報（衝突が起こった場合のみ有効）
 // {
-//    pC1 : Vec  // ボール1がボール2と衝突する時の、ボール1の中心座標
-//    pC2 : Vec  // ボール1がボール2と衝突する時の、ボール2の中心座標
-//    pCm : Vec // ボール1がボール2と衝突する点(ボール1, 2の周上の点)
-//    pRefB: Vec // 衝突が起こった場合のボール1の到達点(=更新後のpB)
-//    pRefY: Vec // 衝突が起こった場合のボール2の到達点(=更新後のpY)
+//    pC1 : Vec  // 衝突時のボール1の中心座標
+//    pC2 : Vec  // 衝突時のボール2の中心座標
+//    pCm : Vec // ボール1とボール2の接触点(ボール1, 2の周上の点)
+//    pRefB: Vec // 衝突後のボール1の到達点(=更新後のpB)
+//    pRefY: Vec // 衝突後のボール2の到達点(=更新後のpY)
 // }
 // 衝突しない場合はnullが返る
-const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
+const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
     // ボール1, ボール2の移動経路を媒介変数tで表す．
     // 0<=t<=1の範囲で、
     // ボール1はpAからpBへ、
@@ -475,8 +480,6 @@ const calcCollisionPoint2 = (pA, pB, r1, pX, pY, r2) => {
         // 完全弾性衝突として計算する
         let vC1B = vecSub(pB, pC1);
         let vC2Y = vecSub(pY, pC2);
-        let m1=r1*r1;   // 質量は半径の2乗とする
-        let m2=r2*r2;
         let vC1B_ = vecScalar(vecAdd(vecScalar(vC1B, m1-m2), vecScalar(vC2Y, 2*m2)), 1/(m1+m2));
         let vC2Y_ = vecScalar(vecAdd(vecScalar(vC1B, 2*m1), vecScalar(vC2Y, m2-m1)), 1/(m1+m2));
         let pRefB = vecAdd(pC1, vC1B_);

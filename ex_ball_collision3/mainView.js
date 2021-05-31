@@ -469,7 +469,7 @@ const draw = () => {
         // ボール同士の衝突計算テスト
         // --------------------------------
         let r2 = 20;    // 固定
-        let cpInfo2 = U.calcCollisionPoint2(g_pA, g_pB, g_ballSize, g_pX, g_pY, r2);
+        let cpInfo2 = U.calcCollisionPoint2(g_pA, g_pB, g_ballSize, g_ballSize*g_ballSize, g_pX, g_pY, r2, r2*r2);
         if (cpInfo2) {
             // 衝突する
             // console.log(`pA=(${g_pA.x}, ${g_pA.y})`);

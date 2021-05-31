@@ -153,7 +153,7 @@ class Ball extends BaseSpr {
 
         let pB = this.getBallDestPos();
         let pY = ball2.getBallDestPos();
-        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, ball2.getBallPos(), pY, ball2.getRadius());
+        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, this._m, ball2.getBallPos(), pY, ball2.getRadius(), ball2.getMass());
         if (cpInfo !== null) {
             // 衝突した
             let newB = cpInfo.pRefB;
