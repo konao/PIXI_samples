@@ -470,9 +470,12 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 
     if (bCollided) {
         // 衝突した
+
+        // 各ボールの中心点
         let pC1 = vecAdd(pA, vecScalar(v, t));
         let pC2 = vecAdd(pX, vecScalar(u, t));
 
+        // 2つのボールの接触点
         let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
         // 反射後の方向ベクトル計算
@@ -482,8 +485,8 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
         let vC2Y = vecSub(pY, pC2);
         let vC1B_ = vecScalar(vecAdd(vecScalar(vC1B, m1-m2), vecScalar(vC2Y, 2*m2)), 1/(m1+m2));
         let vC2Y_ = vecScalar(vecAdd(vecScalar(vC1B, 2*m1), vecScalar(vC2Y, m2-m1)), 1/(m1+m2));
-        let pRefB = vecAdd(pC1, vC1B_);
-        let pRefY = vecAdd(pC2, vC2Y_);
+        let pRefB = vecAdd(pC1, vC1B_); // ボール1の反射後の到達点
+        let pRefY = vecAdd(pC2, vC2Y_); // ボール2の反射後の到達点
 
         return {
             pC1: pC1,
@@ -561,6 +564,9 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r) => {
     } else {
         // pAと線分mの距離がボールの半径より大きい
         // --> 衝突判定を行う
+
+        // このリストに衝突点の候補をpushしていく
+        // 最終的にpAに一番近い点を衝突点とする
         let cps = [];
 
         // (1) pX, pY中心で半径rの円と、線分lの交点（のうち、pAに近い方）を求める
@@ -624,7 +630,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r) => {
         let minCp = getMinElem(
             cps,
             (x) => { return true }, // isValid
-            (x, y) => { return (x.dist < y.dist )}  // cmp
+            (x, y) => { return (x.dist < y.dist)}  // cmp
         );
     
         if (minCp !== null) {

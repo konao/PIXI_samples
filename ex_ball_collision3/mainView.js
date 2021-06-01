@@ -107,8 +107,8 @@ $(window).on('load', () => {
                 // 衝突計算1（ボール同士）
                 let nBalls = g_ballList.length;
                 for (let i=0; i<nBalls; i++) {
+                    let ball1 = g_ballList[i];
                     for (let j=i+1; j<nBalls; j++) {
-                        let ball1 = g_ballList[i];
                         let ball2 = g_ballList[j];
                         ball1.update1(ball2);
                     }
