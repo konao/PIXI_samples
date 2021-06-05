@@ -65,7 +65,7 @@ class Ball extends BaseSpr {
     }
 
     getBallDestPos() {
-        let dest = U.vecAdd(this._p, this._v);
+        let dest = U.vecAdd(this._p, this.getVec());
         return dest;
     }
 
@@ -186,6 +186,7 @@ class Ball extends BaseSpr {
         let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, this._m, ball2.getBallPos(), pY, ball2.getRadius(), ball2.getMass());
         if (cpInfo !== null) {
             // 衝突した
+            
             let newB = cpInfo.pRefB;
             let newY = cpInfo.pRefY;
             let newV1 = U.vecLenChange(U.vecSub(newB, cpInfo.pC1), speed1);
@@ -263,7 +264,7 @@ class Ball extends BaseSpr {
             let edgeInfos = edgeList.map(e => {
                 return {
                     e: e,
-                    cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r)
+                    cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r, REFLECT_RATIO)
                 };
             });
 
@@ -291,7 +292,6 @@ class Ball extends BaseSpr {
                 // 辺と衝突した
                 let newP = cpInfo.pRefB;
                 let newV = U.vecSub(newP, cpInfo.pC);
-                U.printVec('newV=', newV);
 
                 this._p = newP;
                 let newDir = cpInfo.vRefDir;

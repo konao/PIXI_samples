@@ -481,6 +481,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 
     if (bCollided) {
         // 衝突した
+        console.log('collision detected!');
 
         // 各ボールの中心点
         let pC1 = vecAdd(pA, vecScalar(v, t));
@@ -652,23 +653,33 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
         if (minCp !== null) {
             // 衝突点があった
     
-            // pRefBを計算する
+            // pRefB, vRefDirを計算する
+            let pRefB = null;
+            let vRefDir = null;
             let CB = vecSub(pB, minCp.pC);
-            printVec('CB=', CB);
+            if (isEqual(vecLen(CB), 0)) {
+                // ちょうどpBが線分m上だった場合
+                pRefB = minCp.pC;
+
+                // vABをABと同じ長さだけ伸ばした点をDとする．
+                // CDを線分mに対して反射した点をEとする．
+                // vRefDirはvBEを単位ベクトル化したものである．
+                let CD = vecSub(pB, pA);
+                let CH = vecScalar(minCp.vRefLine, vecInnerProd(CD, minCp.vRefLine));
+                let CH2 = vecScalar(CH, 2);
+                vRefDir = vecNorm(vecSub(CH2, CD));
+            } else {
+                CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
+                pB = vecAdd(minCp.pC, CB);  // pBの位置補正
+                let CH = vecScalar(minCp.vRefLine, vecInnerProd(CB, minCp.vRefLine));
+                let BH2 = vecScalar(vecSub(CH, CB), 2);
+                pRefB = vecAdd(pB, BH2);
+                vRefDir = vecNorm(vecSub(pRefB, minCp.pC));
+            }
             
-            CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
-            printVec("CB'=", CB);
-            pB = vecAdd(minCp.pC, CB);  // pBの位置補正
-
-            let CH = vecScalar(minCp.vRefLine, vecInnerProd(CB, minCp.vRefLine));
-            printVec('CH=', CH);
-            let BH2 = vecScalar(vecSub(CH, CB), 2);
-            printVec('BH2=', BH2);
-            let pRefB = vecAdd(pB, BH2);
-            let vRefDir = vecNorm(vecSub(pRefB, minCp.pC));
-
-            printVec('minCp.pC=', minCp.pC);
-            printVec('pRefB=', pRefB);
+            // printVec('minCp.pC=', minCp.pC);
+            // printVec('pRefB=', pRefB);
+            // printVec('vRefDir=',vRefDir);
 
             return {
                 pC: minCp.pC,
