@@ -208,20 +208,9 @@ class Ball extends BaseSpr {
     // ----------------------------------------
     update2(wallList) {
         // this.applyGravity();
-        // let speed = U.vecLen(this._v);
-        let speed = this.getSpeed();
         let v = this.getVec();
-        console.log(`speed=${speed}`);
-        U.printVec('v=', v);
 
         this.update2Sub(v, wallList);
-
-        // [TODO] **** 後で修正 ****
-        // this._vを元のスピードに戻す
-        // let origSpeedVec = U.vecLenChange(this._v, speed);
-        // U.printVec('this._v=', this._v);
-        // U.printVec('origSpeedVec=', origSpeedVec);
-        // this.setVec(origSpeedVec)
 
         this.saveCurrPos();  // 現在の位置をトレースリストにセーブ
 
@@ -305,7 +294,7 @@ class Ball extends BaseSpr {
                 U.printVec('newV=', newV);
 
                 this._p = newP;
-                let newDir = U.vecNorm(newV);
+                let newDir = cpInfo.vRefDir;
                 let newSpeed = REFLECT_RATIO * this.getSpeed();
                 this.setDir(newDir);
                 this.setSpeed(newSpeed);

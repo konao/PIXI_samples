@@ -530,7 +530,9 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 //    pC : Vec  // ボールが線分mと衝突する時の円の中心座標(衝突しない場合はnull）
 //    pCm : Vec // ボールが線分mと衝突する点(線分m上の点)
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
+//    vRefDir: Vec  // 反射後のボールの移動方向（単位ベクトル）
 // }
+// 衝突しない場合はnullが返る
 const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
     // const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
     // const REFLECT_RATIO = 1.0;
@@ -564,18 +566,16 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
             let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
             let CH = vecScalar(nu, vecInnerProd(CB, nu));
             let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
+            let vRefDir = vecNorm(vecSub(pRefB, pA));
 
             return {
                 pC: pA,
                 pCm: pA_m.pF,
-                pRefB: pRefB
+                pRefB: pRefB,
+                vRefDir: vRefDir
             };
         } else {
-            return {
-                pC: null,
-                pCm: null,
-                pRefB: null
-            };
+            return null;
         }
     } else {
         // pAと線分mの距離がボールの半径より大きい
@@ -665,6 +665,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
             let BH2 = vecScalar(vecSub(CH, CB), 2);
             printVec('BH2=', BH2);
             let pRefB = vecAdd(pB, BH2);
+            let vRefDir = vecNorm(vecSub(pRefB, minCp.pC));
 
             printVec('minCp.pC=', minCp.pC);
             printVec('pRefB=', pRefB);
@@ -672,15 +673,12 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
             return {
                 pC: minCp.pC,
                 pCm: minCp.pCm,
-                pRefB: pRefB
+                pRefB: pRefB,
+                vRefDir: vRefDir
             };
         } else {
             // 衝突点はなかった
-            return {
-                pC: null,
-                pCm: null,
-                pRefB: null
-            };
+            return null;
         }
     }
 }
