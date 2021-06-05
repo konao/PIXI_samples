@@ -31,6 +31,13 @@ class Ball extends BaseSpr {
             y: 0.0
         }
 
+        // 方向ベクトル（単位ベクトル）と移動スピード
+        this._dir = {
+            x: 0.0,
+            y: 0.0
+        }
+        this._speed = 1;
+
         this._m = 0;    // 質量(=半径の2乗*定数係数、とする)
     
         this._w = 0;    // クライアントエリアの幅と高さ
@@ -62,14 +69,35 @@ class Ball extends BaseSpr {
         return dest;
     }
 
-    getVec() {
-        return this._v;
-    }
-
     // @param v [i] 方向ベクトル
     setVec(v) {
-        this._v = v;
+        this._dir = U.vecNorm(v);
+        this._speed = U.vecLen(v);
         return this;
+    }
+
+    getVec() {
+        return U.vecLenChange(this._dir, this._speed);
+    }
+
+    setDir(dir) {
+        this._dir = U.vecNorm(dir);
+        return this;
+    }
+
+    getDir() {
+        return this._dir;
+    }
+
+    setSpeed(speed) {
+        if (speed >= 0) {
+            this._speed = speed;
+        }
+        return this;
+    }
+
+    getSpeed() {
+        return this._speed;
     }
 
     setRadius(r) {
@@ -134,7 +162,7 @@ class Ball extends BaseSpr {
 
     applyGravity() {
         const G_RATIO = 0.02;
-        this._v.y += (9.8 * G_RATIO);
+        // this._v.y += (9.8 * G_RATIO);
     }
 
     // ----------------------------------------
@@ -148,8 +176,10 @@ class Ball extends BaseSpr {
         if (d<R) return;
 
         // this.applyGravity();
-        let speed1 = U.vecLen(this._v);
-        let speed2 = U.vecLen(ball2.getVec());
+        // let speed1 = U.vecLen(this._v);
+        // let speed2 = U.vecLen(ball2.getVec());
+        let speed1 = this._speed;
+        let speed2 = ball2.getSpeed();
 
         let pB = this.getBallDestPos();
         let pY = ball2.getBallDestPos();
@@ -164,7 +194,8 @@ class Ball extends BaseSpr {
 
             // このボールの位置と移動ベクトルを修正
             this._p = newB;
-            this._v = newV1;
+            // this._v = newV1;
+            this.setVec(newV1);
 
             // 他のボールの位置と移動ベクトルを修正
             ball2.setBallPos(newY);
@@ -177,14 +208,20 @@ class Ball extends BaseSpr {
     // ----------------------------------------
     update2(wallList) {
         // this.applyGravity();
-        let speed = U.vecLen(this._v);
+        // let speed = U.vecLen(this._v);
+        let speed = this.getSpeed();
+        let v = this.getVec();
+        console.log(`speed=${speed}`);
+        U.printVec('v=', v);
 
-        this.update2Sub(wallList);
+        this.update2Sub(v, wallList);
 
         // [TODO] **** 後で修正 ****
         // this._vを元のスピードに戻す
-        let vOrigSpeed = U.vecLenChange(this._v, speed);
-        this._v = vOrigSpeed;
+        // let origSpeedVec = U.vecLenChange(this._v, speed);
+        // U.printVec('this._v=', this._v);
+        // U.printVec('origSpeedVec=', origSpeedVec);
+        // this.setVec(origSpeedVec)
 
         this.saveCurrPos();  // 現在の位置をトレースリストにセーブ
 
@@ -214,9 +251,13 @@ class Ball extends BaseSpr {
         }
     }
 
-    update2Sub(wallList) {
+    // 反射のたびにこのオブジェクトの保持する方向とスピードが更新される
+    // vは残りの移動変位
+    update2Sub(v, wallList) {
+        const REFLECT_RATIO = 1.0;
+
         let p = this._p;
-        let v = this._v;
+        // let v = this._v;
 
         // pをv方向に移動したときに交差する最も近い辺を求める --> nearestEdge
         let nearestEdge = null;
@@ -252,26 +293,30 @@ class Ball extends BaseSpr {
         
         if (nearestEdge) {
             // 反射判定
-            let newPosInfo = U.reflect(p, v, this._r, nearestEdge.p1, nearestEdge.p2);
-            // console.log(`i=${i}`);
-            // console.log(`q1=(${q1.x}, ${q1.y}), q2=(${q2.x}, ${q2.y})`);
-            // console.log(`newPosInfo.p=(${newPosInfo.p.x}, ${newPosInfo.p.y})`);
-            // console.log(`newPosInfo.v=(${newPosInfo.v.x}, ${newPosInfo.v.y})`);
-            // console.log(`newPosInfo.bRefrect=(${newPosInfo.bReflect})`);
+            // let newPosInfo = U.reflect(p, v, this._r, nearestEdge.p1, nearestEdge.p2);
 
-            // 位置と方向ベクトルを更新
-            this._p = newPosInfo.p;
-            this._v = newPosInfo.v;
+            let pB = U.vecAdd(p, v);
+            let cpInfo = U.calcCollisionPoint1(p, pB, nearestEdge.p1, nearestEdge.p2, this._r, REFLECT_RATIO);
 
-            if (newPosInfo.bReflect) {
+            if ((cpInfo !== null) && (cpInfo.pC !== null)) {
+                // 辺と衝突した
+                let newP = cpInfo.pRefB;
+                let newV = U.vecSub(newP, cpInfo.pC);
+                U.printVec('newV=', newV);
+
+                this._p = newP;
+                let newDir = U.vecNorm(newV);
+                let newSpeed = REFLECT_RATIO * this.getSpeed();
+                this.setDir(newDir);
+                this.setSpeed(newSpeed);
                 // 反射した
                 // 再度反射の判定を再帰的に行う
                 // （反射しなくなるまで）
-                this.update2Sub(wallList);
+                return this.update2Sub(newV, wallList);
             }
-        } else {
-            this._p = U.vecAdd(this._p, this._v);
         }
+
+        this._p = U.vecAdd(this._p, v);
     }
 }
 

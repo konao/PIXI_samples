@@ -346,27 +346,27 @@ const getCrossPoint = (p, v, q1, q2) => {
 // 画面に存在する他の壁との衝突判定が必要．
 // （bReflect=falseになるまで再帰的にreflectを呼ぶ必要がある）
 // --------------------------------------------------------------
-const reflect = (p, v, r, q1, q2) => {
-    let pB = vecAdd(p, v);
-    let cpInfo = calcCollisionPoint1(p, pB, q1, q2, r);
+// const reflect = (p, v, r, q1, q2) => {
+//     let pB = vecAdd(p, v);
+//     let cpInfo = calcCollisionPoint1(p, pB, q1, q2, r);
 
-    if ((cpInfo !== null) && (cpInfo.pC !== null)) {
-        let newP = cpInfo.pRefB;
-        let newV = vecSub(newP, cpInfo.pC);
-        printVec('newV=', newV);
-        return {
-            p: newP,
-            v: newV,
-            bReflect: true
-        };
-    } else {
-        return {
-            p: pB,
-            v: v,
-            bReflect: false
-        };
-    }
-}
+//     if ((cpInfo !== null) && (cpInfo.pC !== null)) {
+//         let newP = cpInfo.pRefB;
+//         let newV = vecSub(newP, cpInfo.pC);
+//         printVec('newV=', newV);
+//         return {
+//             p: newP,
+//             v: newV,
+//             bReflect: true
+//         };
+//     } else {
+//         return {
+//             p: pB,
+//             v: v,
+//             bReflect: false
+//         };
+//     }
+// }
 
 // calcCollisionPoint用の補助関数．
 // オブジェクトのdistメンバーの値が最小の要素を配列から検索する
@@ -523,6 +523,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 // @param pX [i] 線分mの端点1
 // @param pY [i] 線分mの端点2
 // @param r [i] ボールの半径
+// @param REFLECT_RATIO [i] 反射係数(0<REFLECT_RATIO<=1)
 //
 // @return 衝突情報（フォーマットは以下）
 // {
@@ -530,9 +531,9 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 //    pCm : Vec // ボールが線分mと衝突する点(線分m上の点)
 //    pRefB: Vec // ボールがpCで反射した場合の到達点(=更新後のpB)
 // }
-const calcCollisionPoint1 = (pA, pB, pX, pY, r) => {
+const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
     // const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
-    const REFLECT_RATIO = 1.0;
+    // const REFLECT_RATIO = 1.0;
 
     let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
     if (dist_pA_m <= r) {
@@ -829,9 +830,9 @@ module.exports = {
     vecLenChange,
     vecNorm,
     vecRotate,
+    printVec,
     getNearestPos,
     getCrossPoint,
-    reflect,
     getMinElem,
     calcCollisionPoint1,
     calcCollisionPoint2,
