@@ -183,6 +183,16 @@ const vecRotate = (v, deg) => {
     };
 }
 
+// -----------------------------------------------
+// ベクトルをコンソールに表示（デバッグ用）
+//
+// @param title [i] タイトル（文字列）
+// @param v {x, y} [i] ベクトル
+// -----------------------------------------------
+const printVec = (title, v) => {
+    console.log(`${title}(${v.x}, ${v.y})`);
+}
+
 // --------------------------------------------------------------
 // {x, y}とpListの最少距離と、その最少距離の点を返す
 //
@@ -343,6 +353,7 @@ const reflect = (p, v, r, q1, q2) => {
     if ((cpInfo !== null) && (cpInfo.pC !== null)) {
         let newP = cpInfo.pRefB;
         let newV = vecSub(newP, cpInfo.pC);
+        printVec('newV=', newV);
         return {
             p: newP,
             v: newV,
@@ -483,8 +494,12 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
         // 完全弾性衝突として計算する
         let vC1B = vecSub(pB, pC1);
         let vC2Y = vecSub(pY, pC2);
+        printVec('vC1B=', vC1B);
+        printVec('vC2Y=', vC2Y);
         let vC1B_ = vecScalar(vecAdd(vecScalar(vC1B, m1-m2), vecScalar(vC2Y, 2*m2)), 1/(m1+m2));
         let vC2Y_ = vecScalar(vecAdd(vecScalar(vC1B, 2*m1), vecScalar(vC2Y, m2-m1)), 1/(m1+m2));
+        printVec('vC1B_=', vC1B_);
+        printVec('vC2Y_=', vC2Y_);
         let pRefB = vecAdd(pC1, vC1B_); // ボール1の反射後の到達点
         let pRefY = vecAdd(pC2, vC2Y_); // ボール2の反射後の到達点
 
@@ -612,7 +627,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r) => {
                 pC: pA_m1.pF,   // 衝突した時のボールの中心
                 pCm: vecAdd(pA_m1.pF, vecScalar(pu1, -1)),  // 衝突点(線分m1上)
                 dist: vecDist(pA, pA_m1.pF),    // pAとボールの中心間の距離
-                vRefLine: nu // ボールが反射する直線の方向ベクトル
+                vRefLine: nu // ボールが反射する直線(=直線XY)の方向ベクトル
             });
         }
     
@@ -638,12 +653,20 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r) => {
     
             // pRefBを計算する
             let CB = vecSub(pB, minCp.pC);
-
+            printVec('CB=', CB);
+            
             CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
+            printVec("CB'=", CB);
             pB = vecAdd(minCp.pC, CB);  // pBの位置補正
 
             let CH = vecScalar(minCp.vRefLine, vecInnerProd(CB, minCp.vRefLine));
-            let pRefB = vecAdd(pB, vecScalar(vecSub(CH, CB), 2));
+            printVec('CH=', CH);
+            let BH2 = vecScalar(vecSub(CH, CB), 2);
+            printVec('BH2=', BH2);
+            let pRefB = vecAdd(pB, BH2);
+
+            printVec('minCp.pC=', minCp.pC);
+            printVec('pRefB=', pRefB);
 
             return {
                 pC: minCp.pC,

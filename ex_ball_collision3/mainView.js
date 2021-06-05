@@ -67,7 +67,7 @@ $(window).on('load', () => {
 
         // buildScene1(g_wallList);
         // buildScene2(g_wallList);
-        buildScene3(g_wallList);
+        // buildScene3(g_wallList);
 
         // 操作説明
         new Text()
@@ -582,7 +582,7 @@ $(window).on('mousemove', e => {
 
 // [TEST]
 let g_pA = {x: 430, y: 650};
-let g_pB = {x: 750, y: 650};
+let g_pB = {x: 300, y: 650};
 let g_pX = {x: 500, y: 550};
 let g_pY = {x: 645, y: 800};
 let g_focus = null;
