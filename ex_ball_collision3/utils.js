@@ -325,49 +325,6 @@ const getCrossPoint = (p, v, q1, q2) => {
 }
 
 // --------------------------------------------------------------
-// ボールの位置、方向ベクトルと壁の線分から、
-// ボールの更新された位置と方向ベクトルを返す．
-// 壁に衝突したときは反射させる．
-//
-// @param p [i] ボールの位置
-// @param v [i] ボール進行方向ベクトル（長さ1でなくてよい）
-// @param r [i] ボールの半径
-// pからv方向に伸びる直線（ボールの進行線）をLとする．
-//
-// @param q1 [i] 線分Wの端点1
-// @param q2 [i] 線分Wの端点2
-// q1とq2を結ぶ線分Wは壁を構成するものとする．
-//
-// @return {p, v, bRefrect}
-// p : ボールの新しい位置
-// v : ボールの新しい方向ベクトル
-// bRefrect : true=ボールは壁に衝突した（反射した）
-// 反射した場合、pはボールの反射点になる．この時、v>0なら、再度反射の可能性があるので、
-// 画面に存在する他の壁との衝突判定が必要．
-// （bReflect=falseになるまで再帰的にreflectを呼ぶ必要がある）
-// --------------------------------------------------------------
-// const reflect = (p, v, r, q1, q2) => {
-//     let pB = vecAdd(p, v);
-//     let cpInfo = calcCollisionPoint1(p, pB, q1, q2, r);
-
-//     if ((cpInfo !== null) && (cpInfo.pC !== null)) {
-//         let newP = cpInfo.pRefB;
-//         let newV = vecSub(newP, cpInfo.pC);
-//         printVec('newV=', newV);
-//         return {
-//             p: newP,
-//             v: newV,
-//             bReflect: true
-//         };
-//     } else {
-//         return {
-//             p: pB,
-//             v: v,
-//             bReflect: false
-//         };
-//     }
-// }
-
 // calcCollisionPoint用の補助関数．
 // オブジェクトのdistメンバーの値が最小の要素を配列から検索する
 //
@@ -384,6 +341,7 @@ const getCrossPoint = (p, v, q1, q2) => {
 // @param x [i] 比較対象
 // @param y [i] 被比較対象
 // @return true(=xでyを置き換える), false(=置き換えない)
+// --------------------------------------------------------------
 const getMinElem = (xs, isValid, cmp) => {
     let result = xs.reduce((prev, curr) => {
         if (!isValid(curr)) {
@@ -397,6 +355,7 @@ const getMinElem = (xs, isValid, cmp) => {
     return result;
 }
 
+// --------------------------------------------------------------
 // pAからpBに移動する半径rのボールが、線分m(pX-->pY)に衝突する点を計算する
 //
 // @param pA [i] ボールの始点(線分gの端点1)
@@ -414,6 +373,7 @@ const getMinElem = (xs, isValid, cmp) => {
 //    vRefDir: Vec  // 反射後のボールの移動方向（単位ベクトル）
 // }
 // 衝突しない場合はnullが返る
+// --------------------------------------------------------------
 const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
     let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
     if (dist_pA_m <= r) {
@@ -571,6 +531,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
     }
 }
 
+// --------------------------------------------------------------
 // ボール同士の衝突計算
 //
 // pAからpBに移動する半径r1, 質量m1のボール1が、
@@ -597,6 +558,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
 //    vRefDirY: Vec  // 反射後のボール2の移動方向（単位ベクトル）
 // }
 // 衝突しない場合はnullが返る
+// --------------------------------------------------------------
 const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
     // ボール1, ボール2の移動経路を媒介変数tで表す．
     // 0<=t<=1の範囲で、
@@ -697,6 +659,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
     }
 }
 
+// --------------------------------------------------------------
 // pを通って方向ベクトルvの直線lと線分m(pX-->pY)の交点pFを求める．
 // pからpFまでの距離他の情報を返す．
 // lとmが平行の場合はnullを返す．
@@ -715,6 +678,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 //    a: number,    // pFにおける線分lのパラメータ
 //    b: number     // pFにおける線分mのパラメータ
 // }
+// --------------------------------------------------------------
 const calcDist_PointToLine = (p, v, pX, pY) => {
     let u = vecSub(pY, pX);    // pX --> pYへのベクトル
 
@@ -754,6 +718,7 @@ const calcDist_PointToLine = (p, v, pX, pY) => {
     }
 }
 
+// --------------------------------------------------------------
 // pから線分m(pX-->pY)までの距離を計算する
 //
 // @param p [i] 基準点
@@ -761,6 +726,7 @@ const calcDist_PointToLine = (p, v, pX, pY) => {
 // @param pY [i] 線分mの端点2
 //
 // @return pから線分mまでの距離
+// --------------------------------------------------------------
 const calcDist_PointToSeg = (p, pX, pY) => {
     let nu = vecNorm(vecSub(pY, pX));    // pX --> pYへの単位ベクトル
     let pnu = vecCross(nu);
@@ -779,6 +745,7 @@ const calcDist_PointToSeg = (p, pX, pY) => {
     }
 }
 
+// --------------------------------------------------------------
 // 線分AB上の半径rの円が、pXで衝突するか調べる．
 // 衝突する場合は、円の中心座標pCと、pAからpCまでの距離を返す．
 //
@@ -791,6 +758,7 @@ const calcDist_PointToSeg = (p, pX, pY) => {
 //      dAC: numeric   // pAとpCの距離
 // }
 // pCが線分g上に存在しない場合はnullを返す
+// --------------------------------------------------------------
 const calcPoint_CircCenterOnEdge = (pA, pB, pX, r) => {
     let nv = vecNorm(vecSub(pB, pA)); // pA --> pBの単位ベクトル
 
