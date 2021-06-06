@@ -419,6 +419,8 @@ const getMinElem = (xs, isValid, cmp) => {
 //    pCm : Vec // ボール1とボール2の接触点(ボール1, 2の周上の点)
 //    pRefB: Vec // 衝突後のボール1の到達点(=更新後のpB)
 //    pRefY: Vec // 衝突後のボール2の到達点(=更新後のpY)
+//    vRefDirB: Vec  // 反射後のボール1の移動方向（単位ベクトル）
+//    vRefDirY: Vec  // 反射後のボール2の移動方向（単位ベクトル）
 // }
 // 衝突しない場合はnullが返る
 const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
@@ -481,7 +483,6 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 
     if (bCollided) {
         // 衝突した
-        console.log('collision detected!');
 
         // 各ボールの中心点
         let pC1 = vecAdd(pA, vecScalar(v, t));
@@ -493,23 +494,28 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
         // 反射後の方向ベクトル計算
         //
         // 完全弾性衝突として計算する
-        let vC1B = vecSub(pB, pC1);
-        let vC2Y = vecSub(pY, pC2);
-        printVec('vC1B=', vC1B);
-        printVec('vC2Y=', vC2Y);
-        let vC1B_ = vecScalar(vecAdd(vecScalar(vC1B, m1-m2), vecScalar(vC2Y, 2*m2)), 1/(m1+m2));
-        let vC2Y_ = vecScalar(vecAdd(vecScalar(vC1B, 2*m1), vecScalar(vC2Y, m2-m1)), 1/(m1+m2));
-        printVec('vC1B_=', vC1B_);
-        printVec('vC2Y_=', vC2Y_);
-        let pRefB = vecAdd(pC1, vC1B_); // ボール1の反射後の到達点
-        let pRefY = vecAdd(pC2, vC2Y_); // ボール2の反射後の到達点
+        let v_ = vecScalar(vecAdd(vecScalar(v, m1-m2), vecScalar(u, 2*m2)), 1/(m1+m2));
+        let u_ = vecScalar(vecAdd(vecScalar(v, 2*m1), vecScalar(u, m2-m1)), 1/(m1+m2));
+
+        // 反射後の方向（単位ベクトル）
+        let vRefDirB = vecNorm(v_);
+        let vRefDirY = vecNorm(u_);
+
+        // 衝突点から反射後の到達点までの距離
+        let refVecLen1 = vecLen(v)*(1-t);
+        let refVecLen2 = vecLen(u)*(1-t);
+
+        let pRefB = vecAdd(pC1, vecScalar(vRefDirB, refVecLen1)); // ボール1の反射後の到達点
+        let pRefY = vecAdd(pC2, vecScalar(vRefDirY, refVecLen2)); // ボール2の反射後の到達点
 
         return {
             pC1: pC1,
             pC2: pC2,
             pCm: pCm,
             pRefB: pRefB,
-            pRefY: pRefY
+            pRefY: pRefY,
+            vRefDirB: vRefDirB,
+            vRefDirY: vRefDirY
         }
     } else {
         // 衝突しなかった
