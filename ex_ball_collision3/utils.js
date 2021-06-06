@@ -397,132 +397,6 @@ const getMinElem = (xs, isValid, cmp) => {
     return result;
 }
 
-// ボール同士の衝突計算
-//
-// pAからpBに移動する半径r1, 質量m1のボール1が、
-// pXからpYに移動する半径r2, 質量m2のボール2に衝突するか？を計算する．
-// 衝突する場合は、衝突時の位置、衝突後の到達点等を返す．
-//
-// @param pA [i] ボール1の始点(線分gの端点1)
-// @param pB [i] ボール1の終点(線分gの端点2)
-// @param r1 [i] ボール1の半径
-// @param m1 [i] ボール1の質量
-// @param pX [i] ボール2の始点(線分mの端点1)
-// @param pY [i] ボール2の終点(線分mの端点2)
-// @param r2 [i] ボール2の半径
-// @param m2 [i] ボール2の質量
-//
-// @return 衝突情報（衝突が起こった場合のみ有効）
-// {
-//    pC1 : Vec  // 衝突時のボール1の中心座標
-//    pC2 : Vec  // 衝突時のボール2の中心座標
-//    pCm : Vec // ボール1とボール2の接触点(ボール1, 2の周上の点)
-//    pRefB: Vec // 衝突後のボール1の到達点(=更新後のpB)
-//    pRefY: Vec // 衝突後のボール2の到達点(=更新後のpY)
-//    vRefDirB: Vec  // 反射後のボール1の移動方向（単位ベクトル）
-//    vRefDirY: Vec  // 反射後のボール2の移動方向（単位ベクトル）
-// }
-// 衝突しない場合はnullが返る
-const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
-    // ボール1, ボール2の移動経路を媒介変数tで表す．
-    // 0<=t<=1の範囲で、
-    // ボール1はpAからpBへ、
-    // ボール2はpXからpYへ移動する、とする．
-    //
-    // この時、ボール1とボール2の中心間の距離dがr1+r2になる位置を
-    // 計算することで、衝突点が求まる．
-    //
-    // dはtに関する2次式になるので、2次方程式を解くだけでよい．
-
-    let v = vecSub(pB, pA); // pAからpBへ向かうベクトル
-    let u = vecSub(pY, pX); // pXからpYへ向かうベクトル
-
-    let R = r1+r2;
-
-    let a = ((u.x-v.x)*(u.x-v.x)+(u.y-v.y)*(u.y-v.y));
-    let b = (u.x-v.x)*(pX.x-pA.x)+(u.y-v.y)*(pX.y-pA.y);
-    let c = (pX.x-pA.x)*(pX.x-pA.x)+(pX.y-pA.y)*(pX.y-pA.y)-R*R;
-
-    let bCollided = false;
-    let t = 0;
-    let D = b*b-a*c;    // 判別式
-    // console.log(`D=${D}`);
-    if (D>=0 && !isEqual(a, 0)) {
-        let t1 = (-b+Math.sqrt(D))/a;
-        let t2 = (-b-Math.sqrt(D))/a;
-        // console.log(`t1=${t1}, t2=${t2}`);
-
-        let bt1Valid = false;
-        let bt2Valid = false;
-        if ((t1>=0) && (t1<=1)) {
-            // t1で衝突
-            bt1Valid = true;
-        }
-        if ((t2>=0) && (t2<=1)) {
-            // t2で衝突
-            bt2Valid = true;
-        }
-
-        if (bt1Valid && bt2Valid) {
-            bCollided = true;
-            if (t1 < t2) {
-                t = t1;
-            } else {
-                t = t2;
-            }
-        }
-        else if (bt1Valid) {
-            bCollided = true;
-            t = t1;
-        }
-        else if (bt2Valid) {
-            bCollided = true;
-            t = t2;
-        }
-    }
-
-    if (bCollided) {
-        // 衝突した
-
-        // 各ボールの中心点
-        let pC1 = vecAdd(pA, vecScalar(v, t));
-        let pC2 = vecAdd(pX, vecScalar(u, t));
-
-        // 2つのボールの接触点
-        let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
-
-        // 反射後の方向ベクトル計算
-        //
-        // 完全弾性衝突として計算する
-        let v_ = vecScalar(vecAdd(vecScalar(v, m1-m2), vecScalar(u, 2*m2)), 1/(m1+m2));
-        let u_ = vecScalar(vecAdd(vecScalar(v, 2*m1), vecScalar(u, m2-m1)), 1/(m1+m2));
-
-        // 反射後の方向（単位ベクトル）
-        let vRefDirB = vecNorm(v_);
-        let vRefDirY = vecNorm(u_);
-
-        // 衝突点から反射後の到達点までの距離
-        let refVecLen1 = vecLen(v)*(1-t);
-        let refVecLen2 = vecLen(u)*(1-t);
-
-        let pRefB = vecAdd(pC1, vecScalar(vRefDirB, refVecLen1)); // ボール1の反射後の到達点
-        let pRefY = vecAdd(pC2, vecScalar(vRefDirY, refVecLen2)); // ボール2の反射後の到達点
-
-        return {
-            pC1: pC1,
-            pC2: pC2,
-            pCm: pCm,
-            pRefB: pRefB,
-            pRefY: pRefY,
-            vRefDirB: vRefDirB,
-            vRefDirY: vRefDirY
-        }
-    } else {
-        // 衝突しなかった
-        return null;
-    }
-}
-
 // pAからpBに移動する半径rのボールが、線分m(pX-->pY)に衝突する点を計算する
 //
 // @param pA [i] ボールの始点(線分gの端点1)
@@ -694,6 +568,132 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
             // 衝突点はなかった
             return null;
         }
+    }
+}
+
+// ボール同士の衝突計算
+//
+// pAからpBに移動する半径r1, 質量m1のボール1が、
+// pXからpYに移動する半径r2, 質量m2のボール2に衝突するか？を計算する．
+// 衝突する場合は、衝突時の位置、衝突後の到達点等を返す．
+//
+// @param pA [i] ボール1の始点(線分gの端点1)
+// @param pB [i] ボール1の終点(線分gの端点2)
+// @param r1 [i] ボール1の半径
+// @param m1 [i] ボール1の質量
+// @param pX [i] ボール2の始点(線分mの端点1)
+// @param pY [i] ボール2の終点(線分mの端点2)
+// @param r2 [i] ボール2の半径
+// @param m2 [i] ボール2の質量
+//
+// @return 衝突情報（衝突が起こった場合のみ有効）
+// {
+//    pC1 : Vec  // 衝突時のボール1の中心座標
+//    pC2 : Vec  // 衝突時のボール2の中心座標
+//    pCm : Vec // ボール1とボール2の接触点(ボール1, 2の周上の点)
+//    pRefB: Vec // 衝突後のボール1の到達点(=更新後のpB)
+//    pRefY: Vec // 衝突後のボール2の到達点(=更新後のpY)
+//    vRefDirB: Vec  // 反射後のボール1の移動方向（単位ベクトル）
+//    vRefDirY: Vec  // 反射後のボール2の移動方向（単位ベクトル）
+// }
+// 衝突しない場合はnullが返る
+const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
+    // ボール1, ボール2の移動経路を媒介変数tで表す．
+    // 0<=t<=1の範囲で、
+    // ボール1はpAからpBへ、
+    // ボール2はpXからpYへ移動する、とする．
+    //
+    // この時、ボール1とボール2の中心間の距離dがr1+r2になる位置を
+    // 計算することで、衝突点が求まる．
+    //
+    // dはtに関する2次式になるので、2次方程式を解くだけでよい．
+
+    let v = vecSub(pB, pA); // pAからpBへ向かうベクトル
+    let u = vecSub(pY, pX); // pXからpYへ向かうベクトル
+
+    let R = r1+r2;
+
+    let a = ((u.x-v.x)*(u.x-v.x)+(u.y-v.y)*(u.y-v.y));
+    let b = (u.x-v.x)*(pX.x-pA.x)+(u.y-v.y)*(pX.y-pA.y);
+    let c = (pX.x-pA.x)*(pX.x-pA.x)+(pX.y-pA.y)*(pX.y-pA.y)-R*R;
+
+    let bCollided = false;
+    let t = 0;
+    let D = b*b-a*c;    // 判別式
+    // console.log(`D=${D}`);
+    if (D>=0 && !isEqual(a, 0)) {
+        let t1 = (-b+Math.sqrt(D))/a;
+        let t2 = (-b-Math.sqrt(D))/a;
+        // console.log(`t1=${t1}, t2=${t2}`);
+
+        let bt1Valid = false;
+        let bt2Valid = false;
+        if ((t1>=0) && (t1<=1)) {
+            // t1で衝突
+            bt1Valid = true;
+        }
+        if ((t2>=0) && (t2<=1)) {
+            // t2で衝突
+            bt2Valid = true;
+        }
+
+        if (bt1Valid && bt2Valid) {
+            bCollided = true;
+            if (t1 < t2) {
+                t = t1;
+            } else {
+                t = t2;
+            }
+        }
+        else if (bt1Valid) {
+            bCollided = true;
+            t = t1;
+        }
+        else if (bt2Valid) {
+            bCollided = true;
+            t = t2;
+        }
+    }
+
+    if (bCollided) {
+        // 衝突した
+
+        // 各ボールの中心点
+        let pC1 = vecAdd(pA, vecScalar(v, t));
+        let pC2 = vecAdd(pX, vecScalar(u, t));
+
+        // 2つのボールの接触点
+        let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
+
+        // 反射後の方向ベクトル計算
+        //
+        // 完全弾性衝突として計算する
+        let v_ = vecScalar(vecAdd(vecScalar(v, m1-m2), vecScalar(u, 2*m2)), 1/(m1+m2));
+        let u_ = vecScalar(vecAdd(vecScalar(v, 2*m1), vecScalar(u, m2-m1)), 1/(m1+m2));
+
+        // 反射後の方向（単位ベクトル）
+        let vRefDirB = vecNorm(v_);
+        let vRefDirY = vecNorm(u_);
+
+        // 衝突点から反射後の到達点までの距離
+        let refVecLen1 = vecLen(v)*(1-t);
+        let refVecLen2 = vecLen(u)*(1-t);
+
+        let pRefB = vecAdd(pC1, vecScalar(vRefDirB, refVecLen1)); // ボール1の反射後の到達点
+        let pRefY = vecAdd(pC2, vecScalar(vRefDirY, refVecLen2)); // ボール2の反射後の到達点
+
+        return {
+            pC1: pC1,
+            pC2: pC2,
+            pCm: pCm,
+            pRefB: pRefB,
+            pRefY: pRefY,
+            vRefDirB: vRefDirB,
+            vRefDirY: vRefDirY
+        }
+    } else {
+        // 衝突しなかった
+        return null;
     }
 }
 
