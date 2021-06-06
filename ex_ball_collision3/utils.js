@@ -541,9 +541,6 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 // }
 // 衝突しない場合はnullが返る
 const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
-    // const REFLECT_RATIO = 0.05;  // 反射係数（0以上1以下．小さいほどスピードダウンする）
-    // const REFLECT_RATIO = 1.0;
-
     let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
     if (dist_pA_m <= r) {
         // pAと線分mの距離がボールの半径以下

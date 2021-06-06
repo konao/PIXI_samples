@@ -18,8 +18,8 @@ const { Spline } = require('./spline');
 let g_w = 0;
 let g_h = 0;
 let g_bPause = false;
-let g_ballSize = 40; // ボールのサイズ
-let g_ballSpeed = 5;    // ボールのスピード
+let g_ballSize = 25; // ボールのサイズ
+let g_ballSpeed = 8;    // ボールのスピード
 let g_nBalls = 0;   // ボールの個数
 
 const N_BALL_TRACE = 10;    // ボールの残像の個数
@@ -67,7 +67,7 @@ $(window).on('load', () => {
 
         // buildScene1(g_wallList);
         // buildScene2(g_wallList);
-        // buildScene3(g_wallList);
+        buildScene3(g_wallList);
 
         // 操作説明
         new Text()
@@ -579,7 +579,7 @@ $(window).on('mousemove', e => {
 
 // [TEST]
 let g_pA = {x: 430, y: 650};
-let g_pB = {x: 300, y: 650};
+let g_pB = {x: 600, y: 650};
 let g_pX = {x: 500, y: 550};
 let g_pY = {x: 645, y: 800};
 let g_focus = null;
