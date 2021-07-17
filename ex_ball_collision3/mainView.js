@@ -577,6 +577,29 @@ $(window).on('mousemove', e => {
     }
 });
 
+// マウスホイールイベント
+$(window).on('wheel', e => {
+    // console.log(`deltaY=(${e.originalEvent.deltaY})`);
+    // ホイール移動量
+    // (100か-100しか渡ってこないようだ)
+    const dY = e.originalEvent.deltaY;
+    if (dY < 0) {
+        // ボールサイズ拡大
+        if (g_ballSize < 50) {
+            g_ballSize++;
+            showStatus();
+            draw();
+        }
+    } else if (dY > 0) {
+        // ボールサイズ縮小
+        if (g_ballSize > 1) {
+            g_ballSize--;
+            showStatus();
+            draw();
+        }
+    }
+});
+
 // [TEST]
 let g_pA = {x: 430, y: 650};
 let g_pB = {x: 600, y: 650};
@@ -671,26 +694,26 @@ $(window).on('keydown', e => {
             }
             break;
         }
-        case 37:    // left
-        {
-            // ボールサイズ縮小
-            if (g_ballSize > 1) {
-                g_ballSize--;
-                showStatus();
-                draw();
-            }
-            break;
-        }
-        case 39:    // right
-        {
-            // ボールサイズ拡大
-            if (g_ballSize < 50) {
-                g_ballSize++;
-                showStatus();
-                draw();
-            }
-            break;
-        }
+        // case 37:    // left
+        // {
+        //     // ボールサイズ縮小
+        //     if (g_ballSize > 1) {
+        //         g_ballSize--;
+        //         showStatus();
+        //         draw();
+        //     }
+        //     break;
+        // }
+        // case 39:    // right
+        // {
+        //     // ボールサイズ拡大
+        //     if (g_ballSize < 50) {
+        //         g_ballSize++;
+        //         showStatus();
+        //         draw();
+        //     }
+        //     break;
+        // }
         case 38:    // up
         {
             // ボールスピードアップ
