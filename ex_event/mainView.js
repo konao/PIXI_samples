@@ -50,16 +50,6 @@ $(window).on('load', () => {
     });
 });
 
-// const draw = () => {
-//     g_G.clear();
-//     if ((g_pA !== null) && (g_pB !== null) && (g_pX !== null) && (g_pY !== null)) {
-//         // AからBへの線を引く
-//         g_G.lineStyle(1, 0xffff00, 1);  // 黄色
-//         g_G.moveTo(g_pA.x, g_pA.y);
-//         g_G.lineTo(g_pB.x, g_pB.y);
-//     }
-// };
-
 $(window).on('resize', () => {
     console.log(`resize`);
     g_w = window.innerWidth-30;
@@ -92,9 +82,6 @@ $(window).on('mousedown', e => {
 });
 
 $(window).on('mouseup', e => {
-    // g_arrowDragging = 0;
-    // g_focus = null;
-    // draw();
     console.log(`mouseup`);
 });
 
