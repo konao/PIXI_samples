@@ -1,0 +1,36 @@
+{
+    "frames": {
+        "New": {
+            "frame": {"x":0,"y":0,"w":48,"h":48},
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+            "sourceSize": {"w":48,"h":48},
+            "pivot": {"x":0,"y":0}
+        },
+        "Select": {
+            "frame": {"x":48,"y":0,"w":48,"h":48},
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+            "sourceSize": {"w":48,"h":48},
+            "pivot": {"x":0,"y":0}
+        },
+        "Move": {
+            "frame": {"x":96,"y":0,"w":48,"h":48},
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+            "sourceSize": {"w":48,"h":48},
+            "pivot": {"x":0,"y":0}
+        }
+    },
+    "meta": {
+        "image": "Image1.png",
+        "size": {
+            "w":500,
+            "h":520
+        },
+        "scale": "1"
+    }
+}

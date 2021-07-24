@@ -6,6 +6,7 @@
 
 const PIXI = require('pixi.js');
 const $ = require('jquery');
+const { CmdButtons } = require('./cmdButtons');
 
 let g_w = 0;
 let g_h = 0;
@@ -25,6 +26,8 @@ app.stage.interactive = true;
 
 const loader = PIXI.Loader.shared;
 
+let cmdButtons = new CmdButtons();
+
 // ロード時とリサイズ時の両方でイベントを受け取る
 // https://qiita.com/chillart/items/15bc48f98897391e12ca
 $(window).on('load', () => {
@@ -33,9 +36,14 @@ $(window).on('load', () => {
     g_h = window.innerHeight-50;
     app.renderer.resize(g_w, g_h);
 
-    // loader.add('assets/characters.json');
+    const loader = PIXI.Loader.shared;
+    loader.add('images/characters.json');
     loader.load((loader, resources) => {
 
+        let container = new PIXI.Container();
+        app.stage.addChild(container);
+    
+        cmdButtons.initSprite(PIXI, container);
         // 操作説明
         // new Text()
         //     .initSprite(PIXI, app.stage)
