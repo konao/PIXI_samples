@@ -7,6 +7,7 @@
 const PIXI = require('pixi.js');
 const $ = require('jquery');
 const { CmdButtons } = require('./cmdButtons');
+const { MainPanel } = require('./mainPanel');
 
 let g_w = 0;
 let g_h = 0;
@@ -26,6 +27,9 @@ app.stage.interactive = true;
 
 const loader = PIXI.Loader.shared;
 
+let contMainPanel = new PIXI.Container();   // メイン描画エリア用コンテナ
+let mainPanel = new MainPanel();
+let contCmdPanel = new PIXI.Container();    // コマンドパネル用コンテナ
 let cmdButtons = new CmdButtons();
 
 // ロード時とリサイズ時の両方でイベントを受け取る
@@ -39,11 +43,11 @@ $(window).on('load', () => {
     const loader = PIXI.Loader.shared;
     loader.add('images/characters.json');
     loader.load((loader, resources) => {
-
-        let container = new PIXI.Container();
-        app.stage.addChild(container);
+        app.stage.addChild(contMainPanel);
+        app.stage.addChild(contCmdPanel);
     
-        cmdButtons.initSprite(PIXI, container);
+        mainPanel.initSprite(PIXI, contMainPanel);
+        cmdButtons.initSprite(PIXI, contCmdPanel);
         // 操作説明
         // new Text()
         //     .initSprite(PIXI, app.stage)
@@ -54,6 +58,7 @@ $(window).on('load', () => {
     
         app.ticker.add((delta) => {
             // 画面更新
+            mainPanel.update();
         });
     });
 });
@@ -86,6 +91,13 @@ $(window).on('mousedown', e => {
             x: e.clientX,
             y: e.clientY
         };
+
+        let id = cmdButtons.hitTest(mousePressPos);
+        if (id > 0) {
+            let pressed = cmdButtons.isPressed(id);
+            console.log(`id=${id}, pressed=${pressed}`);
+            cmdButtons.press(id, !pressed); // 反転させる
+        }
     }
 });
 
@@ -107,18 +119,22 @@ $(window).on('keydown', e => {
         }
         case 37:    // left
         {
+            contCmdPanel.visible = false;
             break;
         }
         case 39:    // right
         {
+            contCmdPanel.visible = true;
             break;
         }
         case 38:    // up
         {
+            contMainPanel.visible = true;
             break;
         }
         case 40:    // down
         {
+            contMainPanel.visible = false;
             break;
         }
     }
