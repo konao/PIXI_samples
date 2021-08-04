@@ -27,42 +27,48 @@ class CmdButtons {
         this._sprs = {};
 
         // New Button
+        let x1 = 1300;
+        let y1 = 10;
         let sprNewN = new PIXI.Sprite(PIXI.Texture.from("New_N"));
         sprNewN.visible = true;
-        sprNewN.x = 100;
-        sprNewN.y = 10;
+        sprNewN.x = x1;
+        sprNewN.y = y1;
         container.addChild(sprNewN);
 
         let sprNewP = new PIXI.Sprite(PIXI.Texture.from("New_P"));
         sprNewP.visible = false;
-        sprNewP.x = 100;
-        sprNewP.y = 10;
+        sprNewP.x = x1;
+        sprNewP.y = y1;
         container.addChild(sprNewP);
 
         // Select Button
+        let x2 = 1300;
+        let y2 = y1+48+10;
         let sprSelectN = new PIXI.Sprite(PIXI.Texture.from("Select_N"));
         sprSelectN.visible = true;
-        sprSelectN.x = 200;
-        sprSelectN.y = 10;
+        sprSelectN.x = x2;
+        sprSelectN.y = y2;
         container.addChild(sprSelectN);
 
         let sprSelectP = new PIXI.Sprite(PIXI.Texture.from("Select_P"));
         sprSelectP.visible = false;
-        sprSelectP.x = 200;
-        sprSelectP.y = 10;
+        sprSelectP.x = x2;
+        sprSelectP.y = y2;
         container.addChild(sprSelectP);
 
         // Move Button
+        let x3 = 1300;
+        let y3 = y2+48+10;
         let sprMoveN = new PIXI.Sprite(PIXI.Texture.from("Move_N"));
         sprMoveN.visible = true;
-        sprMoveN.x = 300;
-        sprMoveN.y = 10;
+        sprMoveN.x = x3;
+        sprMoveN.y = y3;
         container.addChild(sprMoveN);
 
         let sprMoveP = new PIXI.Sprite(PIXI.Texture.from("Move_P"));
         sprMoveP.visible = false;
-        sprMoveP.x = 300;
-        sprMoveP.y = 10;
+        sprMoveP.x = x3;
+        sprMoveP.y = y3;
         container.addChild(sprMoveP);
 
         this._sprs[getButtonName(NEW)] = {
@@ -98,20 +104,26 @@ class CmdButtons {
         return 0;
     }
 
-    // ボタンを押した/離した
+    // ボタンの状態を変える（トグル動作）
     //
-    // @return 押したボタンの状態(true=押している, false=押していない)
+    // @param btnId {number} ボタンId
+    // @param bPress {boolean} true=押した/false=押していない
     press(btnId, bPress) {
+        // 一旦全ボタンをNormalに戻す
+        let allIds = [NEW, SELECT, MOVE];
+        for (let id of allIds) {
+            let btnName = getButtonName(id);
+            // 離した状態にする
+            this._sprs[btnName].sprN.visible = true;
+            this._sprs[btnName].sprP.visible = false;
+        }
+
         let btnName = getButtonName(btnId);
         if (btnName.length > 0) {
             if (bPress) {
                 // 押した状態にする
                 this._sprs[btnName].sprN.visible = false;
                 this._sprs[btnName].sprP.visible = true;
-            } else {
-                // 離した状態にする
-                this._sprs[btnName].sprN.visible = true;
-                this._sprs[btnName].sprP.visible = false;
             }
         }
     }
