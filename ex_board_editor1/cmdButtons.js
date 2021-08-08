@@ -141,8 +141,22 @@ class CmdButtons {
             }
         }
     }
+
+    getCurrMode() {
+        for (let key of Object.keys(this._sprs)) {
+            let btnInfo = this._sprs[key];
+            if (btnInfo.sprP.visible === true) {
+                // 押されている
+                return btnInfo.id;
+            }
+        }
+        return 0;   // 何も押されていない
+    }
 }
 
 module.exports = {
-    CmdButtons
+    CmdButtons,
+    NEW,
+    SELECT,
+    MOVE
 }

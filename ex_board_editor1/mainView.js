@@ -97,6 +97,8 @@ $(window).on('mousedown', e => {
             let pressed = cmdButtons.isPressed(id);
             console.log(`id=${id}, pressed=${pressed}`);
             cmdButtons.press(id, !pressed); // 反転させる
+        } else {
+            mainPanel.onMouseDown(mousePressPos, cmdButtons.getCurrMode());
         }
     }
 });
