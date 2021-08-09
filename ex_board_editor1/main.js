@@ -1,7 +1,11 @@
 const { app, BrowserWindow } = require("electron");
 let win;
 function createWindow() {
-    win = new BrowserWindow({width: 1480, height: 1024});
+    win = new BrowserWindow({width: 1480, height: 1024, useContentSize: true});
+    // win.setContentBounds({x: 100, y: 100, width: 500, height: 400});
+    // win.setBounds({x: 100, y: 0, width: 1200, height: 1000});
+    // let b = win.getBounds();
+    // console.log('aaa');
     win.loadURL(`file://${__dirname}/index.html`);
     win.on("closed", ()=>{win=null;});
 }

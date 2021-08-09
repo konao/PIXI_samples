@@ -11,10 +11,11 @@ const { MainPanel } = require('./mainPanel');
 
 let g_w = 0;
 let g_h = 0;
+let canvas = document.getElementById('myCanvas');
 
 //Create a Pixi Application
 let app = new PIXI.Application({ 
-    view: document.getElementById('myCanvas'),
+    view: canvas,
     width: 640, 
     height: 480,                       
     antialias: true, 
@@ -36,8 +37,12 @@ let cmdButtons = new CmdButtons();
 // https://qiita.com/chillart/items/15bc48f98897391e12ca
 $(window).on('load', () => {
     console.log(`load`);
-    g_w = window.innerWidth-30;
-    g_h = window.innerHeight-50;
+    // g_w = window.innerWidth-30;
+    // g_h = window.innerHeight-50;
+    g_w = document.body.clientWidth;
+    g_h = document.body.clientHeight;
+    console.log(`innerSize(${window.innerWidth}, ${window.innerHeight})`);
+    console.log(`clientSize(${document.body.clientWidth}, ${document.body.clientHeight})`);
     app.renderer.resize(g_w, g_h);
 
     const loader = PIXI.Loader.shared;
@@ -65,8 +70,25 @@ $(window).on('load', () => {
 
 $(window).on('resize', () => {
     console.log(`resize`);
-    g_w = window.innerWidth-30;
-    g_h = window.innerHeight-50;
+
+    let i_w = window.innerWidth;
+    let i_h = window.innerHeight;
+    // canvas.width = g_w;
+    // canvas.height = g_h;
+    let c_w = document.body.clientWidth;
+    let c_h = document.body.clientHeight;
+    canvas.width = c_w;
+    canvas.height = c_h;
+
+    // // g_w = window.innerWidth-30;
+    // // g_h = window.innerHeight-50;
+    // // canvas.width = window.innerWidth;
+    // // canvas.height = window.innerHeight;
+    // canvas.width = document.body.clientWidth;
+    // canvas.height = document.body.clientHeight;
+
+    // g_w = document.body.clientWidth;
+    // g_h = document.body.clientHeight;
     app.renderer.resize(g_w, g_h);
     console.log(`resized to (${g_w}, ${g_h})`);
 });
