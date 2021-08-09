@@ -87,8 +87,8 @@ $(window).on('resize', () => {
     // canvas.width = document.body.clientWidth;
     // canvas.height = document.body.clientHeight;
 
-    // g_w = document.body.clientWidth;
-    // g_h = document.body.clientHeight;
+    g_w = c_w;
+    g_h = c_h;
     app.renderer.resize(g_w, g_h);
     console.log(`resized to (${g_w}, ${g_h})`);
 });
