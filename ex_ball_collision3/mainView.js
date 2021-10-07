@@ -694,26 +694,26 @@ $(window).on('keydown', e => {
             }
             break;
         }
-        // case 37:    // left
-        // {
-        //     // ボールサイズ縮小
-        //     if (g_ballSize > 1) {
-        //         g_ballSize--;
-        //         showStatus();
-        //         draw();
-        //     }
-        //     break;
-        // }
-        // case 39:    // right
-        // {
-        //     // ボールサイズ拡大
-        //     if (g_ballSize < 50) {
-        //         g_ballSize++;
-        //         showStatus();
-        //         draw();
-        //     }
-        //     break;
-        // }
+        case 37:    // left
+        {
+            // ボールサイズ縮小
+            if (g_ballSize > 1) {
+                g_ballSize--;
+                showStatus();
+                draw();
+            }
+            break;
+        }
+        case 39:    // right
+        {
+            // ボールサイズ拡大
+            if (g_ballSize < 50) {
+                g_ballSize++;
+                showStatus();
+                draw();
+            }
+            break;
+        }
         case 38:    // up
         {
             // ボールスピードアップ
