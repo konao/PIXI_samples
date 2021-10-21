@@ -17,7 +17,7 @@ let canvas = document.getElementById('myCanvas');
 let app = new PIXI.Application({ 
     view: canvas,
     width: 640, 
-    height: 480,                       
+    height: 480,
     antialias: true, 
     transparent: false, 
     resolution: 1
@@ -29,7 +29,7 @@ app.stage.interactive = true;
 const loader = PIXI.Loader.shared;
 
 let contMainPanel = new PIXI.Container();   // メイン描画エリア用コンテナ
-let mainPanel = new MainPanel();
+let mainPanel = new MainPanel(app);
 let contCmdPanel = new PIXI.Container();    // コマンドパネル用コンテナ
 let cmdButtons = new CmdButtons();
 
@@ -129,18 +129,15 @@ $(window).on('mouseup', e => {
     console.log(`mouseup`);
 });
 
-
 $(window).on('keydown', e => {
     console.log(`keydown (${e.which})`);
+
+    let mode = cmdButtons.getCurrMode();
+    console.log(`keydown: mode=(${mode})`);
+
+    mainPanel.onKeyDown(e.which, mode);
+
     switch (e.which) {
-        case 32:    // space
-        {
-            break;
-        }
-        case 78:    // N
-        {
-            break;
-        }
         case 37:    // left
         {
             contCmdPanel.visible = false;

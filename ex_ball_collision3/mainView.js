@@ -248,7 +248,7 @@ const buildScene3 = (wallList) => {
         let block = new Wall();
         block.setWallPoints(pts);
         block.init(PIXI, app.stage, g_w, g_h);
-        wallList.push(block);    
+        wallList.push(block);
     }
 
     sp.clear();
