@@ -619,7 +619,39 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
 
     if (bCollided) {
         // 衝突した
+        // -------- new ---------
+        // 新バージョン．しかしこっちのほうが動きがヘンなので、旧版を有効にしておく
 
+        // 2つのボールが接触した位置から、ボールの中心と接触面の法線を求める
+        // 接触時の2つのボールの中心をpC1, pC2として、
+        // 接触面からC1方向の法線nC1を求める
+
+        // 各ボールの中心点
+        // let pC1 = vecAdd(pA, vecScalar(v, t));
+        // let pC2 = vecAdd(pX, vecScalar(u, t));
+
+        // // // 2つのボールの接触点
+        // let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
+
+        // // nC1
+        // let vC2C1 = vecSub(pC2, pC1)
+        // let nC1 = vecScalar(vC2C1, 1.0/vecLen(vC2C1));
+        // printVec('nC1=', nC1);
+
+        // // nC2 = nC1の反対方向のベクトル
+        // let nC2 = vecScalar(nC1, -1)
+
+        // // 反射後の方向ベクトル計算
+        // // v --> v_
+        // // u --> u_
+        // let v_ = vecSub(v, vecScalar(nC1, -2.0*vecInnerProd(v, nC1)))
+        // let u_ = vecSub(u, vecScalar(nC2, -2.0*vecInnerProd(u, nC2)))
+        // printVec('v_=', v_);
+        // printVec('u_=', u_);
+        // -------- new ---------
+        
+
+        // -------- old ---------
         // 各ボールの中心点
         let pC1 = vecAdd(pA, vecScalar(v, t));
         let pC2 = vecAdd(pX, vecScalar(u, t));
@@ -632,6 +664,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
         // 完全弾性衝突として計算する
         let v_ = vecScalar(vecAdd(vecScalar(v, m1-m2), vecScalar(u, 2*m2)), 1/(m1+m2));
         let u_ = vecScalar(vecAdd(vecScalar(v, 2*m1), vecScalar(u, m2-m1)), 1/(m1+m2));
+        // -------- old ---------
 
         // 反射後の方向（単位ベクトル）
         let vRefDirB = vecNorm(v_);
