@@ -1,19 +1,24 @@
 // *******************************************************
-//  壁
+//  壁(Wall)と壁のリスト(Walls)
 //
 //  1つの壁は複数個の辺からなる多角形
 // *******************************************************
 
 const { BaseSpr } = require('./baseSpr');
+const { Spline } = require('./spline');
 const U = require('./utils');
 
+// ===================================================
+//  1個の壁
+// ===================================================
 class Wall extends BaseSpr {
     constructor() {
         super();
 
         this._g = null; // スプライトイメージ(PIXI.Graphics)
 
-        this._pts = []; // 壁を構成する点の座標のリスト．各点のフォーマットは{x, y}
+        this._pivots = [];  // ピボット点のリスト．各点のフォーマットは{x, y}
+        this._pts = []; // 壁を構成する点の座標のリスト．
 
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;        
@@ -36,10 +41,45 @@ class Wall extends BaseSpr {
         container.addChild(cont);
     }
 
+    // @param pivot点のリスト
+    setPivotPoints(pivots) {
+        this._pivots = pivots;
+    }
+
     // @param pts [i] 壁を構成する点の座標のリスト
     // ptsのフォーマット：[{x, y}]
     setWallPoints(pts) {
         this._pts = pts;
+    }
+
+    // this._pivotsからスプライン関数を使ってwallPointsを生成
+    genWallPoints() {
+        if (this._pivots.length > 0) {
+            let sp = new Spline();
+            sp.clear();
+
+            for (let p of this._pivots) {
+                sp.addPoint(p.x, p.y);
+            }
+
+            sp.genSpline(); // スプライン生成
+
+            let ipts = [];
+            for (let t=0.0; t<1.0; t+=0.02) {
+                let ipt = sp.interp(t);
+                ipts.push({
+                    x: ipt.x,
+                    y: ipt.y
+                });
+            }
+            let ipt = sp.interp(1.0);
+            ipts.push({
+                x: ipt.x,
+                y: ipt.y
+            });
+
+            this.setWallPoints(ipts);
+        }
     }
 
     // 中心(x, y), 半径rの円形の壁を生成
@@ -58,6 +98,39 @@ class Wall extends BaseSpr {
             this._pts.push({x: x, y: y});
             deg += dDeg;
         }
+    }
+
+    // pに最も近いピボット点を返す
+    //
+    // @return {
+    //      pt: {x, y},   // pに最も近いピボット点
+    //      dist: number    // pからptまでの距離
+    // }
+    //
+    // pのスレッショルド半径内に入っている点のみ選択ピボット点の候補になる
+    // 見つからなかった場合はnullが返る
+    getNearestPivot(p) {
+        const THRESHOLD_RADIUS = 30;    // スレッショルド半径
+        const TR2 = THRESHOLD_RADIUS * THRESHOLD_RADIUS;    // あらかじめ二乗した値を計算しておく
+
+        if (this._pivots.length <= 0) return null;
+
+        let nearestPivot = null;
+        let minDist2 = null;
+        for (let pivot of this._pivots) {
+            let dist2 = U.vecDist2(p, pivot);   // 毎回sqrtを計算すると遅いので距離の二乗値で比較
+            if (dist2 < TR2) {
+                if (minDist2 === null || dist2 < minDist2) {
+                    minDist2 = dist2;
+                    nearestPivot = pivot;
+                }
+            }
+        }
+
+        return (nearestPivot === null) ? null : {
+            pt: nearestPivot,
+            dist: Math.sqrt(minDist2)
+        };
     }
 
     // 辺の数を返す
@@ -151,10 +224,61 @@ class Wall extends BaseSpr {
                     this._g.lineTo(this._pts[i].x, this._pts[i].y);
                 }
             }
+
+            this._g.beginFill(0x00a000);
+            this._g.lineStyle(1, 0xffff00, 0.7);  // 太さ、色、アルファ(0=透明)
+            for (let pivot of this._pivots) {
+                this._g.drawEllipse(pivot.x, pivot.y, 5, 5);  // 中心(cx, cy), 半径(rx, ry)
+            }
+            this._g.endFill();
         }
     }
 }
 
+// ===================================================
+//  複数個の壁
+// ===================================================
+class Walls {
+    constructor() {
+        this._walls = [];
+    }
+
+    addWall(wall) {
+        this._walls.push(wall);
+    }
+
+    // すべての壁のピボット点の中から、pに最も近いものを返す．
+    //
+    // @return {
+    //      pt: {x, y},   // pに最も近いピボット点
+    //      dist: number    // pからptまでの距離
+    // }
+    getNearestPivot(p) {
+        // 各wall中のpに最も近いピボット点のリストを作る
+        let nearestPivots = this._walls.map((wall) => {
+            return wall.getNearestPivot(p);
+        });
+
+        // その中からさらに一番pに近いものを取り出す
+        let result = nearestPivots.reduce((prev, curr) => {
+            if ((prev === null) || (curr !== null && curr.dist < prev.dist)) {
+                return curr;
+            } else {
+                return prev;
+            }
+        });
+
+        return result;
+    }
+
+    update() {
+        this._walls.forEach(wall => {
+            wall.update();
+        });
+    }
+}
+
 module.exports = {
-    Wall
+    Wall,
+    Walls
 }

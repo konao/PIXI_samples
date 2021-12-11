@@ -1,58 +1,60 @@
 // *******************************************************
 //  2Dボードエディタ (1)
 //
+//  このファイルは現在使っていないが、リサイズ処理の実験コードが含まれている(24行目以降)
+//
 //  2021/7/24
 // *******************************************************
 
-const PIXI = require('pixi.js');
-const $ = require('jquery');
-const { CmdButtons } = require('./cmdButtons');
-const { MainPanel } = require('./mainPanel');
+// const PIXI = require('pixi.js');
+// const $ = require('jquery');
+// const { CmdButtons } = require('./cmdButtons');
+// const { MainPanel } = require('./mainPanel');
 
-let g_w = 0;
-let g_h = 0;
+// let g_w = 0;
+// let g_h = 0;
 
-let canvas = document.getElementById('myCanvas');
+// let canvas = document.getElementById('myCanvas');
 
-$(window).on('load', () => {
-    console.log(`load`);
-    draw();
-});
+// $(window).on('load', () => {
+//     console.log(`load`);
+//     draw();
+// });
 
-$(window).on('resize', () => {
-    console.log(`resize`);
+// $(window).on('resize', () => {
+//     console.log(`resize`);
 
-    let i_w = window.innerWidth;
-    let i_h = window.innerHeight;
-    // canvas.width = i_w;
-    // canvas.height = i_h;
-    let c_w = document.body.clientWidth;
-    let c_h = document.body.clientHeight;
+//     let i_w = window.innerWidth;
+//     let i_h = window.innerHeight;
+//     // canvas.width = i_w;
+//     // canvas.height = i_h;
+//     let c_w = document.body.clientWidth;
+//     let c_h = document.body.clientHeight;
 
-    let sb_w = i_w - c_w;
-    let sb_h = i_h - c_h;
+//     let sb_w = i_w - c_w;
+//     let sb_h = i_h - c_h;
 
-    canvas.width = c_w-sb_w;
-    canvas.height = c_h-sb_h;
-    // g_w = window.innerWidth;
-    // g_h = window.innerHeight;
-    // canvas.width = g_w;
-    // canvas.height = g_h;
-    g_w = document.body.clientWidth;
-    g_h = document.body.clientHeight;
-    // canvas.width = g_w;
-    // canvas.height = g_h;
-    // app.renderer.resize(g_w, g_h);
-    console.log(`resized to (${g_w}, ${g_h})`);
-    draw();
-});
+//     canvas.width = c_w-sb_w;
+//     canvas.height = c_h-sb_h;
+//     // g_w = window.innerWidth;
+//     // g_h = window.innerHeight;
+//     // canvas.width = g_w;
+//     // canvas.height = g_h;
+//     g_w = document.body.clientWidth;
+//     g_h = document.body.clientHeight;
+//     // canvas.width = g_w;
+//     // canvas.height = g_h;
+//     // app.renderer.resize(g_w, g_h);
+//     console.log(`resized to (${g_w}, ${g_h})`);
+//     draw();
+// });
 
-function draw() {
-    if (canvas.getContext) {
-        let ctx = canvas.getContext('2d');
-        ctx.strokeRect(0, 0, g_w, g_h);
-    }
-}
+// function draw() {
+//     if (canvas.getContext) {
+//         let ctx = canvas.getContext('2d');
+//         ctx.strokeRect(0, 0, g_w, g_h);
+//     }
+// }
 
 //Create a Pixi Application
 // let app = new PIXI.Application({ 

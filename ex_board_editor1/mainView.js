@@ -63,7 +63,7 @@ $(window).on('load', () => {
     
         app.ticker.add((delta) => {
             // 画面更新
-            mainPanel.update();
+            mainPanel.update(cmdButtons.getCurrMode());
         });
     });
 });
@@ -94,7 +94,11 @@ $(window).on('resize', () => {
 });
 
 $(window).on('mousemove', e => {
-    console.log(`mousemove`);
+    let mousePos = {
+        x: e.clientX,
+        y: e.clientY
+    };
+    mainPanel.onMouseMove(mousePos, cmdButtons.getCurrMode());
 });
 
 // マウスホイールイベント
@@ -106,7 +110,6 @@ $(window).on('wheel', e => {
 });
 
 $(window).on('mousedown', e => {
-    console.log(`mousedown`);
     if (e.which === 1) {
         // 左ボタンクリック
         let mousePressPos = {

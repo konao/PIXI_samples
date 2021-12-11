@@ -120,7 +120,12 @@ const vecInnerProd = (v1, v2) => {
 // @return vの長さ
 // -----------------------------------------------
 const vecLen = (v) => {
-    return Math.sqrt(v.x*v.x + v.y*v.y);
+    return Math.sqrt(vecLen2(v));
+}
+
+// 長さの二乗を返す
+const vecLen2 = (v) => {
+    return v.x*v.x + v.y*v.y;
 }
 
 // -----------------------------------------------
@@ -133,6 +138,11 @@ const vecLen = (v) => {
 // -----------------------------------------------
 const vecDist = (v1, v2) => {
     return vecLen(vecSub(v1, v2));
+}
+
+// 2点間の距離の二乗を返す
+const vecDist2 = (v1, v2) => {
+    return vecLen2(vecSub(v1, v2));
 }
 
 // -----------------------------------------------
@@ -806,7 +816,9 @@ module.exports = {
     vecScalar,
     vecInnerProd,
     vecLen,
+    vecLen2,
     vecDist,
+    vecDist2,
     vecLenChange,
     vecNorm,
     vecRotate,

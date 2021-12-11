@@ -1,6 +1,5 @@
 const PIXI = require('pixi.js');
-const { Wall } = require('./wall');
-const { Spline } = require('./spline');
+const { Wall, Walls } = require('./wall');
 const { NEW, SELECT, MOVE } = require('./cmdButtons');
 
 class MainPanel {
@@ -10,7 +9,8 @@ class MainPanel {
         this._g_h = g_h;
         this._g = null;
         this._pts = [];
-        this._wallList = [];
+        this._walls = new Walls();
+        this._nearestPivot = null;
     }
 
     initSprite(PIXI, container) {
@@ -34,7 +34,9 @@ class MainPanel {
     }
 
     onMouseMove(p, mode) {
-
+        if (mode === SELECT) {
+            this._nearestPivot = this._walls.getNearestPivot(p);
+        }
     }
 
     onMouseWheel(d, mode) {
@@ -62,38 +64,14 @@ class MainPanel {
             {
                 console.log('Ret');
 
-                // this._ptsに溜まっている点のリストを使って
-                // スプラインオブジェクトを生成．
-                // さらに補間点を求めてthis._wallistに追加
-
+                // this._ptsに溜まっている点のリストを使って新しい壁を生成
                 if (this._pts.length > 0) {
-                    let sp = new Spline();
-                    sp.clear();
+                    let wall = new Wall();
+                    wall.init(PIXI, this._pixiApp.stage, this._g_w, this._g_h);
+                    wall.setPivotPoints(this._pts); // ピボット点をセット
+                    wall.genWallPoints();   // 壁のスプライン曲線を生成
 
-                    for (let p of this._pts) {
-                        sp.addPoint(p.x, p.y);
-                    }
-
-                    sp.genSpline(); // スプライン生成
-
-                    let ipts = [];
-                    for (let t=0.0; t<1.0; t+=0.02) {
-                        let ipt = sp.interp(t);
-                        ipts.push({
-                            x: ipt.x,
-                            y: ipt.y
-                        });
-                    }
-                    let ipt = sp.interp(1.0);
-                    ipts.push({
-                        x: ipt.x,
-                        y: ipt.y
-                    });
-
-                    let block = new Wall();
-                    block.setWallPoints(ipts);
-                    block.init(PIXI, this._pixiApp.stage, this._g_w, this._g_h);
-                    this._wallList.push(block);
+                    this._walls.addWall(wall);  // 壁リストに追加
                 }
 
                 this._pts = []; // クリア
@@ -106,14 +84,11 @@ class MainPanel {
 
     }
 
-    update() {
+    update(mode) {
         if (this._g) {
             this._g.clear();
 
-            // this._g.beginFill(0x00ffff);
-            // this._g.drawEllipse(300, 300, 280, 280);    // 中心(cx, cy)、半径(sx, sy)
-            // this._g.endFill();
-
+            // マウスでクリックした点を表示
             for (let pt of this._pts) {
                 this._g.beginFill(0x00ffff);
                 this._g.drawEllipse(pt.x, pt.y, 3, 3);
@@ -121,9 +96,16 @@ class MainPanel {
             }
 
             // 壁を描く
-            this._wallList.forEach(wall => {
-                wall.update();
-            });
+            this._walls.update();
+
+            // 選択モードのとき、マウスポインタの近くにあるピボット点を強調表示
+            if (mode === SELECT && this._nearestPivot !== null) {
+                let pt = this._nearestPivot.pt;
+                // マウス位置に最も近いピボット点を表示
+                this._g.beginFill(0xff8000);
+                this._g.drawEllipse(pt.x, pt.y, 10, 10);
+                this._g.endFill();
+            }
         }
     }
 }
