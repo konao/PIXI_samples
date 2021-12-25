@@ -258,6 +258,10 @@ class Walls {
         this._walls.push(wall);
     }
 
+    getWallList() {
+        return this._walls;
+    }
+
     setPivotPoint(idxWall, idx, p) {
         if (idxWall >= 0 && idxWall < this._walls.length) {
             let wall = this._walls[idxWall];

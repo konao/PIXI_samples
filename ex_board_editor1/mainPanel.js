@@ -1,6 +1,10 @@
 const PIXI = require('pixi.js');
 const { Wall, Walls } = require('./wall');
 const { NEW, SELECT, MOVE } = require('./cmdButtons');
+const { Ball } = require('./ball');
+const U = require('./utils');
+
+const N_BALL_TRACE = 10;    // ボールの残像の個数
 
 class MainPanel {
     constructor(pixiApp, g_w, g_h) {
@@ -9,22 +13,56 @@ class MainPanel {
         this._g_h = g_h;
         this._g = null;
         this._pts = [];
+
         this._walls = new Walls();
         this._nearestPivot = null;
         this._bPivotDragging = false;   // ピボット点ドラッグ中フラグ
+
+        // ボール関連
+        this._pA = {x: 430, y: 650};    // 射出ベクトル開始点
+        this._pB = {x: 600, y: 650};    // 射出ベクトル終了点
+        this._focus = null;
+        this._arrowDragging = 0;    // 1=pA, 2=pB
+        this._ballSize = 25; // ボールのサイズ
+        this._ballSpeed = 8;    // ボールのスピード
+        this._nBalls = 0;   // ボールの個数
+
+        this._ballList = [];
+        this._infoText = null;
+
+        this._bPause = false;
+    }
+
+    resize(w, h) {
+        this._g_w = w;
+        this._g_h = h;
     }
 
     initSprite(PIXI, container) {
         this._g = new PIXI.Graphics();
 
         container.addChild(this._g);
+
+        // 一番外側の枠を生成
+        let w0 = new Wall();
+        w0.setWallPoints([
+            {x: 10, y: 10},
+            {x: this._g_w-10, y: 10},
+            {x: this._g_w-10, y: this._g_h-10},
+            {x: 10, y: this._g_h-10}
+        ]);
+        w0.init(PIXI, this._g, this._g_w, this._g_h);
+        this._walls.addWall(w0);
     }
 
     clear() {
         this._pts = [];
     }
 
-    onMouseDown(p, mode) {
+    // @param p [i] マウスの位置
+    // @param e [i] イベント情報
+    // @param mode [i] 現在のモード
+    onMouseDown(p, e, mode) {
         if (mode === NEW) {
             this._pts.push(p);
         }
@@ -33,6 +71,48 @@ class MainPanel {
                 this._bPivotDragging = true;    // ピボット点ドラッグ中
             }
         }
+        else if (mode === MOVE) {
+            if (e.which === 1) {
+                // 左ボタンクリック
+                let mousePressPos = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+        
+                // マウスの位置と射出点A, Bの距離を計算
+                let r1 = U.vecDist(mousePressPos, this._pA);
+                let r2 = U.vecDist(mousePressPos, this._pB);
+
+                // マウスの位置が射出点に近ければフォーカスを更新
+                const CLOSE_DIST = 20;
+                if (r1 < CLOSE_DIST) {
+                    this._arrowDragging = 1;
+                    this._focus = this._pA;
+                } else if (r2 < CLOSE_DIST) {
+                    this._arrowDragging = 2;
+                    this._focus = this._pB;
+                } else {
+                    this._arrowDragging = 0;
+                    this._focus = null;    
+                }
+            } else if (e.which === 3) {
+                // 右ボタンクリック
+                let ejPos = this._pA;
+                let ejVec = U.vecNorm(U.vecSub(this._pB, this._pA));
+                ejVec = U.vecScalar(ejVec, this._ballSpeed);
+        
+                // ボールを生成
+                let newBall = new Ball();
+                newBall.setRadius(this._ballSize)
+                    .setBallPos(ejPos)
+                    .setVec(ejVec);
+                newBall.init(PIXI, this._pixiApp.stage, this._g_w, this._g_h, N_BALL_TRACE);
+        
+                this._ballList.push(newBall);
+                this._nBalls++;
+                // showStatus();
+            }                    
+        }
     }
 
     onMouseUp(p, mode) {
@@ -40,6 +120,10 @@ class MainPanel {
             if (this._bPivotDragging) {
                 this._bPivotDragging = false;
             }
+        }
+        else if (mode === MOVE) {
+            this._arrowDragging = 0;
+            this._focus = null;        
         }
     }
 
@@ -52,6 +136,19 @@ class MainPanel {
                 let idx = this._nearestPivot.idx;
 
                 this._walls.setPivotPoint(idxWall, idx, p); // ピボット点を移動させる
+            }
+        }
+        else if (mode === MOVE) {
+            if (this._arrowDragging > 0) {
+                this._focus = p;
+                switch (this._arrowDragging) {
+                    case 1:
+                        this._pA = p;
+                        break;
+                    case 2:
+                        this._pB = p;
+                        break;
+                }
             }
         }
     }
@@ -122,6 +219,47 @@ class MainPanel {
                 this._g.beginFill(0xff8000);
                 this._g.drawEllipse(pt.x, pt.y, 10, 10);
                 this._g.endFill();
+            }
+
+            if (mode === MOVE) {
+                // ボール射出ベクトルを描く
+                if ((this._pA !== null) && (this._pB !== null)) {
+                    // AからBへの線を引く
+                    this._g.lineStyle(1, 0xffff00, 1);  // 黄色
+                    this._g.moveTo(this._pA.x, this._pA.y);
+                    this._g.lineTo(this._pB.x, this._pB.y);
+            
+                    // 矢印を描く
+                    let rv = U.vecScalar(U.vecNorm(U.vecSub(this._pA, this._pB)), 20);
+                    let pB1 = U.vecAdd(this._pB, U.vecRotate(rv, 30));
+                    this._g.moveTo(this._pB.x, this._pB.y);
+                    this._g.lineTo(pB1.x, pB1.y);
+                    let pB2 = U.vecAdd(this._pB, U.vecRotate(rv, -30));
+                    this._g.moveTo(this._pB.x, this._pB.y);
+                    this._g.lineTo(pB2.x, pB2.y);
+                }
+
+                // ボールを描く
+                if (!this._bPause) {
+                    // 衝突計算1（ボール同士）
+                    let nBalls = this._ballList.length;
+                    for (let i=0; i<nBalls; i++) {
+                        let ball1 = this._ballList[i];
+                        for (let j=i+1; j<nBalls; j++) {
+                            let ball2 = this._ballList[j];
+                            ball1.update1(ball2);
+                        }
+                    }
+
+                    // 衝突計算2（ボールと壁）
+                    this._ballList.forEach(ball => {
+                        ball.update2(this._walls.getWallList() /*, g_ballList */);
+                    });
+
+                    // if (this._arrowDragging > 0) {
+                    //     draw();
+                    // }
+                }
             }
         }
     }

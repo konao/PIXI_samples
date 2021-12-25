@@ -29,7 +29,7 @@ app.stage.interactive = true;
 const loader = PIXI.Loader.shared;
 
 let contMainPanel = new PIXI.Container();   // メイン描画エリア用コンテナ
-let mainPanel = new MainPanel(app);
+let mainPanel = null;
 let contCmdPanel = new PIXI.Container();    // コマンドパネル用コンテナ
 let cmdButtons = new CmdButtons();
 
@@ -44,6 +44,8 @@ $(window).on('load', () => {
     console.log(`innerSize(${window.innerWidth}, ${window.innerHeight})`);
     console.log(`clientSize(${document.body.clientWidth}, ${document.body.clientHeight})`);
     app.renderer.resize(g_w, g_h);
+
+    mainPanel = new MainPanel(app, g_w, g_h);
 
     const loader = PIXI.Loader.shared;
     loader.add('images/characters.json');
@@ -90,6 +92,8 @@ $(window).on('resize', () => {
     g_w = c_w;
     g_h = c_h;
     app.renderer.resize(g_w, g_h);
+
+    mainPanel.resize(g_w, g_h);
     console.log(`resized to (${g_w}, ${g_h})`);
 });
 
@@ -110,21 +114,23 @@ $(window).on('wheel', e => {
 });
 
 $(window).on('mousedown', e => {
+    let mousePressPos = {
+        x: e.clientX,
+        y: e.clientY
+    };
+
     if (e.which === 1) {
         // 左ボタンクリック
-        let mousePressPos = {
-            x: e.clientX,
-            y: e.clientY
-        };
-
         let id = cmdButtons.hitTest(mousePressPos);
         if (id > 0) {
             let pressed = cmdButtons.isPressed(id);
             console.log(`id=${id}, pressed=${pressed}`);
             cmdButtons.press(id, !pressed); // 反転させる
         } else {
-            mainPanel.onMouseDown(mousePressPos, cmdButtons.getCurrMode());
+            mainPanel.onMouseDown(mousePressPos, e, cmdButtons.getCurrMode());
         }
+    } else {
+        mainPanel.onMouseDown(mousePressPos, e, cmdButtons.getCurrMode());
     }
 });
 
