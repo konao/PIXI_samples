@@ -52,6 +52,12 @@ class Wall extends BaseSpr {
         this._pts = pts;
     }
 
+    setPivotPoint(idx, p) {
+        if (idx >= 0 && idx < this._pivots.length) {
+            this._pivots[idx] = p;
+        }
+    }
+
     // this._pivotsからスプライン関数を使ってwallPointsを生成
     genWallPoints() {
         if (this._pivots.length > 0) {
@@ -105,6 +111,7 @@ class Wall extends BaseSpr {
     // @return {
     //      pt: {x, y},   // pに最も近いピボット点
     //      dist: number    // pからptまでの距離
+    //      idx: number     // ピボット点のインデックス
     // }
     //
     // pのスレッショルド半径内に入っている点のみ選択ピボット点の候補になる
@@ -117,19 +124,23 @@ class Wall extends BaseSpr {
 
         let nearestPivot = null;
         let minDist2 = null;
-        for (let pivot of this._pivots) {
+        let idx = -1;
+        for (let i=0; i<this._pivots.length; i++) {
+            let pivot = this._pivots[i];
             let dist2 = U.vecDist2(p, pivot);   // 毎回sqrtを計算すると遅いので距離の二乗値で比較
             if (dist2 < TR2) {
                 if (minDist2 === null || dist2 < minDist2) {
                     minDist2 = dist2;
                     nearestPivot = pivot;
+                    idx = i;
                 }
             }
         }
 
         return (nearestPivot === null) ? null : {
             pt: nearestPivot,
-            dist: Math.sqrt(minDist2)
+            dist: Math.sqrt(minDist2),
+            idx: idx
         };
     }
 
@@ -247,26 +258,52 @@ class Walls {
         this._walls.push(wall);
     }
 
+    setPivotPoint(idxWall, idx, p) {
+        if (idxWall >= 0 && idxWall < this._walls.length) {
+            let wall = this._walls[idxWall];
+            if (wall !== null) {
+                // ピボット点移動
+                wall.setPivotPoint(idx, p);
+                // 壁の点を再生成
+                wall.genWallPoints();
+            }
+        }
+    }
+
     // すべての壁のピボット点の中から、pに最も近いものを返す．
     //
     // @return {
     //      pt: {x, y},   // pに最も近いピボット点
     //      dist: number    // pからptまでの距離
+    //      idx: number     // ピボット点のインデックス
+    //      idxWall: number  // ピボット点を含むwallへのインデックス
     // }
+    // 見つからなかった場合はnullが返る
     getNearestPivot(p) {
         // 各wall中のpに最も近いピボット点のリストを作る
-        let nearestPivots = this._walls.map((wall) => {
-            return wall.getNearestPivot(p);
-        });
+        let nearestPivots = [];
+        for (let i=0; i<this._walls.length; i++) {
+            let wall = this._walls[i];
+            let np = wall.getNearestPivot(p);
+            if (np !== null) {
+                nearestPivots.push({
+                    idxWall: i,
+                    ...np
+                })
+            }
+        }
 
         // その中からさらに一番pに近いものを取り出す
-        let result = nearestPivots.reduce((prev, curr) => {
-            if ((prev === null) || (curr !== null && curr.dist < prev.dist)) {
-                return curr;
-            } else {
-                return prev;
-            }
-        });
+        let result = null;
+        if (nearestPivots.length > 0) {
+            result = nearestPivots.reduce((prev, curr) => {
+                if ((prev === null) || (curr !== null && curr.dist < prev.dist)) {
+                    return curr;
+                } else {
+                    return prev;
+                }
+            });    
+        }
 
         return result;
     }

@@ -27,7 +27,7 @@ class CmdButtons {
         this._sprs = {};
 
         // New Button
-        let x1 = 1300;
+        let x1 = 10;
         let y1 = 10;
         let sprNewN = new PIXI.Sprite(PIXI.Texture.from("New_N"));
         sprNewN.visible = true;
@@ -42,7 +42,7 @@ class CmdButtons {
         container.addChild(sprNewP);
 
         // Select Button
-        let x2 = 1300;
+        let x2 = x1;
         let y2 = y1+48+10;
         let sprSelectN = new PIXI.Sprite(PIXI.Texture.from("Select_N"));
         sprSelectN.visible = true;
@@ -57,7 +57,7 @@ class CmdButtons {
         container.addChild(sprSelectP);
 
         // Move Button
-        let x3 = 1300;
+        let x3 = x1;
         let y3 = y2+48+10;
         let sprMoveN = new PIXI.Sprite(PIXI.Texture.from("Move_N"));
         sprMoveN.visible = true;

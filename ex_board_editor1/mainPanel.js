@@ -11,6 +11,7 @@ class MainPanel {
         this._pts = [];
         this._walls = new Walls();
         this._nearestPivot = null;
+        this._bPivotDragging = false;   // ピボット点ドラッグ中フラグ
     }
 
     initSprite(PIXI, container) {
@@ -27,15 +28,31 @@ class MainPanel {
         if (mode === NEW) {
             this._pts.push(p);
         }
+        else if (mode === SELECT) {
+            if ((this._nearestPivot !== null) && (this._bPivotDragging === false)) {
+                this._bPivotDragging = true;    // ピボット点ドラッグ中
+            }
+        }
     }
 
     onMouseUp(p, mode) {
-
+        if (mode === SELECT) {
+            if (this._bPivotDragging) {
+                this._bPivotDragging = false;
+            }
+        }
     }
 
     onMouseMove(p, mode) {
         if (mode === SELECT) {
             this._nearestPivot = this._walls.getNearestPivot(p);
+
+            if (this._nearestPivot !== null && this._bPivotDragging) {
+                let idxWall = this._nearestPivot.idxWall;
+                let idx = this._nearestPivot.idx;
+
+                this._walls.setPivotPoint(idxWall, idx, p); // ピボット点を移動させる
+            }
         }
     }
 

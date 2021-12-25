@@ -129,7 +129,11 @@ $(window).on('mousedown', e => {
 });
 
 $(window).on('mouseup', e => {
-    console.log(`mouseup`);
+    let mouseReleasePos = {
+        x: e.clientX,
+        y: e.clientY
+    };
+    mainPanel.onMouseUp(mouseReleasePos, cmdButtons.getCurrMode());
 });
 
 $(window).on('keydown', e => {
