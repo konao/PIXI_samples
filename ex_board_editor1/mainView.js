@@ -39,8 +39,8 @@ $(window).on('load', () => {
     console.log(`load`);
     // g_w = window.innerWidth-30;
     // g_h = window.innerHeight-50;
-    g_w = document.body.clientWidth;
-    g_h = document.body.clientHeight;
+    g_w = document.body.clientWidth-20;
+    g_h = document.body.clientHeight-20;
     console.log(`innerSize(${window.innerWidth}, ${window.innerHeight})`);
     console.log(`clientSize(${document.body.clientWidth}, ${document.body.clientHeight})`);
     app.renderer.resize(g_w, g_h);
@@ -73,24 +73,8 @@ $(window).on('load', () => {
 $(window).on('resize', () => {
     console.log(`resize`);
 
-    let i_w = window.innerWidth;
-    let i_h = window.innerHeight;
-    // canvas.width = g_w;
-    // canvas.height = g_h;
-    let c_w = document.body.clientWidth;
-    let c_h = document.body.clientHeight;
-    canvas.width = c_w;
-    canvas.height = c_h;
-
-    // // g_w = window.innerWidth-30;
-    // // g_h = window.innerHeight-50;
-    // // canvas.width = window.innerWidth;
-    // // canvas.height = window.innerHeight;
-    // canvas.width = document.body.clientWidth;
-    // canvas.height = document.body.clientHeight;
-
-    g_w = c_w;
-    g_h = c_h;
+    g_w = document.body.clientWidth-20;
+    g_h = document.body.clientHeight-20;
     app.renderer.resize(g_w, g_h);
 
     mainPanel.resize(g_w, g_h);
@@ -143,33 +127,12 @@ $(window).on('mouseup', e => {
 });
 
 $(window).on('keydown', e => {
-    console.log(`keydown (${e.which})`);
-
     let mode = cmdButtons.getCurrMode();
-    console.log(`keydown: mode=(${mode})`);
+    console.log(`keydown: (${e.which}), mode=(${mode})`);
 
     mainPanel.onKeyDown(e.which, mode);
 
-    switch (e.which) {
-        case 37:    // left
-        {
-            contCmdPanel.visible = false;
-            break;
-        }
-        case 39:    // right
-        {
-            contCmdPanel.visible = true;
-            break;
-        }
-        case 38:    // up
-        {
-            contMainPanel.visible = true;
-            break;
-        }
-        case 40:    // down
-        {
-            contMainPanel.visible = false;
-            break;
-        }
-    }
+    // キー入力をキャンセルする(デフォルトハンドラで処理させない)
+    // （これがないと、矢印キーを押したときにクライアントエリアがスクロールしてしまう）
+    return false;
 });

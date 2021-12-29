@@ -2,6 +2,7 @@ const PIXI = require('pixi.js');
 const { Wall, Walls } = require('./wall');
 const { NEW, SELECT, MOVE } = require('./cmdButtons');
 const { Ball } = require('./ball');
+const { Text } = require('./text');
 const U = require('./utils');
 
 const N_BALL_TRACE = 10;    // ボールの残像の個数
@@ -53,11 +54,26 @@ class MainPanel {
         ]);
         w0.init(PIXI, this._g, this._g_w, this._g_h);
         this._walls.addWall(w0);
+
+        // ステータス表示用テキスト
+        this._infoText = new Text()
+            .initSprite(PIXI, container)
+            .setText(`balls: ${this._nBalls}  size: ${this._ballSize}  speed: ${this._ballSpeed}`)
+            .setPos(70, 20)
+            .setFontSize(20)
+            .setColor('cyan');
     }
 
     clear() {
         this._pts = [];
     }
+
+    showStatus() {
+        if (this._infoText) {
+            this._infoText.setText(`balls: ${this._nBalls}  size: ${this._ballSize}  speed: ${this._ballSpeed}`);
+        }
+    }
+    
 
     // @param p [i] マウスの位置
     // @param e [i] イベント情報
@@ -110,7 +126,7 @@ class MainPanel {
         
                 this._ballList.push(newBall);
                 this._nBalls++;
-                // showStatus();
+                this.showStatus();
             }                    
         }
     }
@@ -159,11 +175,6 @@ class MainPanel {
 
     onKeyDown(key, mode) {
         switch (key) {
-            case 32:    // space
-            {
-                console.log('Space');
-                break;
-            }
             case 27:    // Esc
             {
                 console.log('Esc');
@@ -191,6 +202,49 @@ class MainPanel {
                 this._pts = []; // クリア
                 break;
             }
+            case 32:    // space
+            {
+                console.log('Space');
+                this._bPause = !this._bPause;
+                break;
+            }
+            case 37:    // left
+            {
+                console.log('left');
+                // ボールサイズ縮小
+                if (this._ballSize > 1) {
+                    this._ballSize--;
+                    this.showStatus();
+                }
+                break;
+            }
+            case 39:    // right
+            {
+                // ボールサイズ拡大
+                if (this._ballSize < 50) {
+                    this._ballSize++;
+                    this.showStatus();
+                }
+                break;
+            }
+            case 38:    // up
+            {
+                // ボールスピードアップ
+                if (this._ballSpeed < 50) {
+                    this._ballSpeed++;
+                    this.showStatus();
+                }
+                break;
+            }
+            case 40:    // down
+            {
+                // ボールスピードダウン
+                if (this._ballSpeed > 1) {
+                    this._ballSpeed--;
+                    this.showStatus();
+                }
+                break;
+            }    
         }    
     }
 
