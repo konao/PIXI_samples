@@ -37,6 +37,10 @@ let cmdButtons = new CmdButtons();
 // https://qiita.com/chillart/items/15bc48f98897391e12ca
 $(window).on('load', () => {
     console.log(`load`);
+
+    // window.innerWidth ... スクロールバーを含んだウィンドウの横幅
+    // document.body.clientWidth ... スクロールバーを含まないウィンドウの横幅（クライアントエリアの幅）
+    
     // g_w = window.innerWidth-30;
     // g_h = window.innerHeight-50;
     g_w = document.body.clientWidth-20;
