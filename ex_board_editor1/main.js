@@ -1,7 +1,15 @@
 const { app, BrowserWindow } = require("electron");
 let win;
 function createWindow() {
-    win = new BrowserWindow({width: 1400, height: 900, useContentSize: true});
+    win = new BrowserWindow({
+        width: 1400, 
+        height: 900, 
+        useContentSize: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
     // win.setContentBounds({x: 100, y: 100, width: 500, height: 400});
     // win.setBounds({x: 100, y: 0, width: 1200, height: 1000});
     // let b = win.getBounds();
