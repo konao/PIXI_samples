@@ -8,6 +8,12 @@ const PIXI = require('pixi.js');
 const $ = require('jquery');
 const { CmdButtons } = require('./cmdButtons');
 const { MainPanel } = require('./mainPanel');
+// const ipc = require('ipc');
+const { ipcRenderer } = window.native;
+
+ipcRenderer.on('mapLoadClicked', (msg) => {
+    alert('map load clicked!' + msg);
+});
 
 let g_w = 0;
 let g_h = 0;

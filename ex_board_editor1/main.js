@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, Menu } = require("electron");
+const path = require("path");
 let win;
 function createWindow() {
     win = new BrowserWindow({
@@ -7,7 +8,8 @@ function createWindow() {
         useContentSize: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            preload: path.join(__dirname, 'preload.js')
         }
     });
     // win.setContentBounds({x: 100, y: 100, width: 500, height: 400});
@@ -16,7 +18,39 @@ function createWindow() {
     // console.log('aaa');
     win.loadURL(`file://${__dirname}/index.html`);
     win.on("closed", ()=>{win=null;});
+
+    // ここを有効にするとデバッガウィンドウが開く
+    win.webContents.openDevTools();
+
+    const template = Menu.buildFromTemplate([
+        {
+          label: "ファイル",
+          submenu: [
+            { role:'close', label:'ウィンドウを閉じる' },
+            { label: 'マップロード', click() {
+                console.log('map load clicked');
+                
+                // メインプロセスからレンダラープロセスへ通信する方法
+                // https://sourcechord.hatenablog.com/entry/2015/11/03/124814
+                win.webContents.send('mapLoadClicked', 'oppai ga ippai');
+            }}
+          ]
+        },
+        {
+          label: "編集",
+          submenu: [
+            { role:'undo',  label:'元に戻す' },
+            { role:'redo',  label:'やり直す' },
+            { type:'separator' },
+            { role:'cut',   label:'切り取り' },
+            { role:'copy',  label:'コピー' },
+            { role:'paste', label:'貼り付け' },
+          ]
+        }
+    ]);
+    win.setMenu(template);
 }
+// Menu.setApplicationMenu(template);
 app.on("ready", createWindow);
 app.on("window-all-closed", ()=>{
     if (process.platform !== "darwin") {
