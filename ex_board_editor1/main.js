@@ -30,8 +30,10 @@ function createWindow() {
             { label: 'マップロード', click() {
                 console.log('map load clicked');
                 
-                // メインプロセスからレンダラープロセスへ通信する方法
+                // メインプロセスからレンダラープロセスへの通信関連
                 // https://sourcechord.hatenablog.com/entry/2015/11/03/124814
+                // https://webbibouroku.com/Blog/Article/electron-ipc
+                // https://qiita.com/Quantum/items/4841aa18643b8ef1fc11
                 win.webContents.send('mapLoadClicked', 'oppai ga ippai');
             }}
           ]
