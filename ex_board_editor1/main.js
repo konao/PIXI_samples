@@ -20,7 +20,7 @@ function createWindow() {
     win.on("closed", ()=>{win=null;});
 
     // ここを有効にするとデバッガウィンドウが開く
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 
     const template = Menu.buildFromTemplate([
         {
