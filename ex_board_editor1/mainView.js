@@ -11,8 +11,15 @@ const { MainPanel } = require('./mainPanel');
 // const ipc = require('ipc');
 const { ipcRenderer } = window.native;
 
-ipcRenderer.on('mapLoadClicked', (msg) => {
-    alert('map load clicked!' + msg);
+ipcRenderer.on('mapLoadClicked', (event, arg) => {
+    alert('map load clicked!' + JSON.stringify(arg));
+    // argにマップデータが入ってくるので、これを使ってマップを復元する
+});
+
+ipcRenderer.on('mapSaveClicked', (event, msg) => {
+    alert('map save clicked!' + JSON.stringify(msg));
+    // マップデータをjson化してsendでメインプロセスに送る
+    ipcRenderer.send("mapSaveData", { title: "elichi-oppai", size: 88});
 });
 
 let g_w = 0;
