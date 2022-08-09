@@ -23,8 +23,8 @@ class Spr1 extends BaseSpr {
         const r = (w > h) ? h/2 : w/2;
 
         // 内側の円と外側の円を別々に回転させる
-        const im = 2;   // ★★★ 内側の円の回転倍率
-        const om = 5;   // ★★★ 外側の円の回転倍率
+        const im = 3;   // ★★★ 内側の円の回転倍率
+        const om = 7;   // ★★★ 外側の円の回転倍率
         const ir = r*0.6;   // 内側の円の半径
         const or = r*0.4;   // 外側の円の半径
 

@@ -19,12 +19,11 @@ class Ball extends BaseSpr {
         
         this._r = 0;    // 半径
     
-        // 方向ベクトル（単位ベクトル）と移動スピード
-        this._dir = {
+        // 方向ベクトル（このベクトルの絶対値が速さ）
+        this._vec = {
             x: 0.0,
             y: 0.0
         }
-        this._speed = 1;
 
         this._m = 0;    // 質量(=半径の2乗*定数係数、とする)
     
@@ -59,33 +58,35 @@ class Ball extends BaseSpr {
 
     // @param v [i] 方向ベクトル
     setVec(v) {
-        this._dir = U.vecNorm(v);
-        this._speed = U.vecLen(v);
+        this._vec = v;
         return this;
     }
 
     getVec() {
-        return U.vecLenChange(this._dir, this._speed);
+        return this._vec;
     }
 
+    // 移動方向をdirに変更
+    // 現在のボールの速さは変えない
     setDir(dir) {
-        this._dir = U.vecNorm(dir);
+        const speed = U.vecLen(this._vec);
+        this._vec = U.vecScalar(U.vecNorm(dir), speed);
         return this;
     }
 
-    getDir() {
-        return this._dir;
-    }
-
+    // 速さをspeedに変更
+    // 現在のボールの移動方向は変えない
     setSpeed(speed) {
         if (speed >= 0) {
-            this._speed = speed;
+            const newDir = U.vecScalar(U.vecNorm(this._vec), speed);
+            this._vec = newDir;
         }
         return this;
     }
 
+    // 現在のボールの速さを返す
     getSpeed() {
-        return this._speed;
+        return U.vecLen(this._vec);
     }
 
     setRadius(r) {
@@ -149,8 +150,8 @@ class Ball extends BaseSpr {
     }
 
     applyGravity() {
-        const G_RATIO = 0.002;
-        this._dir.y += (9.8 * G_RATIO);
+        const G_RATIO = 0.02;
+        this._vec.y += (9.8 * G_RATIO);
     }
 
     // ----------------------------------------
@@ -162,8 +163,6 @@ class Ball extends BaseSpr {
         let d = U.vecDist(this._p, ball2.getBallPos());
         let R = this._r + ball2.getRadius();
         if (d<R) return;
-
-        // this.applyGravity();
 
         let pB = this.getBallDestPos();
         let pY = ball2.getBallDestPos();
@@ -221,7 +220,7 @@ class Ball extends BaseSpr {
     // 反射のたびにこのオブジェクトの保持する方向とスピードが更新される
     // vは残りの移動変位
     update2Sub(v, wallList) {
-        const REFLECT_RATIO = 1.0;
+        const REFLECT_RATIO = 0.9;
 
         let p = this._p;
 

@@ -24,8 +24,8 @@ class MainPanel {
         this._pB = {x: 600, y: 650};    // 射出ベクトル終了点
         this._focus = null;
         this._arrowDragging = 0;    // 1=pA, 2=pB
-        this._ballSize = 25; // ボールのサイズ
-        this._ballSpeed = 8;    // ボールのスピード
+        this._ballSize = 20; // ボールのサイズ
+        this._ballSpeed = 10;    // ボールのスピード
         this._nBalls = 0;   // ボールの個数
 
         this._ballList = [];
@@ -295,13 +295,14 @@ class MainPanel {
 
                 // ボールを描く
                 if (!this._bPause) {
-                    // 衝突計算1（ボール同士）
                     let nBalls = this._ballList.length;
                     for (let i=0; i<nBalls; i++) {
                         let ball1 = this._ballList[i];
 
+                        // 重力を適用
                         ball1.applyGravity();
-                        
+
+                        // 衝突計算1（ボール同士）
                         for (let j=i+1; j<nBalls; j++) {
                             let ball2 = this._ballList[j];
                             ball1.update1(ball2);
