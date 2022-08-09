@@ -149,8 +149,8 @@ class Ball extends BaseSpr {
     }
 
     applyGravity() {
-        const G_RATIO = 0.02;
-        // this._v.y += (9.8 * G_RATIO);
+        const G_RATIO = 0.002;
+        this._dir.y += (9.8 * G_RATIO);
     }
 
     // ----------------------------------------

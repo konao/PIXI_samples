@@ -20,7 +20,7 @@ function createWindow() {
     win.on("closed", () => { win = null; });
 
     // ここを有効にするとデバッガウィンドウが開く
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 
     const template = Menu.buildFromTemplate([
         {
@@ -35,12 +35,12 @@ function createWindow() {
                         // https://sourcechord.hatenablog.com/entry/2015/11/03/124814
                         // https://webbibouroku.com/Blog/Article/electron-ipc
                         // https://qiita.com/Quantum/items/4841aa18643b8ef1fc11
-                        win.webContents.send('mapLoadClicked', 'oppai ga ippai');
+                        win.webContents.send('mapLoadClicked', 'msg from main: mapLoad clicked');
                     }
                 },
                 {
                     label: 'マップセーブ', click() {
-                        win.webContents.send('mapSaveClicked', 'oppai momi momi');
+                        win.webContents.send('mapSaveClicked', 'msg from main: mapSave clicked');
                     }
                 }
             ]
@@ -54,6 +54,13 @@ function createWindow() {
                 { role: 'cut', label: '切り取り' },
                 { role: 'copy', label: 'コピー' },
                 { role: 'paste', label: '貼り付け' },
+            ]
+        },
+        {
+            label: "システム",
+            submenu: [
+                { role: 'reload', label: 'Reload' },
+                { role: 'toggleDevTools', label: 'ToggleDevTools' }
             ]
         }
     ]);

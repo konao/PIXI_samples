@@ -299,6 +299,9 @@ class MainPanel {
                     let nBalls = this._ballList.length;
                     for (let i=0; i<nBalls; i++) {
                         let ball1 = this._ballList[i];
+
+                        ball1.applyGravity();
+                        
                         for (let j=i+1; j<nBalls; j++) {
                             let ball2 = this._ballList[j];
                             ball1.update1(ball2);
