@@ -11,9 +11,11 @@ const { MainPanel } = require('./mainPanel');
 // const ipc = require('ipc');
 const { ipcRenderer } = window.native;
 
-ipcRenderer.on('mapLoadClicked', (event, arg) => {
-    alert('map load clicked!' + JSON.stringify(arg));
+ipcRenderer.on('mapLoadClicked', (event, data) => {
     // argにマップデータが入ってくるので、これを使ってマップを復元する
+    if (mainPanel) {
+        mainPanel.loadWallData(data);
+    }
 });
 
 ipcRenderer.on('mapSaveClicked', (event, msg) => {

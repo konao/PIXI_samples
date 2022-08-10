@@ -42,17 +42,11 @@ class Wall extends BaseSpr {
     }
 
     // セーブ用データを返す
-    getSaveData() {
+    getWallData() {
         // 現在のところ、セーブするのはピボット点だけ
         return this._pivots;
     }
-    
-    // 
-    loadSaveData(data) {
-        this._pivots = data;
-    }
 
-    // @param pivot点のリスト
     setPivotPoints(pivots) {
         this._pivots = pivots;
     }
@@ -263,6 +257,10 @@ class Wall extends BaseSpr {
 // ===================================================
 class Walls {
     constructor() {
+        this.clear();
+    }
+
+    clear() {
         this._walls = [];
     }
 
@@ -275,18 +273,29 @@ class Walls {
     }
 
     // ファイルセーブ用データを取得
-    getSaveData() {
-        let saveData = [];
+    getWallData() {
+        let wallData = [];
         for (let i=0; i<this._walls.length; i++) {
-            const wd = this._walls[i].getSaveData();
-            saveData.push(wd);
+            const wd = this._walls[i].getWallData();
+            wallData.push(wd);
         }
-        return saveData;
+        return wallData;
     }
 
     // セーブデータから壁を復活させる（ロード）
-    loadSaveData(data) {
-
+    loadWallData(wallData, PIXI, container, w, h) {
+        this.clear();
+        for (let wd of wallData) {
+            if (wd.length > 0) {    // 空の壁データはロードしない
+                let wall = new Wall();
+                wall.init(PIXI, container, w, h);
+    
+                wall.setPivotPoints(wd);
+                wall.genWallPoints();
+    
+                this.addWall(wall);    
+            }
+        }
     }
 
     setPivotPoint(idxWall, idx, p) {

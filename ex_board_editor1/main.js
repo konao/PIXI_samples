@@ -31,13 +31,36 @@ function createWindow() {
                 { role: 'close', label: 'ウィンドウを閉じる' },
                 {
                     label: 'マップロード', click() {
-                        console.log('map load clicked');
-
-                        // メインプロセスからレンダラープロセスへの通信関連
-                        // https://sourcechord.hatenablog.com/entry/2015/11/03/124814
-                        // https://webbibouroku.com/Blog/Article/electron-ipc
-                        // https://qiita.com/Quantum/items/4841aa18643b8ef1fc11
-                        win.webContents.send('mapLoadClicked', 'msg from main: mapLoad clicked');
+                        dialog.showOpenDialog(win, {
+                            title: 'マップデータロード',
+                            filters: [
+                                { name: 'mapData', extensions: 'json' }
+                            ]
+                        }).then(({filePaths, canceled}) => {
+                            if (!canceled) {
+                                if (filePaths.length > 0) {
+                                    const filePath = filePaths[0];
+                                    console.log(filePath);
+                                    fs.readFile(filePath, { encoding: 'utf8' }, (err, text) => {
+                                        if (err) {
+                                            console.log('[ERROR] load failed');
+                                        } else {
+                                            const data = JSON.parse(text);
+                                            console.log(JSON.stringify(data, null, 2));
+                                            console.log('load ok');
+    
+                                            // メインプロセスからレンダラープロセスへの通信関連
+                                            // https://sourcechord.hatenablog.com/entry/2015/11/03/124814
+                                            // https://webbibouroku.com/Blog/Article/electron-ipc
+                                            // https://qiita.com/Quantum/items/4841aa18643b8ef1fc11
+                                            win.webContents.send('mapLoadClicked', data);
+                                        }
+                                    });    
+                                }
+                            } else {
+                                console.log('load canceled');
+                            }
+                        })
                     }
                 },
                 {
@@ -86,7 +109,7 @@ ipcMain.on("mapSaveData", (event, saveData) => {
     // それをここで受け取る．
     // メインプロセスはnode.jsのファイル操作関連APIが使えるので、ここでマップデータをファイルにセーブする．
     // console.log("ipcMain: mapSaveData");
-    const jsonSaveData = JSON.stringify(saveData);
+    const jsonSaveData = JSON.stringify(saveData, null, 2);
 
     dialog.showSaveDialog(win, {
         title: 'マップデータ保存',

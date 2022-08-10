@@ -6,6 +6,7 @@ const { Text } = require('./text');
 const U = require('./utils');
 
 const N_BALL_TRACE = 10;    // ボールの残像の個数
+const FILE_VERSION = '0.0.1';
 
 class MainPanel {
     constructor(pixiApp, g_w, g_h) {
@@ -76,9 +77,20 @@ class MainPanel {
     
     getSaveData() {
         if (this._walls) {
-            return this._walls.getSaveData();
+            const wallData = this._walls.getWallData();
+            const saveData = {
+                version: FILE_VERSION,
+                wallData
+            }    
+            return saveData;
         } else {
             return null;
+        }
+    }
+
+    loadWallData(data) {
+        if (data.version === FILE_VERSION) {
+            this._walls.loadWallData(data.wallData, PIXI, this._g, this._g_w, this._g_h);
         }
     }
 
