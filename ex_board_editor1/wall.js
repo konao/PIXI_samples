@@ -21,7 +21,7 @@ class Wall extends BaseSpr {
         this._pts = []; // 壁を構成する点の座標のリスト．
 
         this._w = 0;    // クライアントエリアの幅と高さ
-        this._h = 0;        
+        this._h = 0;
     }
 
     init(PIXI, container, w, h) {
@@ -36,15 +36,23 @@ class Wall extends BaseSpr {
         cont.addChild(this._g);
         this._spr = cont;
 
-        this.setPos({x: 0, y: 0});
-    
+        this.setPos({ x: 0, y: 0 });
+
         container.addChild(cont);
     }
 
     // セーブ用データを返す
     getWallData() {
-        // 現在のところ、セーブするのはピボット点だけ
-        return this._pivots;
+        if (this._pivots.length > 0) {
+            return {
+                pivots: this._pivots
+            }
+        } else {
+            // pivot点がない場合（一番外側の壁など）
+            return {
+                pts: this._pts,
+            }
+        }
     }
 
     setPivotPoints(pivots) {
@@ -77,7 +85,7 @@ class Wall extends BaseSpr {
 
             const td = 0.05 / this._pivots.length;  // ステップ値をピボット点の個数に応じて変える
             let ipts = [];
-            for (let t=0.0; t<1.0; t+=td) {
+            for (let t = 0.0; t < 1.0; t += td) {
                 let ipt = sp.interp(t);
                 ipts.push({
                     x: ipt.x,
@@ -105,9 +113,9 @@ class Wall extends BaseSpr {
         const dDeg = 15;
         let deg = 0.0;
         while (deg < 360) {
-            let x = cx + r*Math.cos(U.d2r(deg));
-            let y = cy + r*Math.sin(U.d2r(deg));
-            this._pts.push({x: x, y: y});
+            let x = cx + r * Math.cos(U.d2r(deg));
+            let y = cy + r * Math.sin(U.d2r(deg));
+            this._pts.push({ x: x, y: y });
             deg += dDeg;
         }
     }
@@ -131,7 +139,7 @@ class Wall extends BaseSpr {
         let nearestPivot = null;
         let minDist2 = null;
         let idx = -1;
-        for (let i=0; i<this._pivots.length; i++) {
+        for (let i = 0; i < this._pivots.length; i++) {
             let pivot = this._pivots[i];
             let dist2 = U.vecDist2(p, pivot);   // 毎回sqrtを計算すると遅いので距離の二乗値で比較
             if (dist2 < TR2) {
@@ -157,7 +165,7 @@ class Wall extends BaseSpr {
     // それ以外 --> 0
     countEdges() {
         const n = this._pts.length;
-        if (n>=3) {
+        if (n >= 3) {
             return n;
         } else if (n === 2) {
             return 1;
@@ -176,7 +184,7 @@ class Wall extends BaseSpr {
         const n = this._pts.length;
         if ((i < 0) || (i >= n)) {
             return null;
-        } else if (i === n-1) {
+        } else if (i === n - 1) {
             return {
                 p1: this._pts[i],
                 p2: this._pts[0]
@@ -184,7 +192,7 @@ class Wall extends BaseSpr {
         } else {
             return {
                 p1: this._pts[i],
-                p2: this._pts[i+1]
+                p2: this._pts[i + 1]
             };
         }
     }
@@ -197,11 +205,11 @@ class Wall extends BaseSpr {
     calcCrossPoint(p, v) {
         let n = this._pts.length;
         let ids = [];   // {s, e} s=開始点, e=終了点
-        for (let i=0; i<n; i++) {
-            if (i != n-1) {
-                ids.push({s:i, e:i+1});
+        for (let i = 0; i < n; i++) {
+            if (i != n - 1) {
+                ids.push({ s: i, e: i + 1 });
             } else {
-                ids.push({s:i, e:0});
+                ids.push({ s: i, e: 0 });
             }
         }
         let cpInfos = ids.map(idx => {
@@ -232,7 +240,7 @@ class Wall extends BaseSpr {
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
 
             let n = this._pts.length;
-            for (let i=0; i<=n; i++) {
+            for (let i = 0; i <= n; i++) {
                 if (i === 0) {
                     this._g.moveTo(this._pts[0].x, this._pts[0].y);
                 } else if (i === n) {
@@ -275,7 +283,7 @@ class Walls {
     // ファイルセーブ用データを取得
     getWallData() {
         let wallData = [];
-        for (let i=0; i<this._walls.length; i++) {
+        for (let i = 0; i < this._walls.length; i++) {
             const wd = this._walls[i].getWallData();
             wallData.push(wd);
         }
@@ -286,15 +294,19 @@ class Walls {
     loadWallData(wallData, PIXI, container, w, h) {
         this.clear();
         for (let wd of wallData) {
-            if (wd.length > 0) {    // 空の壁データはロードしない
-                let wall = new Wall();
-                wall.init(PIXI, container, w, h);
-    
-                wall.setPivotPoints(wd);
+            let wall = new Wall();
+            wall.init(PIXI, container, w, h);
+
+            if (wd.pivots) {
+                // pivotがある場合
+                wall.setPivotPoints(wd.pivots);
                 wall.genWallPoints();
-    
-                this.addWall(wall);    
+            } else {
+                // pivotがない場合
+                wall.setWallPoints(wd.pts);
             }
+
+            this.addWall(wall);
         }
     }
 
@@ -322,7 +334,7 @@ class Walls {
     getNearestPivot(p) {
         // 各wall中のpに最も近いピボット点のリストを作る
         let nearestPivots = [];
-        for (let i=0; i<this._walls.length; i++) {
+        for (let i = 0; i < this._walls.length; i++) {
             let wall = this._walls[i];
             let np = wall.getNearestPivot(p);
             if (np !== null) {
@@ -342,7 +354,7 @@ class Walls {
                 } else {
                     return prev;
                 }
-            });    
+            });
         }
 
         return result;
