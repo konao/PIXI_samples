@@ -20,11 +20,11 @@ class MainPanel {
         this._bPivotDragging = false;   // ピボット点ドラッグ中フラグ
 
         // ボール関連
-        this._pA = {x: 430, y: 650};    // 射出ベクトル開始点
-        this._pB = {x: 600, y: 650};    // 射出ベクトル終了点
+        this._pA = {x: 100, y: 650};    // 射出ベクトル開始点
+        this._pB = {x: 150, y: 500};    // 射出ベクトル終了点
         this._focus = null;
         this._arrowDragging = 0;    // 1=pA, 2=pB
-        this._ballSize = 20; // ボールのサイズ
+        this._ballSize = 10; // ボールのサイズ
         this._ballSpeed = 10;    // ボールのスピード
         this._nBalls = 0;   // ボールの個数
 
@@ -74,6 +74,13 @@ class MainPanel {
         }
     }
     
+    getSaveData() {
+        if (this._walls) {
+            return this._walls.getSaveData();
+        } else {
+            return null;
+        }
+    }
 
     // @param p [i] マウスの位置
     // @param e [i] イベント情報

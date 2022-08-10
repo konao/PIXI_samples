@@ -17,9 +17,10 @@ ipcRenderer.on('mapLoadClicked', (event, arg) => {
 });
 
 ipcRenderer.on('mapSaveClicked', (event, msg) => {
-    alert('map save clicked!' + JSON.stringify(msg));
-    // マップデータをjson化してsendでメインプロセスに送る
-    ipcRenderer.send("mapSaveData", { title: "msg from renderer: here is save data. save this.", size: 88});
+    // マップデータをsendでメインプロセスに送る
+    const saveData = (mainPanel) ? mainPanel.getSaveData() : null;
+
+    ipcRenderer.send("mapSaveData", saveData);
 });
 
 let g_w = 0;

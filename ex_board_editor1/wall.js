@@ -41,6 +41,17 @@ class Wall extends BaseSpr {
         container.addChild(cont);
     }
 
+    // セーブ用データを返す
+    getSaveData() {
+        // 現在のところ、セーブするのはピボット点だけ
+        return this._pivots;
+    }
+    
+    // 
+    loadSaveData(data) {
+        this._pivots = data;
+    }
+
     // @param pivot点のリスト
     setPivotPoints(pivots) {
         this._pivots = pivots;
@@ -70,8 +81,9 @@ class Wall extends BaseSpr {
 
             sp.genSpline(); // スプライン生成
 
+            const td = 0.05 / this._pivots.length;  // ステップ値をピボット点の個数に応じて変える
             let ipts = [];
-            for (let t=0.0; t<1.0; t+=0.02) {
+            for (let t=0.0; t<1.0; t+=td) {
                 let ipt = sp.interp(t);
                 ipts.push({
                     x: ipt.x,
@@ -260,6 +272,21 @@ class Walls {
 
     getWallList() {
         return this._walls;
+    }
+
+    // ファイルセーブ用データを取得
+    getSaveData() {
+        let saveData = [];
+        for (let i=0; i<this._walls.length; i++) {
+            const wd = this._walls[i].getSaveData();
+            saveData.push(wd);
+        }
+        return saveData;
+    }
+
+    // セーブデータから壁を復活させる（ロード）
+    loadSaveData(data) {
+
     }
 
     setPivotPoint(idxWall, idx, p) {

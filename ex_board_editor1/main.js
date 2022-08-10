@@ -1,5 +1,7 @@
-const { app, BrowserWindow, Menu, ipcMain } = require("electron");
-const path = require("path");
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const path = require('path');
+const fs = require('fs');
+
 let win;
 function createWindow() {
     win = new BrowserWindow({
@@ -79,10 +81,30 @@ app.on("activate", () => {
     }
 });
 
-ipcMain.on("mapSaveData", (event, arg) => {
+ipcMain.on("mapSaveData", (event, saveData) => {
     // マップセーブメニューをクリックすると、レンダラープロセスがマップデータをjson化して送るので、
     // それをここで受け取る．
     // メインプロセスはnode.jsのファイル操作関連APIが使えるので、ここでマップデータをファイルにセーブする．
-    console.log("ipcMain: mapSaveData");
-    console.log(arg);
+    // console.log("ipcMain: mapSaveData");
+    const jsonSaveData = JSON.stringify(saveData);
+
+    dialog.showSaveDialog(win, {
+        title: 'マップデータ保存',
+        filters: [
+            { name: 'mapData', extensions: 'json' }
+        ]
+    }).then(({filePath, canceled}) => {
+        if (!canceled) {
+            console.log(filePath);
+            fs.writeFile(filePath, jsonSaveData, (err) => {
+                if (err) {
+                    console.log('[ERROR] write failed');
+                } else {
+                    console.log('save ok');
+                }
+            });
+        } else {
+            console.log('save canceled');
+        }
+    })
 })
