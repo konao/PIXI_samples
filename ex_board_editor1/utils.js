@@ -564,8 +564,8 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
 //    pCm : Vec // ボール1とボール2の接触点(ボール1, 2の周上の点)
 //    pRefB: Vec // 衝突後のボール1の到達点(=更新後のpB)
 //    pRefY: Vec // 衝突後のボール2の到達点(=更新後のpY)
-//    vRefDirB: Vec  // 反射後のボール1の移動方向（単位ベクトル）
-//    vRefDirY: Vec  // 反射後のボール2の移動方向（単位ベクトル）
+//    vRefDirB: Vec  // 衝突後のボール1の移動方向（単位ベクトル）
+//    vRefDirY: Vec  // 衝突後のボール2の移動方向（単位ベクトル）
 // }
 // 衝突しない場合はnullが返る
 // --------------------------------------------------------------
@@ -630,7 +630,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
     if (bCollided) {
         // 衝突した
 
-        // 各ボールの中心点
+        // 衝突時の各ボールの中心点
         let pC1 = vecAdd(pA, vecScalar(v, t));
         let pC2 = vecAdd(pX, vecScalar(u, t));
 
@@ -638,21 +638,31 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2) => {
         let pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
         // 反射後の方向ベクトル計算
-        //
-        // 完全弾性衝突として計算する
-        let v_ = vecScalar(vecAdd(vecScalar(v, m1-m2), vecScalar(u, 2*m2)), 1/(m1+m2));
-        let u_ = vecScalar(vecAdd(vecScalar(v, 2*m1), vecScalar(u, m2-m1)), 1/(m1+m2));
+        let nC1 = vecNorm(vecSub(pC1, pC2));    // pC2 --> pC1方向の単位ベクトル
+        let vC1_B = vecSub(pB, pC1);    // pC1 --> pBへのベクトル
+        let alpha = 2*Math.abs(vecInnerProd(vC1_B, nC1));
+        let vdisp = vecScalar(nC1, alpha);
+        let vd = vecAdd(vdisp, vC1_B);  // 反射後の方向ベクトル(pC1 --> pB')
+
+        let nC2 = vecScalar(nC1, -1);   // nC1と逆方向の単位ベクトル
+        let uC2_Y = vecSub(pY, pC2);    // pC2 --> pYへのベクトル
+        let beta = 2*Math.abs(vecInnerProd(uC2_Y, nC2));
+        let udisp = vecScalar(nC2, beta);
+        let ud = vecAdd(udisp, uC2_Y);  // 反射後の方向ベクトル(pC2 --> pY')
 
         // 反射後の方向（単位ベクトル）
-        let vRefDirB = vecNorm(v_);
-        let vRefDirY = vecNorm(u_);
+        let vRefDirB = vecNorm(vd);
+        let vRefDirY = vecNorm(ud);
 
         // 衝突点から反射後の到達点までの距離
         let refVecLen1 = vecLen(v)*(1-t);
         let refVecLen2 = vecLen(u)*(1-t);
 
-        let pRefB = vecAdd(pC1, vecScalar(vRefDirB, refVecLen1)); // ボール1の反射後の到達点
-        let pRefY = vecAdd(pC2, vecScalar(vRefDirY, refVecLen2)); // ボール2の反射後の到達点
+        // 各ボールの反射後の到達点
+        // m1, m2はそれぞれのボールの質量（質量の比に応じて反射係数を変える）
+        const k = 1.0;  // 力積ベクトルに掛ける係数
+        let pRefB = vecAdd(pC1, vecScalar(vRefDirB, k*(m2/m1)*refVecLen1));
+        let pRefY = vecAdd(pC2, vecScalar(vRefDirY, k*(m1/m2)*refVecLen2));
 
         return {
             pC1: pC1,
