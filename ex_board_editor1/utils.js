@@ -645,7 +645,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2, e) => {
         const pCm = vecAdd(pC1, vecScalar(vecSub(pC2, pC1), r1/(r1+r2)));
 
         // 衝突時の各ボールの中心点から到達点までのベクトル
-        // このV, Uから反射後のベクトルV', U'を求めるのが目的
+        // このV, Uから反射後のベクトルV_ref, U_refを求めるのが目的
         const V = vecSub(pB, pC1);
         const U = vecSub(pY, pC2);
 
@@ -676,6 +676,7 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2, e) => {
                 vecScalar(Ua, (m2-m1*e))
             ), 1/(m1+m2));
     
+        // 反射後の方向
         const V_ref = vecAdd(V_ref_a, Vb);
         const U_ref = vecAdd(U_ref_a, Ub);
 
