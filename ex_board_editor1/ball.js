@@ -6,7 +6,7 @@ const { BaseSpr } = require('./baseSpr');
 const U = require('./utils');
 const Wall = require('./wall');
 
-const e = 1.0;  // 反射係数
+const e = 0.9;  // 反射係数
 
 // このクラスはボールの描画をPIXI.Graphicsオブジェクトへの
 // 直接描画により行う．そのため、スプライト自身(=PIXI.Graphics)は
@@ -222,8 +222,6 @@ class Ball extends BaseSpr {
     // 反射のたびにこのオブジェクトの保持する方向とスピードが更新される
     // vは残りの移動変位
     update2Sub(v, wallList) {
-        const REFLECT_RATIO = 0.9;
-
         let p = this._p;
 
         // pをv方向に移動したときに交差する最も近い辺を求める --> nearestEdge
@@ -242,7 +240,7 @@ class Ball extends BaseSpr {
                 let edgeInfos = edgeList.map(e => {
                     return {
                         e: e,
-                        cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r, REFLECT_RATIO)
+                        cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r, e)
                     };
                 });
     
@@ -263,7 +261,7 @@ class Ball extends BaseSpr {
         if (nearestEdge) {
             // 反射判定
             let pB = U.vecAdd(p, v);
-            let cpInfo = U.calcCollisionPoint1(p, pB, nearestEdge.p1, nearestEdge.p2, this._r, REFLECT_RATIO);
+            let cpInfo = U.calcCollisionPoint1(p, pB, nearestEdge.p1, nearestEdge.p2, this._r, e);
 
             if (cpInfo !== null) {
                 // 辺と衝突した
@@ -273,7 +271,7 @@ class Ball extends BaseSpr {
                 this.setDir(cpInfo.vRefDir);
 
                 // スピード更新
-                let newSpeed = REFLECT_RATIO * this.getSpeed();
+                let newSpeed = e * this.getSpeed();
                 this.setSpeed(newSpeed);
                 
                 // 再度反射の判定を再帰的に行う

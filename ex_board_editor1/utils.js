@@ -373,7 +373,7 @@ const getMinElem = (xs, isValid, cmp) => {
 // @param pX [i] 線分mの端点1
 // @param pY [i] 線分mの端点2
 // @param r [i] ボールの半径
-// @param REFLECT_RATIO [i] 反射係数(0<REFLECT_RATIO<=1)
+// @param e [i] 反発係数(0<e<=1)
 //
 // @return 衝突情報（フォーマットは以下）
 // {
@@ -384,7 +384,7 @@ const getMinElem = (xs, isValid, cmp) => {
 // }
 // 衝突しない場合はnullが返る
 // --------------------------------------------------------------
-const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
+const calcCollisionPoint1 = (pA, pB, pX, pY, r, e) => {
     let dist_pA_m = calcDist_PointToSeg(pA, pX, pY);
     if (dist_pA_m <= r) {
         // pAと線分mの距離がボールの半径以下
@@ -409,7 +409,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
             // 今ボールのいる位置(=pA)で直ちに反射させる．
             // （つまりpC=pA）
             let CB = vecSub(pB, pA);
-            CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
+            CB = vecScalar(CB, e);  // 反発係数を適用
             pB = vecAdd(pA, CB);  // pBの位置補正
             let nu = vecNorm(vecSub(pY, pX));    // pX-->pY方向の単位ベクトル
             let CH = vecScalar(nu, vecInnerProd(CB, nu));
@@ -516,7 +516,7 @@ const calcCollisionPoint1 = (pA, pB, pX, pY, r, REFLECT_RATIO) => {
                 let CH2 = vecScalar(CH, 2);
                 vRefDir = vecNorm(vecSub(CH2, CD));
             } else {
-                CB = vecScalar(CB, REFLECT_RATIO);  // 反射係数を適用
+                CB = vecScalar(CB, e);  // 反発係数を適用
                 pB = vecAdd(minCp.pC, CB);  // pBの位置補正
                 let CH = vecScalar(minCp.vRefLine, vecInnerProd(CB, minCp.vRefLine));
                 let BH2 = vecScalar(vecSub(CH, CB), 2);
