@@ -25,8 +25,8 @@ class MainPanel {
         this._pB = {x: 150, y: 500};    // 射出ベクトル終了点
         this._focus = null;
         this._arrowDragging = 0;    // 1=pA, 2=pB
-        this._ballSize = 10; // ボールのサイズ
-        this._ballSpeed = 10;    // ボールのスピード
+        this._ballSize = 25; // ボールのサイズ
+        this._ballSpeed = 15;    // ボールのスピード
         this._nBalls = 0;   // ボールの個数
 
         this._ballList = [];

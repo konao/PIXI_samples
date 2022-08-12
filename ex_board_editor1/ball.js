@@ -6,6 +6,8 @@ const { BaseSpr } = require('./baseSpr');
 const U = require('./utils');
 const Wall = require('./wall');
 
+const e = 1.0;  // 反射係数
+
 // このクラスはボールの描画をPIXI.Graphicsオブジェクトへの
 // 直接描画により行う．そのため、スプライト自身(=PIXI.Graphics)は
 // 移動せず、位置を固定(=(0, 0))のままにする．
@@ -166,7 +168,7 @@ class Ball extends BaseSpr {
 
         let pB = this.getBallDestPos();
         let pY = ball2.getBallDestPos();
-        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, this._m, ball2.getBallPos(), pY, ball2.getRadius(), ball2.getMass());
+        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, this._m, ball2.getBallPos(), pY, ball2.getRadius(), ball2.getMass(), e);
         if (cpInfo !== null) {
             // 衝突した
             
