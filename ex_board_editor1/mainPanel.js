@@ -3,7 +3,7 @@ const { Wall, Walls } = require('./wall');
 const { NEW, SELECT, MOVE } = require('./cmdButtons');
 const { Ball } = require('./ball');
 const { Text } = require('./text');
-const U = require('./utils');
+const U = require('./physics');
 
 const N_BALL_TRACE = 10;    // ボールの残像の個数
 const FILE_VERSION = '0.0.1';

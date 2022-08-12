@@ -6,7 +6,7 @@
 
 const { BaseSpr } = require('./baseSpr');
 const { Spline } = require('./spline');
-const U = require('./utils');
+const U = require('./physics');
 
 // ===================================================
 //  1個の壁

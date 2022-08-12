@@ -3,7 +3,7 @@
 // *******************************************************
 
 const { BaseSpr } = require('./baseSpr');
-const U = require('./utils');
+const U = require('./physics');
 const Wall = require('./wall');
 
 const e = 0.9;  // 反射係数
