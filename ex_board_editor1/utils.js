@@ -631,6 +631,12 @@ const calcCollisionPoint2 = (pA, pB, r1, m1, pX, pY, r2, m2, e) => {
     if (bCollided) {
         // 衝突した
 
+        // -------------------------------------
+        //  2つのボールの衝突後の方向ベクトルを計算する
+        // ＜参考サイト＞
+        // https://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1086615725
+        // -------------------------------------
+
         // 衝突時の各ボールの中心点
         const pC1 = vecAdd(pA, vecScalar(v, t));
         const pC2 = vecAdd(pX, vecScalar(u, t));
