@@ -53,7 +53,7 @@ class MainPanel {
             {x: this._g_w-10, y: this._g_h-10},
             {x: 10, y: this._g_h-10}
         ]);
-        w0.init(PIXI, this._g, this._g_w, this._g_h);
+        w0.init(PIXI, this._g, this._g_w, this._g_h, false);
         this._walls.addWall(w0);
 
         // ステータス表示用テキスト

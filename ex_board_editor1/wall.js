@@ -22,9 +22,11 @@ class Wall extends BaseSpr {
 
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;
+
+        this._bFill = true;
     }
 
-    init(PIXI, container, w, h) {
+    init(PIXI, container, w, h, bFill) {
         this._w = w;
         this._h = h;
 
@@ -38,6 +40,8 @@ class Wall extends BaseSpr {
 
         this.setPos({ x: 0, y: 0 });
 
+        this._bFill = bFill;
+
         container.addChild(cont);
     }
 
@@ -45,12 +49,14 @@ class Wall extends BaseSpr {
     getWallData() {
         if (this._pivots.length > 0) {
             return {
-                pivots: this._pivots
+                pivots: this._pivots,
+                bFill: this._bFill
             }
         } else {
             // pivot点がない場合（一番外側の壁など）
             return {
                 pts: this._pts,
+                bFill: this._bFill
             }
         }
     }
@@ -69,6 +75,10 @@ class Wall extends BaseSpr {
         if (idx >= 0 && idx < this._pivots.length) {
             this._pivots[idx] = p;
         }
+    }
+
+    setFillFlag(bFill) {
+        this._bFill = bFill;
     }
 
     // this._pivotsからスプライン関数を使ってwallPointsを生成
@@ -240,6 +250,9 @@ class Wall extends BaseSpr {
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
 
             let n = this._pts.length;
+            if (this._bFill) {
+                this._g.beginFill(0x002010);
+            }
             for (let i = 0; i <= n; i++) {
                 if (i === 0) {
                     this._g.moveTo(this._pts[0].x, this._pts[0].y);
@@ -248,6 +261,9 @@ class Wall extends BaseSpr {
                 } else {
                     this._g.lineTo(this._pts[i].x, this._pts[i].y);
                 }
+            }
+            if (this._bFill) {
+                this._g.endFill();
             }
 
             this._g.beginFill(0x00a000);
@@ -295,7 +311,7 @@ class Walls {
         this.clear();
         for (let wd of wallData) {
             let wall = new Wall();
-            wall.init(PIXI, container, w, h);
+            wall.init(PIXI, container, w, h, false);
 
             if (wd.pivots) {
                 // pivotがある場合
@@ -305,6 +321,8 @@ class Walls {
                 // pivotがない場合
                 wall.setWallPoints(wd.pts);
             }
+
+            wall.setFillFlag(wd.bFill);
 
             this.addWall(wall);
         }
