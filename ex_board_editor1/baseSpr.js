@@ -5,7 +5,7 @@ const U = require('./physics');
 
 class BaseSpr {
     constructor() {
-        this._spr = null;
+        this._spr = null;   // 実体はコンテナ(PIXI.Container)になる
 
         // 位置 
         this._p = {
@@ -76,7 +76,7 @@ class BaseSpr {
     _update() {
         // このオブジェクトの状態をPIXIスプライトオブジェクトに反映させる
         if (this._spr) {
-            this._spr = this._p;
+            this._spr = this._p;    // [TODO] これ合ってる？(this._spr.position = this._pとかじゃない？)
             this._spr.rotation = U.d2r(this._degRot);
             this._spr.scale = this._scale;
             this._spr.zIndex = this._zIndex;
