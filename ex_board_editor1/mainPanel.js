@@ -1,5 +1,6 @@
 const PIXI = require('pixi.js');
 const { Wall, Walls } = require('./wall');
+const { Paddle, Paddles } = require('./paddle');
 const { NEW, SELECT, MOVE } = require('./cmdButtons');
 const { Ball } = require('./ball');
 const { Text } = require('./text');
@@ -16,11 +17,12 @@ class MainPanel {
         this._g = null;
         this._pts = [];
 
+        // 壁
         this._walls = new Walls();
         this._nearestPivot = null;
         this._bPivotDragging = false;   // ピボット点ドラッグ中フラグ
 
-        // ボール関連
+        // ボール
         this._pA = {x: 100, y: 650};    // 射出ベクトル開始点
         this._pB = {x: 150, y: 500};    // 射出ベクトル終了点
         this._focus = null;
@@ -31,6 +33,9 @@ class MainPanel {
 
         this._ballList = [];
         this._infoText = null;
+
+        // パドル
+        this._paddles = new Paddles();
 
         this._bPause = false;
     }
@@ -55,6 +60,12 @@ class MainPanel {
         ]);
         w0.init(PIXI, this._g, this._g_w, this._g_h, false);
         this._walls.addWall(w0);
+
+        // パドル表示実験用
+        let p0 = new Paddle();
+        p0.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100);
+        p0.genPaddlePoints({x: 300, y: 500});
+        this._paddles.addPaddle(p0);
 
         // ステータス表示用テキスト
         this._infoText = new Text()
@@ -284,6 +295,9 @@ class MainPanel {
 
             // 壁を描く
             this._walls.update();
+
+            // パドルを描く
+            this._paddles.update();
 
             // 選択モードのとき、マウスポインタの近くにあるピボット点を強調表示
             if (mode === SELECT && this._nearestPivot !== null) {

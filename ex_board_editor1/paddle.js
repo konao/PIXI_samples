@@ -21,7 +21,7 @@ class Paddle extends BaseSpr {
         }
         this._r1 = 0;   // 半径1
         this._r2 = 0;   // 半径2
-        this._len = 0;  // パドルの腕の長さ
+        this._L = 0;  // パドルの腕の長さ
         this._deg = 0;  // 回転角
 
         // this._pivots = [];  // ピボット点のリスト．各点のフォーマットは{x, y}
@@ -35,8 +35,8 @@ class Paddle extends BaseSpr {
 
     // @param r1 ... 半径1
     // @param r2 ... 半径2
-    // @param len ... パドルの腕の長さ
-    init(PIXI, container, w, h, bFill, r1, r2, len) {
+    // @param L ... パドルの腕の長さ
+    init(PIXI, container, w, h, bFill, r1, r2, L) {
         this._w = w;
         this._h = h;
 
@@ -51,6 +51,10 @@ class Paddle extends BaseSpr {
         this.setPos({ x: 0, y: 0 });
 
         this._bFill = bFill;
+
+        this._r1 = r1;
+        this._r2 = r2;
+        this._L = L;
 
         container.addChild(cont);
     }
@@ -92,17 +96,33 @@ class Paddle extends BaseSpr {
         this._bFill = bFill;
     }
 
-    // this._p, this._r1, this._r2, this._lenからthis._ptsを生成
-    genWallPoints() {
+    // @param p パドルの位置 (={x, y})
+    //
+    // this._p, this._r1, this._r2, this._Lからthis._ptsを生成
+    genPaddlePoints(p) {
         this._pts = [];
 
-        const dDeg = 15;
-        let deg = 0.0;
-        while (deg < 360) {
-            let x = cx + r * Math.cos(U.d2r(deg));
-            let y = cy + r * Math.sin(U.d2r(deg));
-            this._pts.push({ x: x, y: y });
-            deg += dDeg;
+        this._p = p;
+        const C1 = p;
+        const C2 = U.vecAdd(C1, U.vecScalar({x:0, y:-1}, this._L));
+
+        const theta1 = Math.acos((this._r1 - this._r2)/this._L);
+        const theta2 = 2*Math.PI - theta1;
+        const phai1 = Math.PI - theta1;
+        const phai2 = 2*Math.PI - phai1;
+
+        // const P1 = U.vecAdd(C1, U.vecScalar({x: Math.sin(theta1), y: Math.cos(theta1)}, this._r1));
+        // const P2 = U.vecAdd(C1, U.vecScalar({x: Math.sin(theta2), y: Math.cos(theta2)}, this._r1));
+        // const Q1 = U.vecAdd(C2, U.vecScalar({x: Math.sin(phai1), y: -Math.cos(phai1)}, this._r2));
+        // const Q2 = U.vecAdd(C2, U.vecScalar({x: Math.sin(phai2), y: -Math.cos(phai2)}, this._r2));
+        const d = U.d2r(15); // 刻み幅（ラジアン）
+        for (let theta = theta1; theta <= theta2; theta += d) {
+            const P = U.vecAdd(C1, U.vecScalar({x: Math.sin(theta), y: -Math.cos(theta)}, this._r1));
+            this._pts.push(P);
+        }
+        for (let phai = phai2; phai >= phai1; phai -= d) {
+            const Q = U.vecAdd(C2, U.vecScalar({x: Math.sin(phai), y: Math.cos(phai)}, this._r2));
+            this._pts.push(Q);
         }
    }
 
@@ -227,28 +247,23 @@ class Paddle extends BaseSpr {
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
 
             let n = this._pts.length;
-            if (this._bFill) {
-                this._g.beginFill(0x002010);
-            }
-            for (let i = 0; i <= n; i++) {
-                if (i === 0) {
-                    this._g.moveTo(this._pts[0].x, this._pts[0].y);
-                } else if (i === n) {
-                    this._g.lineTo(this._pts[0].x, this._pts[0].y);
-                } else {
-                    this._g.lineTo(this._pts[i].x, this._pts[i].y);
+            if (n > 0) {
+                if (this._bFill) {
+                    this._g.beginFill(0x002010);
                 }
+                for (let i = 0; i <= n; i++) {
+                    if (i === 0) {
+                        this._g.moveTo(this._pts[0].x, this._pts[0].y);
+                    } else if (i === n) {
+                        this._g.lineTo(this._pts[0].x, this._pts[0].y);
+                    } else {
+                        this._g.lineTo(this._pts[i].x, this._pts[i].y);
+                    }
+                }
+                if (this._bFill) {
+                    this._g.endFill();
+                }    
             }
-            if (this._bFill) {
-                this._g.endFill();
-            }
-
-            this._g.beginFill(0x00a000);
-            this._g.lineStyle(1, 0xffff00, 0.7);  // 太さ、色、アルファ(0=透明)
-            for (let pivot of this._pivots) {
-                this._g.drawEllipse(pivot.x, pivot.y, 5, 5);  // 中心(cx, cy), 半径(rx, ry)
-            }
-            this._g.endFill();
         }
     }
 }
@@ -293,7 +308,7 @@ class Paddles {
             if (pd.pivots) {
                 // pivotがある場合
                 paddle.setPivotPoints(pd.pivots);
-                paddle.genWallPoints();
+                paddle.genPaddlePoints();
             } else {
                 // pivotがない場合
                 paddle.setWallPoints(pd.pts);
@@ -312,7 +327,7 @@ class Paddles {
     //             // ピボット点移動
     //             paddle.setPivotPoint(idx, p);
     //             // 壁の点を再生成
-    //             paddle.genWallPoints();
+    //             paddle.genPaddlePoints();
     //         }
     //     }
     // }
