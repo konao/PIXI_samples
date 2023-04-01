@@ -111,10 +111,6 @@ class Paddle extends BaseSpr {
         const phai1 = Math.PI - theta1;
         const phai2 = 2*Math.PI - phai1;
 
-        // const P1 = U.vecAdd(C1, U.vecScalar({x: Math.sin(theta1), y: Math.cos(theta1)}, this._r1));
-        // const P2 = U.vecAdd(C1, U.vecScalar({x: Math.sin(theta2), y: Math.cos(theta2)}, this._r1));
-        // const Q1 = U.vecAdd(C2, U.vecScalar({x: Math.sin(phai1), y: -Math.cos(phai1)}, this._r2));
-        // const Q2 = U.vecAdd(C2, U.vecScalar({x: Math.sin(phai2), y: -Math.cos(phai2)}, this._r2));
         const d = U.d2r(15); // 刻み幅（ラジアン）
         for (let theta = theta1; theta <= theta2; theta += d) {
             const P = U.vecAdd(C1, U.vecScalar({x: Math.sin(theta), y: -Math.cos(theta)}, this._r1));
