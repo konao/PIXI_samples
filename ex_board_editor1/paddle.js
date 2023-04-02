@@ -15,16 +15,15 @@ class Paddle extends BaseSpr {
 
         this._g = null; // スプライトイメージ(PIXI.Graphics)
 
-        this._p = {
+        this._p = { // パドルの位置（回転の中心点）
             x: 0,
             y: 0
         }
         this._r1 = 0;   // 半径1
         this._r2 = 0;   // 半径2
         this._L = 0;  // パドルの腕の長さ
-        this._deg = 0;  // 回転角
+        this._angle = 0;  // 回転角（度）
 
-        // this._pivots = [];  // ピボット点のリスト．各点のフォーマットは{x, y}
         this._pts = []; // 壁を構成する点の座標のリスト．
 
         this._w = 0;    // クライアントエリアの幅と高さ
@@ -59,6 +58,21 @@ class Paddle extends BaseSpr {
         container.addChild(cont);
     }
 
+    // 位置設定
+    setPos(p) {
+        this._p = p;
+    }
+
+    // 回転角取得
+    getAngle() {
+        return this._angle;
+    }
+
+    // 回転角設定
+    setAngle(angle) {
+        this._angle = angle;
+    }
+
     // セーブ用データを返す
     getPaddleData() {
         // if (this._pivots.length > 0) {
@@ -76,20 +90,10 @@ class Paddle extends BaseSpr {
         return null;    // [TODO]
     }
 
-    setPivotPoints(pivots) {
-        // this._pivots = pivots;
-    }
-
     // @param pts [i] 壁を構成する点の座標のリスト
     // ptsのフォーマット：[{x, y}]
     setWallPoints(pts) {
         this._pts = pts;
-    }
-
-    setPivotPoint(idx, p) {
-        // if (idx >= 0 && idx < this._pivots.length) {
-        //     this._pivots[idx] = p;
-        // }
     }
 
     setFillFlag(bFill) {
@@ -248,12 +252,18 @@ class Paddle extends BaseSpr {
                     this._g.beginFill(0x002010);
                 }
                 for (let i = 0; i <= n; i++) {
+                    const targetIdx = (i === n) ? 0 : i;
+
+                    // パドルの各点をthis._angle度回転させる
+                    // p0=回転前、p1=回転後
+                    const p0 = this._pts[targetIdx];
+                    const p1 = U.vecAdd(this._p, U.vecRotate(U.vecSub(p0, this._p), this._angle));
+
+                    // 描画
                     if (i === 0) {
-                        this._g.moveTo(this._pts[0].x, this._pts[0].y);
-                    } else if (i === n) {
-                        this._g.lineTo(this._pts[0].x, this._pts[0].y);
+                        this._g.moveTo(p1.x, p1.y);
                     } else {
-                        this._g.lineTo(this._pts[i].x, this._pts[i].y);
+                        this._g.lineTo(p1.x, p1.y);
                     }
                 }
                 if (this._bFill) {
@@ -365,6 +375,39 @@ class Paddles {
 
     //     return result;
     // }
+
+    onPressLeftFlip() {
+        const a = 40;
+        const b = 10;
+        const f = (x) => b/(a*a)*(x-a)*(x-a);
+        let count = 0;
+        let mode = 1;   // 1=increase, -1=decrease
+        let timerId = setInterval(()=>{
+            const dAngle = f(count) * mode;
+            for (let paddle of this._paddles) {
+                const curAngle = paddle.getAngle();
+                paddle.setAngle(curAngle + dAngle);
+            }
+            if (mode > 0) {
+                count++;
+                if (count >= 30) {
+                    mode = -mode;
+                }    
+            } else {
+                count--;
+                if (count < 0) {
+                    clearInterval(timerId);
+                }    
+            }
+        }, 10);
+    }
+
+    onPressRightFlip() {
+        for (let paddle of this._paddles) {
+            const curAngle = paddle.getAngle();
+            paddle.setAngle(curAngle - 5);
+        }
+    }
 
     update() {
         this._paddles.forEach(paddle => {

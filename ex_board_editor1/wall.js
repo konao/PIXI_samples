@@ -61,14 +61,14 @@ class Wall extends BaseSpr {
         }
     }
 
-    setPivotPoints(pivots) {
-        this._pivots = pivots;
-    }
-
     // @param pts [i] 壁を構成する点の座標のリスト
     // ptsのフォーマット：[{x, y}]
     setWallPoints(pts) {
         this._pts = pts;
+    }
+
+    setPivotPoints(pivots) {
+        this._pivots = pivots;
     }
 
     setPivotPoint(idx, p) {

@@ -274,7 +274,19 @@ class MainPanel {
                     this.showStatus();
                 }
                 break;
-            }    
+            }
+            case 90:   // z
+            {
+                // console.log('flip left');
+                this._paddles.onPressLeftFlip();
+                break;
+            }
+            case 226:    // アンダーバー
+            {
+                // console.log('flip right');
+                this._paddles.onPressRightFlip();
+                break;
+            }
         }    
     }
 
