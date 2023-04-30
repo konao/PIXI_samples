@@ -5,6 +5,7 @@ const { NEW, SELECT, MOVE } = require('./cmdButtons');
 const { Ball } = require('./ball');
 const { Text } = require('./text');
 const U = require('./physics');
+const C = require('./const');
 
 const N_BALL_TRACE = 10;    // ボールの残像の個数
 const FILE_VERSION = '0.0.1';
@@ -63,7 +64,7 @@ class MainPanel {
 
         // パドル表示実験用
         let p0 = new Paddle();
-        p0.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100);
+        p0.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100, C.PADDLE_LEFT);
         p0.genPaddlePoints({x: 300, y: 500});
         this._paddles.addPaddle(p0);
 

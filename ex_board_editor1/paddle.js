@@ -5,6 +5,7 @@
 const { BaseSpr } = require('./baseSpr');
 const { Spline } = require('./spline');
 const U = require('./physics');
+const C = require('./const');
 
 // ===================================================
 //  1個のパドル
@@ -23,6 +24,7 @@ class Paddle extends BaseSpr {
         this._r2 = 0;   // 半径2
         this._L = 0;  // パドルの腕の長さ
         this._angle = 0;  // 回転角（度）
+        this._type = C.PADDLE_LEFT; // パドルのタイプ（左 or 右）
 
         this._pts = []; // 壁を構成する点の座標のリスト．
 
@@ -35,7 +37,7 @@ class Paddle extends BaseSpr {
     // @param r1 ... 半径1
     // @param r2 ... 半径2
     // @param L ... パドルの腕の長さ
-    init(PIXI, container, w, h, bFill, r1, r2, L) {
+    init(PIXI, container, w, h, bFill, r1, r2, L, pdType) {
         this._w = w;
         this._h = h;
 
@@ -54,8 +56,14 @@ class Paddle extends BaseSpr {
         this._r1 = r1;
         this._r2 = r2;
         this._L = L;
+        this._type = pdType;
 
         container.addChild(cont);
+    }
+
+    // タイプ
+    getType() {
+        return this._type;
     }
 
     // 位置設定
@@ -377,20 +385,22 @@ class Paddles {
     // }
 
     onPressLeftFlip() {
-        const a = 40;
-        const b = 10;
+        const a = 30;
+        const b = 20;
         const f = (x) => b/(a*a)*(x-a)*(x-a);
         let count = 0;
         let mode = 1;   // 1=increase, -1=decrease
         let timerId = setInterval(()=>{
             const dAngle = f(count) * mode;
             for (let paddle of this._paddles) {
-                const curAngle = paddle.getAngle();
-                paddle.setAngle(curAngle + dAngle);
+                if (paddle.getType() === C.PADDLE_LEFT) {
+                    const curAngle = paddle.getAngle();
+                    paddle.setAngle(curAngle + dAngle);    
+                }
             }
             if (mode > 0) {
                 count++;
-                if (count >= 30) {
+                if (count >= 20) {
                     mode = -mode;
                 }    
             } else {
