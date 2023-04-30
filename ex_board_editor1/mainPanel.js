@@ -65,12 +65,14 @@ class MainPanel {
         // パドル表示実験用
         let p0 = new Paddle();
         p0.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100, -180, C.PADDLE_LEFT);
-        p0.genPaddlePoints({x: 300, y: 500});
+        p0.genPaddlePoints({x: 400, y: 650});
+        p0.setAngle(-180);
         this._paddles.addPaddle(p0);
 
         let p1 = new Paddle();
         p1.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100, 180, C.PADDLE_RIGHT);
-        p1.genPaddlePoints({x: 700, y: 500});
+        p1.genPaddlePoints({x: 1000, y: 650});
+        p1.setAngle(180);
         this._paddles.addPaddle(p1);
 
         // ステータス表示用テキスト
@@ -362,7 +364,12 @@ class MainPanel {
 
                     // 衝突計算2（ボールと壁）
                     this._ballList.forEach(ball => {
-                        ball.update2(this._walls.getWallList() /*, g_ballList */);
+                        ball.update2(this._walls.getWallList());
+                    });
+
+                    // 衝突計算3（ボールとパドル）
+                    this._ballList.forEach(ball => {
+                        ball.update2(this._paddles.getPaddleList());
                     });
 
                     // if (this._arrowDragging > 0) {

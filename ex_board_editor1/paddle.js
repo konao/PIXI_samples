@@ -26,7 +26,8 @@ class Paddle extends BaseSpr {
         this._angle = 0;  // 回転角（度）
         this._type = C.PADDLE_LEFT; // パドルのタイプ（左 or 右）
 
-        this._pts = []; // 壁を構成する点の座標のリスト．
+        this._pts = []; // パドルを構成する点の座標のリスト（回転なしの基準点）
+        this._pts2 = [];    // パドルを構成する点の座標のリスト（this._angleを作用させた回転後）
 
         this._w = 0;    // クライアントエリアの幅と高さ
         this._h = 0;
@@ -82,6 +83,18 @@ class Paddle extends BaseSpr {
     // 回転角設定
     setAngle(angle) {
         this._angle = angle;
+
+        // 回転後の座標を計算してthis._pts2に反映させる
+        this._pts2 = [];    // クリア
+        let n = this._pts.length;
+        for (let i = 0; i < n; i++) {
+            // パドルの各点をthis._angle度回転させる
+            // p0=回転前、p1=回転後
+            const p0 = this._pts[i];
+            const p1 = U.vecAdd(this._p, U.vecRotate(U.vecSub(p0, this._p), this._angle));
+
+            this._pts2.push(p1);
+        }
     }
 
     // セーブ用データを返す
@@ -182,7 +195,7 @@ class Paddle extends BaseSpr {
     // ptsが2の時 --> 1（辺は1個）
     // それ以外 --> 0
     countEdges() {
-        const n = this._pts.length;
+        const n = this._pts2.length;
         if (n >= 3) {
             return n;
         } else if (n === 2) {
@@ -199,18 +212,18 @@ class Paddle extends BaseSpr {
     // p1, p2共にフォーマットは{x, y}
     // iが範囲オーバーの時はnullが返る
     getEdge(i) {
-        const n = this._pts.length;
+        const n = this._pts2.length;
         if ((i < 0) || (i >= n)) {
             return null;
         } else if (i === n - 1) {
             return {
-                p1: this._pts[i],
-                p2: this._pts[0]
+                p1: this._pts2[i],
+                p2: this._pts2[0]
             };
         } else {
             return {
-                p1: this._pts[i],
-                p2: this._pts[i + 1]
+                p1: this._pts2[i],
+                p2: this._pts2[i + 1]
             };
         }
     }
@@ -257,7 +270,7 @@ class Paddle extends BaseSpr {
             this._g.clear();
             this._g.lineStyle(1, 0xffffff, 0.7);  // 太さ、色、アルファ(0=透明)
 
-            let n = this._pts.length;
+            let n = this._pts2.length;
             if (n > 0) {
                 if (this._bFill) {
                     this._g.beginFill(0x002010);
@@ -267,14 +280,14 @@ class Paddle extends BaseSpr {
 
                     // パドルの各点をthis._angle度回転させる
                     // p0=回転前、p1=回転後
-                    const p0 = this._pts[targetIdx];
-                    const p1 = U.vecAdd(this._p, U.vecRotate(U.vecSub(p0, this._p), this._angle));
+                    const p0 = this._pts2[targetIdx];
+                    // const p1 = U.vecAdd(this._p, U.vecRotate(U.vecSub(p0, this._p), this._angle));
 
                     // 描画
                     if (i === 0) {
-                        this._g.moveTo(p1.x, p1.y);
+                        this._g.moveTo(p0.x, p0.y);
                     } else {
-                        this._g.lineTo(p1.x, p1.y);
+                        this._g.lineTo(p0.x, p0.y);
                     }
                 }
                 if (this._bFill) {
