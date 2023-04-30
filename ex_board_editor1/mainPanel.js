@@ -64,9 +64,14 @@ class MainPanel {
 
         // パドル表示実験用
         let p0 = new Paddle();
-        p0.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100, C.PADDLE_LEFT);
+        p0.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100, -180, C.PADDLE_LEFT);
         p0.genPaddlePoints({x: 300, y: 500});
         this._paddles.addPaddle(p0);
+
+        let p1 = new Paddle();
+        p1.init(PIXI, this._g, this._g_w, this._g_h, false, 30, 10, 100, 180, C.PADDLE_RIGHT);
+        p1.genPaddlePoints({x: 700, y: 500});
+        this._paddles.addPaddle(p1);
 
         // ステータス表示用テキスト
         this._infoText = new Text()

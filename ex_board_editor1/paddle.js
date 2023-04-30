@@ -37,7 +37,9 @@ class Paddle extends BaseSpr {
     // @param r1 ... 半径1
     // @param r2 ... 半径2
     // @param L ... パドルの腕の長さ
-    init(PIXI, container, w, h, bFill, r1, r2, L, pdType) {
+    // @param angle ... 角度（度）
+    // @param pdType ... パドルのタイプ（C.PADDLE_LEFT/C.PADDLE_RIGHT)
+    init(PIXI, container, w, h, bFill, r1, r2, L, angle, pdType) {
         this._w = w;
         this._h = h;
 
@@ -56,6 +58,7 @@ class Paddle extends BaseSpr {
         this._r1 = r1;
         this._r2 = r2;
         this._L = L;
+        this._angle = angle;
         this._type = pdType;
 
         container.addChild(cont);
@@ -395,7 +398,7 @@ class Paddles {
             for (let paddle of this._paddles) {
                 if (paddle.getType() === C.PADDLE_LEFT) {
                     const curAngle = paddle.getAngle();
-                    paddle.setAngle(curAngle + dAngle);    
+                    paddle.setAngle(curAngle + dAngle);
                 }
             }
             if (mode > 0) {
@@ -413,10 +416,31 @@ class Paddles {
     }
 
     onPressRightFlip() {
-        for (let paddle of this._paddles) {
-            const curAngle = paddle.getAngle();
-            paddle.setAngle(curAngle - 5);
-        }
+        const a = 30;
+        const b = 20;
+        const f = (x) => b/(a*a)*(x-a)*(x-a);
+        let count = 0;
+        let mode = 1;   // 1=increase, -1=decrease
+        let timerId = setInterval(()=>{
+            const dAngle = f(count) * mode;
+            for (let paddle of this._paddles) {
+                if (paddle.getType() === C.PADDLE_RIGHT) {
+                    const curAngle = paddle.getAngle();
+                    paddle.setAngle(curAngle - dAngle);
+                }
+            }
+            if (mode > 0) {
+                count++;
+                if (count >= 20) {
+                    mode = -mode;
+                }    
+            } else {
+                count--;
+                if (count < 0) {
+                    clearInterval(timerId);
+                }    
+            }
+        }, 10);
     }
 
     update() {
