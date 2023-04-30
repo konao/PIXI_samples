@@ -362,14 +362,10 @@ class MainPanel {
                         }
                     }
 
-                    // 衝突計算2（ボールと壁）
+                    // 衝突計算2（ボールと壁、ボールとパドル）
+                    const walls_and_paddles = this._walls.getWallList().concat(this._paddles.getPaddleList());
                     this._ballList.forEach(ball => {
-                        ball.update2(this._walls.getWallList());
-                    });
-
-                    // 衝突計算3（ボールとパドル）
-                    this._ballList.forEach(ball => {
-                        ball.update2(this._paddles.getPaddleList());
+                        ball.update2(walls_and_paddles);
                     });
 
                     // if (this._arrowDragging > 0) {
