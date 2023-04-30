@@ -289,7 +289,7 @@ class MainPanel {
                 this._paddles.onPressLeftFlip();
                 break;
             }
-            case 226:    // アンダーバー
+            case 88:    // x
             {
                 // console.log('flip right');
                 this._paddles.onPressRightFlip();
