@@ -6,7 +6,7 @@ const { BaseSpr } = require('./baseSpr');
 const U = require('./physics');
 const Wall = require('./wall');
 
-const e = 0.9;  // 反射係数
+const e_ratio = 0.95;  // 反射係数
 
 // このクラスはボールの描画をPIXI.Graphicsオブジェクトへの
 // 直接描画により行う．そのため、スプライト自身(=PIXI.Graphics)は
@@ -168,7 +168,7 @@ class Ball extends BaseSpr {
 
         let pB = this.getBallDestPos();
         let pY = ball2.getBallDestPos();
-        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, this._m, ball2.getBallPos(), pY, ball2.getRadius(), ball2.getMass(), e);
+        let cpInfo = U.calcCollisionPoint2(this._p, pB, this._r, this._m, ball2.getBallPos(), pY, ball2.getRadius(), ball2.getMass(), e_ratio);
         if (cpInfo !== null) {
             // 衝突した
             
@@ -240,7 +240,7 @@ class Ball extends BaseSpr {
                 let edgeInfos = edgeList.map(e => {
                     return {
                         e: e,
-                        cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r, e)
+                        cpInfo: U.calcCollisionPoint1(p, U.vecAdd(p, v), e.p1, e.p2, this._r, e_ratio)
                     };
                 });
     
@@ -261,7 +261,7 @@ class Ball extends BaseSpr {
         if (nearestEdge) {
             // 反射判定
             let pB = U.vecAdd(p, v);
-            let cpInfo = U.calcCollisionPoint1(p, pB, nearestEdge.p1, nearestEdge.p2, this._r, e);
+            let cpInfo = U.calcCollisionPoint1(p, pB, nearestEdge.p1, nearestEdge.p2, this._r, e_ratio);
 
             if (cpInfo !== null) {
                 // 辺と衝突した
@@ -271,7 +271,7 @@ class Ball extends BaseSpr {
                 this.setDir(cpInfo.vRefDir);
 
                 // スピード更新
-                let newSpeed = e * this.getSpeed();
+                let newSpeed = e_ratio * this.getSpeed();
                 this.setSpeed(newSpeed);
                 
                 // 再度反射の判定を再帰的に行う
