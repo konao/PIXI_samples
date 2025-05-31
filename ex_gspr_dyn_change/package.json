@@ -1,9 +1,10 @@
 {
-  "name": "spaceShooter1",
+  "name": "ex_gspr_dyn_change",
   "version": "0.1.0",
   "description": "",
   "main": "main.js",
   "scripts": {
+    "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,5 +14,8 @@
     "@types/pixi.js": "^5.0.0",
     "jquery": "^3.5.1",
     "pixi.js": "^5.2.4"
+  },
+  "devDependencies": {
+    "electron": "^36.3.2"
   }
 }
