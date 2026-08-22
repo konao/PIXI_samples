@@ -1,6 +1,7 @@
 # 素のPIXI + React + Vite + TypeScriptアプリのビルド方法
 
 2025/6/10 konao
+2026/5/3 修正
 
 ## ひな形生成＆ライブラリインストール
 
@@ -20,12 +21,14 @@ npm start
 
 ## ソース上の注意点
 
-`tsconfig.json`に以下を追加
+[1] `tsconfig.json`に以下を追加
 
 ```json
 {
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "jsx": "react-jsx", # <--- "compilerOptions"セクションは既にあるので、この行だけ追加！
   }
 }
 ```
+
+[2] `renderer.ts`の拡張子を`.tsx`に変え、`renderer.tsx`にする．
