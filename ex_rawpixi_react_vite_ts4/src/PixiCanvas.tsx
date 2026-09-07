@@ -59,12 +59,12 @@ export default function PixiCanvas() {
       });
       app.stage.addChild(particleContainer);
 
-      textureManager = new Texture.Texture(app, data.objTerrain2Tex);
-      textureManager.createTexture().then(() => {
+      textureManager = new Texture.Texture();
+      textureManager.createTexture(data.objTerrain2Tex).then(() => {
         console.log('テクスチャの作成が完了しました。');
 
-        terrain = new Terrain.Terrain(app, data.objTerrain);
-        terrain.createTerrain();
+        terrain = new Terrain.Terrain();
+        terrain.createTerrain(data.objTerrain);
 
         // 4. 大量スプライトの生成とコンテナへの追加
         const sprites: PIXI.Particle[] = [];

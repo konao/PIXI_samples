@@ -1,17 +1,14 @@
-import * as PIXI from 'pixi.js';
-
 export class Terrain {
-    private app: PIXI.Application;
     private terrain: any;
     private terrainSize: { xsize: number; ysize: number } = { xsize: 0, ysize: 0 };
     private terrainMap: object[][] = [];
 
-    constructor(app: PIXI.Application, terrainData: any) {
-        this.app = app;
-        this.terrain = terrainData;
+    constructor() {
     }
 
-    public createTerrain() {
+    public createTerrain(terrainData: any) {
+        this.terrain = terrainData;
+
         // terrain.jsonの内容をもとに、terrainSizeとterrainMapを初期化
         this.terrainSize.xsize = this.terrain["xsize"];
         this.terrainSize.ysize = this.terrain["ysize"];
