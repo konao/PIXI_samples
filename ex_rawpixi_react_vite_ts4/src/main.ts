@@ -1,7 +1,18 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
+import fs from 'fs';
 import started from 'electron-squirrel-startup';
 
+function loadJsonSync(jsonPath: string): any {
+  try {
+    // jsonファイルを同期的に読み込み、オブジェクトとして返す
+    const fileContent = fs.readFileSync(jsonPath, 'utf8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error('JSONの読み込みに失敗しました:', error);
+    return {}; // 失敗時のフォールバック
+  }
+}
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -10,10 +21,12 @@ if (started) {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1280,
+    height: 1024,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true, // セキュリティのために有効化
+      nodeIntegration: false, // セキュリティのために無効化
     },
   });
 
@@ -33,7 +46,22 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', () => {
+  // 地形データを読み込む
+  const objTerrain = loadJsonSync('./data/terrain.json');
+  console.log('terrain.jsonの内容:', objTerrain);
+
+  // 地形名をテクスチャ名のマッピング情報を読み込む
+  const objTerrain2Tex = loadJsonSync('./data/terrain2tex.json');
+  console.log('terrain2tex.jsonの内容:', objTerrain2Tex);
+
+  // メインプロセスで読み込んだJSONデータをレンダラープロセスに渡すためのIPCハンドラーを設定
+  ipcMain.handle('get-data', () => {
+    return { objTerrain, objTerrain2Tex };
+  });
+
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

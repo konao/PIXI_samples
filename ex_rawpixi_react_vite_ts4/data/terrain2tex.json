@@ -1,0 +1,134 @@
+{
+    "texmap": [
+        {
+            "name": "grass0",
+            "texture": "Ground/Grass.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 1,
+                "iy": 0
+            }
+        },
+        {
+            "name": "grass1",
+            "texture": "Ground/Grass.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 2,
+                "iy": 0
+            }
+        },
+        {
+            "name": "ground0",
+            "texture": "Ground/Grass.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 5,
+                "iy": 0
+            }
+        },
+        {
+            "name": "ground1",
+            "texture": "Ground/Grass.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 4,
+                "iy": 0
+            }
+        },
+        {
+            "name": "shore0",
+            "texture": "Ground/Shore.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 0,
+                "iy": 0
+            }
+        },
+        {
+            "name": "shore1",
+            "texture": "Ground/Shore.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 1,
+                "iy": 0
+            }
+        },
+        {
+            "name": "shore2",
+            "texture": "Ground/Shore.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 2,
+                "iy": 0
+            }
+        },
+        {
+            "name": "shore3",
+            "texture": "Ground/Shore.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 3,
+                "iy": 0
+            }
+        },
+        {
+            "name": "shore4",
+            "texture": "Ground/Shore.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 4,
+                "iy": 0
+            }
+        },
+        {
+            "name": "tree0",
+            "texture": "Nature/Trees.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 0,
+                "iy": 0
+            }
+        },
+        {
+            "name": "tree1",
+            "texture": "Nature/Trees.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 1,
+                "iy": 0
+            }
+        },
+        {
+            "name": "tree2",
+            "texture": "Nature/Trees.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 2,
+                "iy": 0
+            }
+        },
+        {
+            "name": "tree3",
+            "texture": "Nature/Trees.png",
+            "subtexture": {
+                "width": 16,
+                "height": 16,
+                "ix": 3,
+                "iy": 0
+            }
+        }
+    ]
+}
