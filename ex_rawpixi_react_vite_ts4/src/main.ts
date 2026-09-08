@@ -51,7 +51,7 @@ app.on('ready', () => {
   const objTerrain = loadJsonSync('./data/terrain.json');
   console.log('terrain.jsonの内容:', objTerrain);
 
-  // 地形名をテクスチャ名のマッピング情報を読み込む
+  // 地形名とテクスチャ名のマッピング情報を読み込む
   const objTerrain2Tex = loadJsonSync('./data/terrain2tex.json');
   console.log('terrain2tex.jsonの内容:', objTerrain2Tex);
 
