@@ -36,6 +36,7 @@ const keys: { [key: string]: boolean } = {
 };
 
 let bulletMode: number = 1;
+let pause: boolean = false;
 
 // 2. イベントリスナーを登録（キーが押されたか離されたかを記録）
 window.addEventListener('keydown', (e) => {
@@ -64,6 +65,12 @@ window.addEventListener('keydown', (e) => {
       case 'Digit5': {
         bulletMode = 5;
         console.log(bulletMode);
+        e.preventDefault(); // スクロール防止
+        break;
+      }
+      case 'KeyP': {
+        pause = !pause;
+        console.log(`pause: ${pause}`);
         e.preventDefault(); // スクロール防止
         break;
       }
@@ -123,6 +130,8 @@ export default function PixiCanvas() {
       const moveSpeed = 300;
 
       app.ticker.add((ticker) => {
+        if (pause) return;  // 一時停止中なら何もしない
+
         // 前のフレームからの経過時間（秒に変換するためのデルタ値）
         const delta = ticker.deltaTime;
         
@@ -131,6 +140,9 @@ export default function PixiCanvas() {
 
         const player = g_stage.getPlayer();
         const bullets = g_stage.getBullets();
+        const enemies = g_stage.getEnemies();
+
+        g_stage.countUp();
 
         // 上下左右の移動計算
         if (keys.ArrowUp)    player?.move(0, -distance);
@@ -142,12 +154,21 @@ export default function PixiCanvas() {
 
           const playerPos = player?.getPos();
           if (playerPos) {
+            // 弾丸生成
             bullets?.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
           }
         }
 
         // 弾丸移動
         bullets?.update();
+
+        if ((g_stage.getCount() % 100) == 0) {
+          // 敵生成
+          enemies?.genEnemies();
+        }
+
+        // 敵移動
+        enemies?.update();
       });
     });
 
