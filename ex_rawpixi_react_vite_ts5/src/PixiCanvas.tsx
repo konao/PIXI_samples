@@ -9,8 +9,7 @@ import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import * as Stage from './Stage';
 import * as Player from './Player';
-// import * as Texture from './Texture';
-// import * as Terrain from './Terrain';
+import * as Utils from './Utils';
 
 // ── windowオブジェクトの型定義を追加 ──
 // declare global {
@@ -115,16 +114,25 @@ export default function PixiCanvas() {
               position: true, // 位置の変更を許可
               scale: true,    // 拡大・縮小の変更を許可
               rotation: true, // 回転の変更を許可
-              color: true     // アルファ値（透明度）の変更を許可
+              color: true,     // アルファ値（透明度）の変更を許可
+              vertex: true // 動的にパーティクルのテクスチャを変える場合に必要
           }
       });
+
+      // 通常のContainerの作成（アニメーション付きスプライト用）
+      const effectContainer = new PIXI.Container();
+
+      // addChildの順番に注意
+      // （後に追加したものが上に表示される）
       app.stage.addChild(particleContainer);
+      app.stage.addChild(effectContainer);
 
       // JSONファイルをAssets.loadすると、内部の画像も自動でロード・分割される
       const wholeTexture = await PIXI.Assets.load<PIXI.Spritesheet>('image/SpaceRage.json');
 
       // ステージ初期化
-      g_stage.init(particleContainer, wholeTexture, app.screen.width, app.screen.height);
+      const containers = new Utils.Containers(particleContainer, effectContainer);
+      g_stage.init(containers, wholeTexture, app.screen.width, app.screen.height);
       
       // 移動速度（1秒間に移動するピクセル数）
       const moveSpeed = 300;
@@ -141,6 +149,7 @@ export default function PixiCanvas() {
         const player = g_stage.getPlayer();
         const bullets = g_stage.getBullets();
         const enemies = g_stage.getEnemies();
+        const explosions = g_stage.getExplosions();
 
         g_stage.countUp();
 
@@ -169,6 +178,11 @@ export default function PixiCanvas() {
 
         // 敵移動
         enemies?.update();
+
+        // 弾丸衝突判定、点数加算、他
+        if (player && bullets && enemies) {
+          g_stage.hitTest(player, bullets, enemies);
+        }
       });
     });
 

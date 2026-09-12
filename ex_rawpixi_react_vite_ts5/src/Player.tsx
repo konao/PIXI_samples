@@ -3,21 +3,22 @@
 // ************************************************************
 
 import * as PIXI from 'pixi.js';
+import * as Utils from './Utils';
 
 export class Player {
-    private _container: PIXI.ParticleContainer | null = null;
+    private _containers: Utils.Containers | null = null;
     private _tex_player_b_m: PIXI.Texture | null = null;
     private _player: PIXI.Particle | null = null;
 
-    public init(container: PIXI.ParticleContainer, wholeTexture: PIXI.Spritesheet) {
-        this._container = container;
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet) {
+        this._containers = containers;
         this._tex_player_b_m = wholeTexture.textures['Player/player_b_m.png'];
 
         // プレーヤーのスプライト（パーティクル）を生成
         this._player = new PIXI.Particle(this._tex_player_b_m);
 
         // コンテナに登録
-        this._container.addParticle(this._player);
+        this._containers.particleContainer.addParticle(this._player);
     }
 
     public setPos(x: number, y: number) {
