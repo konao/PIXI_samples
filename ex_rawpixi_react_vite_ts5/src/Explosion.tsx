@@ -7,10 +7,10 @@ import * as Utils from './Utils';
 export class Explosions {
     private _containers: Utils.Containers | null = null;
     private _tex_explotions: PIXI.Texture[] = [];
-    
+
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet) {
         this._containers = containers;
-        for (let i=1; i<=9; i++) {
+        for (let i = 1; i <= 9; i++) {
             const texPath = `Explosions/explosion_2_${String(i).padStart(2, '0')}.png`;
             this._tex_explotions.push(wholeTexture.textures[texPath]);
         }
