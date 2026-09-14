@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import * as Stage from './Stage';
 import * as Player from './Player';
+import * as Sound from './Sound';
 import * as Utils from './Utils';
 
 // ── windowオブジェクトの型定義を追加 ──
@@ -162,6 +163,9 @@ export default function PixiCanvas() {
           if (playerPos) {
             // 弾丸生成
             bullets?.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
+
+            // 発射音
+            Sound.playSE("shot");
           }
         }
 
