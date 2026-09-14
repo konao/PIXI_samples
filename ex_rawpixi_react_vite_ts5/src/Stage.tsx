@@ -4,7 +4,8 @@
 
 import * as PIXI from 'pixi.js';
 import * as Player from './Player';
-import * as Bullet from './Bullet';
+import * as PlayerBullet from './PlayerBullet';
+import * as EnemyBullet from './EnemyBullet';
 import * as Enemy from './Enemy';
 import * as Explosions from './Explosion';
 import * as Font from './Font';
@@ -17,8 +18,9 @@ export class Stage {
     private _w: number = 0;
     private _h: number = 0;
     private _player: Player.Player | null = null;
-    private _bullets: Bullet.Bullets | null = null;
+    private _playerBullets: PlayerBullet.PlayerBullets | null = null;
     private _enemies: Enemy.Enemies | null = null;
+    private _enemyBullets: EnemyBullet.EnemyBullets | null = null;
     private _explosions: Explosions.Explosions | null = null;
     private _stageNo: number = 1;
     private _count: number = 0;
@@ -39,13 +41,17 @@ export class Stage {
         this._player.init(containers, wholeTexture);
         this._player.setPos(w / 2 - 32, h * 4 / 5);
 
-        // 弾丸
-        this._bullets = new Bullet.Bullets();
-        this._bullets.init(containers, wholeTexture, w, h);
+        // 弾丸（プレーヤー）
+        this._playerBullets = new PlayerBullet.PlayerBullets();
+        this._playerBullets.init(containers, wholeTexture, w, h);
 
         // 敵
         this._enemies = new Enemy.Enemies();
         this._enemies.init(containers, wholeTexture, w, h)
+
+        // 弾丸（敵）
+        this._enemyBullets = new EnemyBullet.EnemyBullets();
+        this._enemyBullets.init(containers, wholeTexture, w, h);
 
         // 爆発
         this._explosions = new Explosions.Explosions();
@@ -106,12 +112,16 @@ export class Stage {
         return this._player;
     }
 
-    public getBullets() {
-        return this._bullets;
+    public getPlayerBullets() {
+        return this._playerBullets;
     }
 
     public getEnemies() {
         return this._enemies;
+    }
+
+    public getEnemyBullets() {
+        return this._enemyBullets;
     }
 
     public getExplosions() {
@@ -135,7 +145,7 @@ export class Stage {
         }
     }
 
-    public hitTest(player: Player.Player, bullets: Bullet.Bullets, enemies: Enemy.Enemies) {
+    public hitTest1(player: Player.Player, bullets: PlayerBullet.PlayerBullets, enemies: Enemy.Enemies) {
         // 弾丸ヒットテスト
         const parBullets: PIXI.Particle[] = bullets.getParBullets();
         const pEnemies: Enemy.Enemy[] = enemies.getEnemies();
@@ -182,6 +192,15 @@ export class Stage {
             if (indsToRemoveEnemies.length > 0) {
                 // console.log(`Hit! enemies=${indsToRemoveEnemies}`);
                 enemies.removeEnemies(indsToRemoveEnemies);
+            }
+        }
+    }
+
+    public enemyAttack() {
+        if (this._enemies && this._enemyBullets) {
+            const playerPos = this._player?.getPos();
+            if (playerPos) {
+                this._enemies.attack(playerPos.x, playerPos.y, this._enemyBullets);
             }
         }
     }

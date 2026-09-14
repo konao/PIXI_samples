@@ -3,6 +3,7 @@
 // ************************************************************
 import * as PIXI from 'pixi.js';
 import * as Utils from './Utils';
+import * as EnemyBullet from './EnemyBullet';
 
 export class Enemy {
     private _containers: Utils.Containers | null = null;
@@ -166,6 +167,22 @@ export class Enemies {
 
             // 画面から外れた敵を消す
             this.removeEnemies(indsToRemove);
+        }
+    }
+
+    public attack(player_x: number, player_y: number, enemyBullets: EnemyBullet.EnemyBullets) {
+        const attackRatio = 0.005;  // 攻撃頻度（大きいほど攻撃が多くなる）
+        const bulletSpeed = 10; // 弾丸の速さ（大きいほど弾丸が速い）
+
+        for (let i = 0; i < this._enemies.length; i++) {
+            const enemy = this._enemies[i];
+            if (enemy && Math.random() < attackRatio) {   
+                const parEnemy = enemy.getParEnemy();
+                if (parEnemy) {
+                    // 攻撃
+                    enemyBullets.genNewBullets(player_x, player_y, parEnemy.x, parEnemy.y, 64, 64, bulletSpeed);
+                }
+            }
         }
     }
 }
