@@ -8,6 +8,8 @@ import * as Utils from './Utils';
 export class PlayerBullets {
     private _containers: Utils.Containers | null = null;
     private _tex_bullet: PIXI.Texture | null = null;
+    private _tex_laser: PIXI.Texture | null = null;
+    private _tex_missile: PIXI.Texture | null = null;
     private _w: number = 0;
     private _h: number = 0;
     private _bullets: PIXI.Particle[] = [];
@@ -15,53 +17,78 @@ export class PlayerBullets {
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
         this._containers = containers;
         this._tex_bullet = wholeTexture.textures['SpaceRage/FX/vulcan_3.png'];
+        this._tex_laser = wholeTexture.textures['SpaceShooterPack/laser-3.png'];
+        this._tex_missile = wholeTexture.textures['SpaceShooterPack/rocket.png'];
         this._w = w;
         this._h = h;
     }
 
-    public genNewBullets(bulletMode: number, player_x: number, player_y: number, player_w: number, player_h: number) {
-        console.log(bulletMode);
-        if (this._tex_bullet && this._containers?.particleContainer) {
-            for (let i = 0; i < bulletMode; i++) {
-                // 弾丸のスプライトを生成
-                const bullet_x = player_x + player_w / 2;
-                const bullet_y = player_y;
-                let bullet_dx = 0;
-                const bullet_dy = -10;
-                switch (bulletMode) {
-                    case 1:
-                        this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
-                        break;
-                    case 3:
-                        // 放射状に散らす
-                        for (let i = 0; i < 3; i++) {
-                            bullet_dx = (i - 1) * 2;
-                            this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
-                        }
-                        break;
-                    case 5:
-                        // 平行に連発
-                        for (let i = 0; i < 3; i++) {
-                            this.addBullet(bullet_x + (i - 1) * 15, bullet_y, bullet_dx, bullet_dy);
-                        }
-                        break;
-                }
-
+    public genNewBullets(bulletMode: string, player_x: number, player_y: number, player_w: number, player_h: number) {
+        // console.log(bulletMode);
+        if (this._tex_bullet && this._tex_laser && this._containers?.particleContainer) {
+            // 弾丸のスプライトを生成
+            const bullet_x = player_x + player_w / 2;
+            const bullet_y = player_y;
+            let bullet_dx = 0;
+            const bullet_dy = -10;
+            const laser_dy = -20;
+            switch (bulletMode) {
+                case "single":
+                    this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy, this._tex_bullet);
+                    break;
+                case "multi3":
+                    // 平行に連発
+                    for (let i = 0; i < 3; i++) {
+                        this.addBullet(bullet_x + (i - 1) * 15, bullet_y, bullet_dx, bullet_dy, this._tex_bullet);
+                    }
+                    break;
+                case "spread3":
+                    // 放射状に散らす
+                    for (let i = 0; i < 3; i++) {
+                        bullet_dx = (i - 1) * 2;
+                        this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy, this._tex_bullet);
+                    }
+                    break;
+                case "laser":
+                    // レーザー
+                    this.addLaser(bullet_x, bullet_y, 0, laser_dy, this._tex_laser);
+                    break;
             }
         }
     }
 
-    public addBullet(x: number, y: number, dx: number, dy: number) {
+    public addBullet(x: number, y: number, dx: number, dy: number, tex: PIXI.Texture) {
         // 弾丸のスプライトを生成
         if (this._tex_bullet && this._containers?.particleContainer) {
-            const bullet = new PIXI.Particle(this._tex_bullet)
+            const bullet = new PIXI.Particle(tex)
+            bullet.type = "bullet";
             bullet.x = x;
             bullet.y = y;
             bullet.anchorX = 0.5;   // x方向真ん中を基準とする
             bullet.anchorY = 0;     // y方向は一番上を基準
             bullet.rotation = 0;
-            bullet.w = this._tex_bullet.width;   // テクスチャのサイズをパーティクルにもセットしておく
-            bullet.h = this._tex_bullet.height;
+            bullet.w = tex.width;   // テクスチャのサイズをパーティクルにもセットしておく
+            bullet.h = tex.height;
+            bullet.dx = dx;
+            bullet.dy = dy;
+            this._bullets.push(bullet)
+            this._containers.particleContainer.addParticle(bullet)
+        }
+    }
+
+    public addLaser(x: number, y: number, dx: number, dy: number, tex: PIXI.Texture) {
+        if (this._tex_bullet && this._containers?.particleContainer) {
+            const bullet = new PIXI.Particle(tex)
+            bullet.type = "laser";
+            bullet.x = x;
+            bullet.y = y;
+            bullet.anchorX = 0.5;   // x方向真ん中を基準とする
+            bullet.anchorY = 0.8;   // y方向はレーザー画像の一番下あたりを基準にする
+            bullet.rotation = 0;
+            bullet.scaleX = 0.5;
+            bullet.scaleY = 7;
+            // bullet.w = tex.width;   // テクスチャのサイズをパーティクルにもセットしておく
+            // bullet.h = tex.height;
             bullet.dx = dx;
             bullet.dy = dy;
             this._bullets.push(bullet)
