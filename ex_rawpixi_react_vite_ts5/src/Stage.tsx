@@ -104,6 +104,7 @@ export class Stage {
         // addChildの順番に注意
         // （後に追加したものが上に表示される）
         app.stage.addChild(containers.particleContainer);
+        app.stage.addChild(containers.normalContainer);
         app.stage.addChild(containers.effectContainer);
         app.stage.addChild(containers.uiContainer);
     }
