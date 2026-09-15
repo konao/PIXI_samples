@@ -11,7 +11,7 @@ export class Explosions {
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet) {
         this._containers = containers;
         for (let i = 1; i <= 9; i++) {
-            const texPath = `Explosions/explosion_2_${String(i).padStart(2, '0')}.png`;
+            const texPath = `SpaceRage/Explosions/explosion_2_${String(i).padStart(2, '0')}.png`;
             this._tex_explotions.push(wholeTexture.textures[texPath]);
         }
     }

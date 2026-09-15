@@ -14,7 +14,7 @@ export class EnemyBullets {
 
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
         this._containers = containers;
-        this._tex_bullet = wholeTexture.textures['FX/proton_01.png'];
+        this._tex_bullet = wholeTexture.textures['SpaceRage/FX/proton_01.png'];
         this._w = w;
         this._h = h;
     }

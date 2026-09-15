@@ -17,7 +17,7 @@ export class Enemy {
 
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, spiecies: string, x: number, y: number, sw: number, sh: number, aid: number) {
         this._containers = containers;
-        const texName = `Enemies/${spiecies}.png`;  // (ex) enemy_1_r_m.png
+        const texName = `SpaceRage/Enemies/${spiecies}.png`;  // (ex) enemy_1_r_m.png
         this._tex_enemy = wholeTexture.textures[texName];
         this._parEnemy = new PIXI.Particle(this._tex_enemy)
         this._parEnemy.x = x;

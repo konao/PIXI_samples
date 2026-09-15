@@ -14,7 +14,7 @@ export class PlayerBullets {
 
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
         this._containers = containers;
-        this._tex_bullet = wholeTexture.textures['FX/vulcan_3.png'];
+        this._tex_bullet = wholeTexture.textures['SpaceRage/FX/vulcan_3.png'];
         this._w = w;
         this._h = h;
     }
