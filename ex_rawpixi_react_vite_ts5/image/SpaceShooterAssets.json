@@ -42,7 +42,7 @@
 },
 "LunarLander/Effects/Fx_04.png":
 {
-	"frame": {"x":52,"y":268,"w":256,"h":64},
+	"frame": {"x":104,"y":268,"w":256,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":64},
@@ -50,7 +50,7 @@
 },
 "LunarLander/Effects/Fx_05.png":
 {
-	"frame": {"x":308,"y":268,"w":256,"h":64},
+	"frame": {"x":360,"y":268,"w":256,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":64},
@@ -90,7 +90,7 @@
 },
 "LunarLander/Ships/Guns.png":
 {
-	"frame": {"x":564,"y":268,"w":192,"h":64},
+	"frame": {"x":616,"y":268,"w":192,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":192,"h":64},
@@ -167,6 +167,14 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":112,"h":16},
 	"sourceSize": {"w":112,"h":16}
+},
+"Others/Galaxian.png":
+{
+	"frame": {"x":861,"y":22,"w":48,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+	"sourceSize": {"w":48,"h":48}
 },
 "SpaceRage/Enemies/enemy_1_b_l1.png":
 {
@@ -410,7 +418,7 @@
 },
 "SpaceRage/Enemies/mine_1_01.png":
 {
-	"frame": {"x":861,"y":22,"w":48,"h":48},
+	"frame": {"x":909,"y":22,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -418,7 +426,7 @@
 },
 "SpaceRage/Enemies/mine_1_02.png":
 {
-	"frame": {"x":909,"y":22,"w":48,"h":48},
+	"frame": {"x":0,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -426,7 +434,7 @@
 },
 "SpaceRage/Enemies/mine_1_03.png":
 {
-	"frame": {"x":0,"y":70,"w":48,"h":48},
+	"frame": {"x":48,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -434,7 +442,7 @@
 },
 "SpaceRage/Enemies/mine_1_04.png":
 {
-	"frame": {"x":48,"y":70,"w":48,"h":48},
+	"frame": {"x":96,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -442,7 +450,7 @@
 },
 "SpaceRage/Enemies/mine_1_05.png":
 {
-	"frame": {"x":96,"y":70,"w":48,"h":48},
+	"frame": {"x":144,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -450,7 +458,7 @@
 },
 "SpaceRage/Enemies/mine_1_06.png":
 {
-	"frame": {"x":144,"y":70,"w":48,"h":48},
+	"frame": {"x":192,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -458,7 +466,7 @@
 },
 "SpaceRage/Enemies/mine_1_07.png":
 {
-	"frame": {"x":192,"y":70,"w":48,"h":48},
+	"frame": {"x":240,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -466,7 +474,7 @@
 },
 "SpaceRage/Enemies/mine_1_08.png":
 {
-	"frame": {"x":240,"y":70,"w":48,"h":48},
+	"frame": {"x":288,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -474,7 +482,7 @@
 },
 "SpaceRage/Enemies/mine_1_09.png":
 {
-	"frame": {"x":288,"y":70,"w":48,"h":48},
+	"frame": {"x":336,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -482,7 +490,7 @@
 },
 "SpaceRage/Enemies/mine_2_01.png":
 {
-	"frame": {"x":336,"y":70,"w":48,"h":48},
+	"frame": {"x":384,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -490,7 +498,7 @@
 },
 "SpaceRage/Enemies/mine_2_02.png":
 {
-	"frame": {"x":384,"y":70,"w":48,"h":48},
+	"frame": {"x":432,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -498,7 +506,7 @@
 },
 "SpaceRage/Enemies/mine_2_03.png":
 {
-	"frame": {"x":432,"y":70,"w":48,"h":48},
+	"frame": {"x":480,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -506,7 +514,7 @@
 },
 "SpaceRage/Enemies/mine_2_04.png":
 {
-	"frame": {"x":480,"y":70,"w":48,"h":48},
+	"frame": {"x":528,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -514,7 +522,7 @@
 },
 "SpaceRage/Enemies/mine_11_01.png":
 {
-	"frame": {"x":528,"y":70,"w":48,"h":48},
+	"frame": {"x":576,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -522,7 +530,7 @@
 },
 "SpaceRage/Enemies/mine_11_02.png":
 {
-	"frame": {"x":576,"y":70,"w":48,"h":48},
+	"frame": {"x":624,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -530,7 +538,7 @@
 },
 "SpaceRage/Enemies/mine_11_03.png":
 {
-	"frame": {"x":624,"y":70,"w":48,"h":48},
+	"frame": {"x":672,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -538,7 +546,7 @@
 },
 "SpaceRage/Enemies/mine_11_04.png":
 {
-	"frame": {"x":672,"y":70,"w":48,"h":48},
+	"frame": {"x":720,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -546,7 +554,7 @@
 },
 "SpaceRage/Enemies/mine_11_05.png":
 {
-	"frame": {"x":720,"y":70,"w":48,"h":48},
+	"frame": {"x":768,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -554,7 +562,7 @@
 },
 "SpaceRage/Enemies/mine_11_06.png":
 {
-	"frame": {"x":768,"y":70,"w":48,"h":48},
+	"frame": {"x":816,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -562,7 +570,7 @@
 },
 "SpaceRage/Enemies/mine_11_07.png":
 {
-	"frame": {"x":816,"y":70,"w":48,"h":48},
+	"frame": {"x":864,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -570,7 +578,7 @@
 },
 "SpaceRage/Enemies/mine_11_08.png":
 {
-	"frame": {"x":864,"y":70,"w":48,"h":48},
+	"frame": {"x":912,"y":70,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -578,7 +586,7 @@
 },
 "SpaceRage/Enemies/mine_11_09.png":
 {
-	"frame": {"x":912,"y":70,"w":48,"h":48},
+	"frame": {"x":0,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -586,7 +594,7 @@
 },
 "SpaceRage/Enemies/mine_12_01.png":
 {
-	"frame": {"x":0,"y":118,"w":48,"h":48},
+	"frame": {"x":48,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -594,7 +602,7 @@
 },
 "SpaceRage/Enemies/mine_12_02.png":
 {
-	"frame": {"x":48,"y":118,"w":48,"h":48},
+	"frame": {"x":96,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -602,7 +610,7 @@
 },
 "SpaceRage/Enemies/mine_12_03.png":
 {
-	"frame": {"x":96,"y":118,"w":48,"h":48},
+	"frame": {"x":144,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -610,7 +618,7 @@
 },
 "SpaceRage/Enemies/mine_12_04.png":
 {
-	"frame": {"x":144,"y":118,"w":48,"h":48},
+	"frame": {"x":192,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -618,7 +626,7 @@
 },
 "SpaceRage/Enemies/mine_12_05.png":
 {
-	"frame": {"x":192,"y":118,"w":48,"h":48},
+	"frame": {"x":240,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -626,7 +634,7 @@
 },
 "SpaceRage/Enemies/mine_12_06.png":
 {
-	"frame": {"x":240,"y":118,"w":48,"h":48},
+	"frame": {"x":288,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -634,7 +642,7 @@
 },
 "SpaceRage/Enemies/mine_12_07.png":
 {
-	"frame": {"x":288,"y":118,"w":48,"h":48},
+	"frame": {"x":336,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -642,7 +650,7 @@
 },
 "SpaceRage/Enemies/mine_12_08.png":
 {
-	"frame": {"x":336,"y":118,"w":48,"h":48},
+	"frame": {"x":384,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -650,7 +658,7 @@
 },
 "SpaceRage/Enemies/mine_12_09.png":
 {
-	"frame": {"x":384,"y":118,"w":48,"h":48},
+	"frame": {"x":432,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -658,7 +666,7 @@
 },
 "SpaceRage/Enemies/mine_21_01.png":
 {
-	"frame": {"x":432,"y":118,"w":48,"h":48},
+	"frame": {"x":480,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -666,7 +674,7 @@
 },
 "SpaceRage/Enemies/mine_21_02.png":
 {
-	"frame": {"x":480,"y":118,"w":48,"h":48},
+	"frame": {"x":528,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -674,7 +682,7 @@
 },
 "SpaceRage/Enemies/mine_21_03.png":
 {
-	"frame": {"x":528,"y":118,"w":48,"h":48},
+	"frame": {"x":576,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -682,7 +690,7 @@
 },
 "SpaceRage/Enemies/mine_21_04.png":
 {
-	"frame": {"x":576,"y":118,"w":48,"h":48},
+	"frame": {"x":624,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -690,7 +698,7 @@
 },
 "SpaceRage/Enemies/mine_22_01.png":
 {
-	"frame": {"x":624,"y":118,"w":48,"h":48},
+	"frame": {"x":672,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -698,7 +706,7 @@
 },
 "SpaceRage/Enemies/mine_22_02.png":
 {
-	"frame": {"x":672,"y":118,"w":48,"h":48},
+	"frame": {"x":720,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -706,7 +714,7 @@
 },
 "SpaceRage/Enemies/mine_22_03.png":
 {
-	"frame": {"x":720,"y":118,"w":48,"h":48},
+	"frame": {"x":768,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -714,7 +722,7 @@
 },
 "SpaceRage/Enemies/mine_22_04.png":
 {
-	"frame": {"x":768,"y":118,"w":48,"h":48},
+	"frame": {"x":816,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -722,7 +730,7 @@
 },
 "SpaceRage/Explosions/explosion_1_01.png":
 {
-	"frame": {"x":432,"y":166,"w":52,"h":51},
+	"frame": {"x":480,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -730,7 +738,7 @@
 },
 "SpaceRage/Explosions/explosion_1_02.png":
 {
-	"frame": {"x":484,"y":166,"w":52,"h":51},
+	"frame": {"x":532,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -738,7 +746,7 @@
 },
 "SpaceRage/Explosions/explosion_1_03.png":
 {
-	"frame": {"x":536,"y":166,"w":52,"h":51},
+	"frame": {"x":584,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -746,7 +754,7 @@
 },
 "SpaceRage/Explosions/explosion_1_04.png":
 {
-	"frame": {"x":588,"y":166,"w":52,"h":51},
+	"frame": {"x":636,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -754,7 +762,7 @@
 },
 "SpaceRage/Explosions/explosion_1_05.png":
 {
-	"frame": {"x":640,"y":166,"w":52,"h":51},
+	"frame": {"x":688,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -762,7 +770,7 @@
 },
 "SpaceRage/Explosions/explosion_1_06.png":
 {
-	"frame": {"x":692,"y":166,"w":52,"h":51},
+	"frame": {"x":740,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -770,7 +778,7 @@
 },
 "SpaceRage/Explosions/explosion_1_07.png":
 {
-	"frame": {"x":744,"y":166,"w":52,"h":51},
+	"frame": {"x":792,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -778,7 +786,7 @@
 },
 "SpaceRage/Explosions/explosion_1_08.png":
 {
-	"frame": {"x":796,"y":166,"w":52,"h":51},
+	"frame": {"x":844,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -786,7 +794,7 @@
 },
 "SpaceRage/Explosions/explosion_1_09.png":
 {
-	"frame": {"x":848,"y":166,"w":52,"h":51},
+	"frame": {"x":896,"y":166,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -794,7 +802,7 @@
 },
 "SpaceRage/Explosions/explosion_1_10.png":
 {
-	"frame": {"x":900,"y":166,"w":52,"h":51},
+	"frame": {"x":0,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -802,7 +810,7 @@
 },
 "SpaceRage/Explosions/explosion_1_11.png":
 {
-	"frame": {"x":0,"y":217,"w":52,"h":51},
+	"frame": {"x":52,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -810,7 +818,7 @@
 },
 "SpaceRage/Explosions/explosion_2_01.png":
 {
-	"frame": {"x":52,"y":217,"w":52,"h":51},
+	"frame": {"x":104,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -818,7 +826,7 @@
 },
 "SpaceRage/Explosions/explosion_2_02.png":
 {
-	"frame": {"x":104,"y":217,"w":52,"h":51},
+	"frame": {"x":156,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -826,7 +834,7 @@
 },
 "SpaceRage/Explosions/explosion_2_03.png":
 {
-	"frame": {"x":156,"y":217,"w":52,"h":51},
+	"frame": {"x":208,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -834,7 +842,7 @@
 },
 "SpaceRage/Explosions/explosion_2_04.png":
 {
-	"frame": {"x":208,"y":217,"w":52,"h":51},
+	"frame": {"x":260,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -842,7 +850,7 @@
 },
 "SpaceRage/Explosions/explosion_2_05.png":
 {
-	"frame": {"x":260,"y":217,"w":52,"h":51},
+	"frame": {"x":312,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -850,7 +858,7 @@
 },
 "SpaceRage/Explosions/explosion_2_06.png":
 {
-	"frame": {"x":312,"y":217,"w":52,"h":51},
+	"frame": {"x":364,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -858,7 +866,7 @@
 },
 "SpaceRage/Explosions/explosion_2_07.png":
 {
-	"frame": {"x":364,"y":217,"w":52,"h":51},
+	"frame": {"x":416,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -866,7 +874,7 @@
 },
 "SpaceRage/Explosions/explosion_2_08.png":
 {
-	"frame": {"x":416,"y":217,"w":52,"h":51},
+	"frame": {"x":468,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -874,7 +882,7 @@
 },
 "SpaceRage/Explosions/explosion_2_09.png":
 {
-	"frame": {"x":468,"y":217,"w":52,"h":51},
+	"frame": {"x":520,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -882,7 +890,7 @@
 },
 "SpaceRage/Explosions/explosion_3_01.png":
 {
-	"frame": {"x":520,"y":217,"w":52,"h":51},
+	"frame": {"x":572,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -890,7 +898,7 @@
 },
 "SpaceRage/Explosions/explosion_3_02.png":
 {
-	"frame": {"x":572,"y":217,"w":52,"h":51},
+	"frame": {"x":624,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -898,7 +906,7 @@
 },
 "SpaceRage/Explosions/explosion_3_03.png":
 {
-	"frame": {"x":624,"y":217,"w":52,"h":51},
+	"frame": {"x":676,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -906,7 +914,7 @@
 },
 "SpaceRage/Explosions/explosion_3_04.png":
 {
-	"frame": {"x":676,"y":217,"w":52,"h":51},
+	"frame": {"x":728,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -914,7 +922,7 @@
 },
 "SpaceRage/Explosions/explosion_3_05.png":
 {
-	"frame": {"x":728,"y":217,"w":52,"h":51},
+	"frame": {"x":780,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -922,7 +930,7 @@
 },
 "SpaceRage/Explosions/explosion_3_06.png":
 {
-	"frame": {"x":780,"y":217,"w":52,"h":51},
+	"frame": {"x":832,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -930,7 +938,7 @@
 },
 "SpaceRage/Explosions/explosion_3_07.png":
 {
-	"frame": {"x":832,"y":217,"w":52,"h":51},
+	"frame": {"x":884,"y":217,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -938,7 +946,7 @@
 },
 "SpaceRage/Explosions/explosion_3_08.png":
 {
-	"frame": {"x":884,"y":217,"w":52,"h":51},
+	"frame": {"x":0,"y":268,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -946,7 +954,7 @@
 },
 "SpaceRage/Explosions/explosion_3_09.png":
 {
-	"frame": {"x":0,"y":268,"w":52,"h":51},
+	"frame": {"x":52,"y":268,"w":52,"h":51},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":51},
@@ -1218,7 +1226,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_01.png":
 {
-	"frame": {"x":816,"y":118,"w":48,"h":48},
+	"frame": {"x":864,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1226,7 +1234,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_02.png":
 {
-	"frame": {"x":864,"y":118,"w":48,"h":48},
+	"frame": {"x":912,"y":118,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1234,7 +1242,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_03.png":
 {
-	"frame": {"x":912,"y":118,"w":48,"h":48},
+	"frame": {"x":0,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1242,7 +1250,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_04.png":
 {
-	"frame": {"x":0,"y":166,"w":48,"h":48},
+	"frame": {"x":48,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1250,7 +1258,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_05.png":
 {
-	"frame": {"x":48,"y":166,"w":48,"h":48},
+	"frame": {"x":96,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1258,7 +1266,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_06.png":
 {
-	"frame": {"x":96,"y":166,"w":48,"h":48},
+	"frame": {"x":144,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1266,7 +1274,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_07.png":
 {
-	"frame": {"x":144,"y":166,"w":48,"h":48},
+	"frame": {"x":192,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1274,7 +1282,7 @@
 },
 "SpaceRage/Shadows/mine_1_shadow_08.png":
 {
-	"frame": {"x":192,"y":166,"w":48,"h":48},
+	"frame": {"x":240,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1282,7 +1290,7 @@
 },
 "SpaceRage/Shadows/mine_2_shadow_01.png":
 {
-	"frame": {"x":240,"y":166,"w":48,"h":48},
+	"frame": {"x":288,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1290,7 +1298,7 @@
 },
 "SpaceRage/Shadows/mine_2_shadow_02.png":
 {
-	"frame": {"x":288,"y":166,"w":48,"h":48},
+	"frame": {"x":336,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1298,7 +1306,7 @@
 },
 "SpaceRage/Shadows/mine_2_shadow_03.png":
 {
-	"frame": {"x":336,"y":166,"w":48,"h":48},
+	"frame": {"x":384,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1306,7 +1314,7 @@
 },
 "SpaceRage/Shadows/mine_2_shadow_04.png":
 {
-	"frame": {"x":384,"y":166,"w":48,"h":48},
+	"frame": {"x":432,"y":166,"w":48,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
@@ -1587,6 +1595,6 @@
 	"format": "RGBA8888",
 	"size": {"w":960,"h":1239},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:39b8f61328ec9963fa1f7fef88ee7e07:2e67c6ed995743fd3ab8a83293016b22:f3d1b924b12cd2295bd54823da5e86ef$"
+	"smartupdate": "$TexturePacker:SmartUpdate:4d9c281f13ea7a05a21b7ce2b08f6551:5ac789d09a2c449784fad53c897e10a0:f3d1b924b12cd2295bd54823da5e86ef$"
 }
 }

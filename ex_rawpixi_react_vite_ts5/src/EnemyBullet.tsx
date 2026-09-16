@@ -83,7 +83,7 @@ export class EnemyBullets {
                 const p = this._bullets[i]
                 p.x += p.dx;
                 p.y += p.dy;
-                if (p.y < 0) {
+                if (p.x < 0 || p.x > this._w || p.y < 0 || p.y > this._h) {
                     // 画面を外れたものを削除対象に入れる
                     indsToRemove.push(i)
                 }
