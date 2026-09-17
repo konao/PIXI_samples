@@ -109,32 +109,8 @@ export class Stage {
         app.stage.addChild(containers.uiContainer);
     }
 
-    public getPlayer() {
-        return this._player;
-    }
-
-    public getPlayerBullets() {
-        return this._playerBullets;
-    }
-
-    public getEnemies() {
-        return this._enemies;
-    }
-
-    public getEnemyBullets() {
-        return this._enemyBullets;
-    }
-
-    public getExplosions() {
-        return this._explosions;
-    }
-
     public countUp() {
         this._count += 1;
-    }
-
-    public getCount() {
-        return this._count;
     }
 
     public updateScoreText() {
@@ -146,70 +122,139 @@ export class Stage {
         }
     }
 
-    public hitTest1(player: Player.Player, bullets: PlayerBullet.PlayerBullets, enemies: Enemy.Enemies) {
+    public updatePlayer(delta: number, keys: Utils.KeyStatus, bulletMode: string, pause: boolean) {
+        if (!this._player || !this._playerBullets) return;
+
+        const player = this._player;
+        const playerBullets = this._playerBullets;
+
+        // ----------------------------
+        // プレーヤー移動
+        // ----------------------------
+
+        // 移動速度（1秒間に移動するピクセル数）
+        const moveSpeed = 300;
+
+        // 1フレームあたりの実際の移動量
+        const distance = (moveSpeed / 60) * delta;
+
+        // 上下左右の移動計算
+        let player_moved = false;
+        if (keys.ArrowUp) {
+            player.move(0, -distance);
+            player_moved = true;
+        }
+        if (keys.ArrowDown) {
+            player.move(0, distance);
+            player_moved = true;
+        }
+        if (keys.ArrowLeft) {
+            player.move(-distance, 0, "left");
+            player_moved = true;
+        }
+        if (keys.ArrowRight) {
+            player.move(distance, 0, "right");
+            player_moved = true;
+        }
+        if (!player_moved) {
+            player.resetPic(); // 移動していなければ正面の絵に戻す
+        }
+        if (keys.Space) {
+            keys.Space = false; // 1回押すごとに一発
+
+            const playerPos = player.getPos();
+            if (playerPos) {
+                // 弾丸生成
+                playerBullets.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
+
+                // 発射音
+                Sound.playSE("shot");
+            }
+        }
+
+        // ----------------------------
+        // プレーヤー弾丸移動
+        // ----------------------------
+        this._playerBullets.update();
+    }
+
+    public updateEnemies() {
+        if (!this._enemies || !this._enemyBullets || !this._player) return;
+
+        // ----------------------------
+        // 敵生成
+        // ----------------------------
+        if ((this._count % 200) == 0) {
+            const posPlayer = this._player.getPos();
+            this._enemies.genEnemies(posPlayer);
+        }
+
+        // ----------------------------
+        // 敵移動
+        // ----------------------------
+        this._enemies.update();
+
+        // ----------------------------
+        // 敵攻撃
+        // ----------------------------
+        const playerPos = this._player.getPos();
+        if (playerPos) {
+            this._enemies.attack(playerPos, this._enemyBullets);
+        }
+
+        // ----------------------------
+        // 敵弾丸移動
+        // ----------------------------
+        this._enemyBullets.update();
+    }
+
+    public hitTest() {
+        if (!this._player || !this._playerBullets || !this._enemies || !this._explosions) return;
+
         // プレーヤー弾丸ヒットテスト
-        const parBullets: PIXI.Particle[] = bullets.getParBullets();
-        const pEnemies: Enemy.Enemy[] = enemies.getEnemies();
+        const parBullets: PIXI.Particle[] = this._playerBullets.getParBullets();
         let indsToRemoveBullets: number[] = [];     // 削除する弾丸のインデックス
-        let indsToRemoveEnemies: number[] = [];     // 削除する敵のインデックス
-        if (parBullets.length > 0 && pEnemies.length > 0) {
+        if (parBullets.length > 0) {
             for (let i = 0; i < parBullets.length; i++) {
                 const parBullet = parBullets[i];
                 if (parBullet) {
                     switch (parBullet.type) {
                         case "bullet":
-                            const bullet_x = parBullet.x;
-                            const bullet_y = parBullet.y;
-                            const bullet_r = parBullet.w * 0.8;    // 大体の半径を適当に計算
-                            for (let j = 0; j < pEnemies.length; j++) {
-                                const parEnemy = pEnemies[j].getParEnemy();
-                                if (parEnemy) {
-                                    const enemy_x = parEnemy.x;
-                                    const enemy_y = parEnemy.y;
-                                    const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
-                                    if (Utils.hitTest1(bullet_x, bullet_y, bullet_r, enemy_x, enemy_y, enemy_r)) {
-                                        // 当たった
-                                        indsToRemoveBullets.push(i);
-                                        indsToRemoveEnemies.push(j);
+                            {
+                                const posPlayerBullet = {
+                                    x: parBullet.x,
+                                    y: parBullet.y
+                                };
+                                const playerBulletSize = parBullet.w * 0.8;    // 大体の半径を適当に計算
+                                const scorePoints = this._enemies.hitTest_bullet(posPlayerBullet, playerBulletSize, this._explosions);
+                                if (scorePoints > 0) {
+                                    // 当たった
+                                    indsToRemoveBullets.push(i);    // i番目の弾丸を消す
 
-                                        // 爆発アニメーションを追加
-                                        this._explosions?.addNewExplosion(enemy_x, enemy_y);
-
-                                        // 爆発音
-                                        Sound.playSE("explosion");
-
-                                        // 点数加算
-                                        this._score += 10;
-                                        this.updateScoreText();
-                                    }
+                                    // 点数加算
+                                    this._score += scorePoints;
+                                    this.updateScoreText();
                                 }
                             }
                             break;
                         case "laser":
-                            const laser_x = parBullet.x;
-                            const laser_y1 = parBullet.y;
-                            const laser_y2 = parBullet.y - 100; // [TODO] 適当、後で調整
-                            for (let j = 0; j < pEnemies.length; j++) {
-                                const parEnemy = pEnemies[j].getParEnemy();
-                                if (parEnemy) {
-                                    const enemy_x = parEnemy.x;
-                                    const enemy_y = parEnemy.y;
-                                    const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
-                                    if (Utils.hitTest2(laser_x, laser_y1, laser_x, laser_y2, enemy_x, enemy_y, enemy_r)) {
-                                        // 当たった
-                                        // indsToRemoveBullets.push(i); // レーザーの時は消さない
-                                        indsToRemoveEnemies.push(j);
+                            {
+                                const posLaser1 = {
+                                    x: parBullet.x,
+                                    y: parBullet.y
+                                }
+                                const posLaser2 = {
+                                    x: parBullet.x,
+                                    y: parBullet.y - 100 // [TODO] 適当、後で調整
+                                }
+                                const scorePoints = this._enemies.hitTest_laser(posLaser1, posLaser2, this._explosions);
+                                if (scorePoints > 0) {
+                                    // 当たった
+                                    // indsToRemoveBullets.push(i);    // レーザーの時は消さない
 
-                                        // 爆発アニメーションを追加
-                                        this._explosions?.addNewExplosion(enemy_x, enemy_y);
-
-                                        // 爆発音
-                                        Sound.playSE("explosion");
-
-                                        // 点数加算
-                                        this._score += 10;
-                                        this.updateScoreText();
-                                    }
+                                    // 点数加算
+                                    this._score += scorePoints;
+                                    this.updateScoreText();
                                 }
                             }
                             break;
@@ -218,22 +263,7 @@ export class Stage {
             }
 
             if (indsToRemoveBullets.length > 0) {
-                // console.log(`Hit! bullets=${indsToRemoveBullets}`);
-                bullets.removeBullets(indsToRemoveBullets);
-            }
-
-            if (indsToRemoveEnemies.length > 0) {
-                // console.log(`Hit! enemies=${indsToRemoveEnemies}`);
-                enemies.removeEnemies(indsToRemoveEnemies);
-            }
-        }
-    }
-
-    public enemyAttack() {
-        if (this._enemies && this._enemyBullets) {
-            const playerPos = this._player?.getPos();
-            if (playerPos) {
-                this._enemies.attack(playerPos.x, playerPos.y, this._enemyBullets);
+                this._playerBullets.removeBullets(indsToRemoveBullets);
             }
         }
     }

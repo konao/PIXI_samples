@@ -8,8 +8,6 @@
 import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import * as Stage from './Stage';
-import * as Player from './Player';
-import * as Sound from './Sound';
 import * as Utils from './Utils';
 
 // ── windowオブジェクトの型定義を追加 ──
@@ -27,7 +25,7 @@ import * as Utils from './Utils';
 const g_stage = new Stage.Stage();
 
 // キーボードの入力状態を管理するオブジェクト
-const keys: { [key: string]: boolean } = {
+const keys: Utils.KeyStatus = {
   ArrowUp: false,
   ArrowDown: false,
   ArrowLeft: false,
@@ -52,31 +50,26 @@ window.addEventListener('keydown', (e) => {
     }
     case 'Digit1': {
       bulletMode = "single";
-      console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
     case 'Digit2': {
       bulletMode = "multi3";
-      console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
     case 'Digit3': {
       bulletMode = "spread3";
-      console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
     case 'Digit4': {
       bulletMode = "laser";
-      console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
     case 'Digit5': {
       bulletMode = "missile";
-      console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
@@ -148,80 +141,23 @@ export default function PixiCanvas() {
       const containers = new Utils.Containers(particleContainer, normalContainer, effectContainer, uiContainer);
       await g_stage.init(app, containers, wholeTexture, app.screen.width, app.screen.height);
 
-      // 移動速度（1秒間に移動するピクセル数）
-      const moveSpeed = 300;
-
       app.ticker.add((ticker) => {
         if (pause) return;  // 一時停止中なら何もしない
 
         // 前のフレームからの経過時間（秒に変換するためのデルタ値）
         const delta = ticker.deltaTime;
 
-        // 1フレームあたりの実際の移動量
-        const distance = (moveSpeed / 60) * delta;
-
-        const player = g_stage.getPlayer();
-        const playerBullets = g_stage.getPlayerBullets();
-        const enemies = g_stage.getEnemies();
-        const enemyBullets = g_stage.getEnemyBullets();
-
+        // ステージカウンタ更新
         g_stage.countUp();
 
-        // 上下左右の移動計算
-        let player_moved = false;
-        if (keys.ArrowUp) {
-          player?.move(0, -distance);
-          player_moved = true;
-        }
-        if (keys.ArrowDown) {
-          player?.move(0, distance);
-          player_moved = true;
-        }
-        if (keys.ArrowLeft) {
-          player?.move(-distance, 0, "left");
-          player_moved = true;
-        }
-        if (keys.ArrowRight) {
-          player?.move(distance, 0, "right");
-          player_moved = true;
-        }
-        if (!player_moved) {
-          player?.resetPic(); // 移動していなければ正面の絵に戻す
-        }
-        if (keys.Space) {
-          keys.Space = false; // 1回押すごとに一発
+        // プレーヤー更新
+        g_stage.updatePlayer(delta, keys, bulletMode, pause);
 
-          const playerPos = player?.getPos();
-          if (playerPos) {
-            // 弾丸生成
-            playerBullets?.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
-
-            // 発射音
-            Sound.playSE("shot");
-          }
-        }
-
-        // 弾丸移動
-        playerBullets?.update();
-
-        if ((g_stage.getCount() % 200) == 0) {
-          // 敵生成
-          enemies?.genEnemies();
-        }
-
-        // 敵移動
-        enemies?.update();
-
-        // 敵攻撃
-        g_stage.enemyAttack();
-
-        // 敵弾丸移動
-        enemyBullets?.update();
+        // 敵更新
+        g_stage.updateEnemies();
 
         // 弾丸衝突判定、点数加算、他
-        if (player && playerBullets && enemies) {
-          g_stage.hitTest1(player, playerBullets, enemies);
-        }
+        g_stage.hitTest();
       });
     });
 

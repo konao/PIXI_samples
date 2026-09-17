@@ -21,6 +21,11 @@ class Containers {
 }
 
 // ----------------------------------------------
+//  キーボードの状態を格納する型
+// ----------------------------------------------
+type KeyStatus = { [key: string]: boolean }
+
+// ----------------------------------------------
 //  ベクトルとベクトル演算
 // ----------------------------------------------
 type Vec2 = {
@@ -61,9 +66,9 @@ const v_len = (p: Vec2): number => {
 //  衝突判定1
 //  点を中心とした円の接触状態で判定する
 // ----------------------------------------------
-const hitTest1 = (x1: number, y1: number, r1: number, x2: number, y2: number, r2: number): boolean => {
+const hitTest1 = (p1: Vec2, r1: number, p2: Vec2, r2: number): boolean => {
 
-    const dist_p1p2_2 = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+    const dist_p1p2_2 = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
     const dist_r1r2_2 = (r1 + r2) * (r1 + r2);
 
     return dist_p1p2_2 < dist_r1r2_2;
@@ -73,18 +78,15 @@ const hitTest1 = (x1: number, y1: number, r1: number, x2: number, y2: number, r2
 //  衝突判定2
 //  線分（レーザーの端点）と円（敵）の接触状態で判定する
 //
-//  @param x1, y1 レーザーの端点(A)
-//  @param x2, y2 レーザーの端点(B)
-//  @param x3, y3, r3 敵の位置(P)とおよその半径
+//  @param A: レーザーの端点(1)
+//  @param B レーザーの端点(2)
+//  @param P, r 敵の位置(P)とおよその半径
 //
 //  ＜参考サイト＞
 //  点と線分の最近傍点と距離の計算
 //  https://qiita.com/deltaMASH/items/e7ffcca78c9b75710d09
 // ----------------------------------------------
-const hitTest2 = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, r3: number): boolean => {
-    const A: Vec2 = {x: x1, y: y1};
-    const B: Vec2 = {x: x2, y: y2};
-    const P: Vec2 = {x: x3, y: y3};
+const hitTest2 = (A: Vec2, B: Vec2, P: Vec2, r: number): boolean => {
     const AP = v_sub(P, A);
     const AB = v_sub(B, A);
     const BP = v_sub(P, B);
@@ -103,12 +105,13 @@ const hitTest2 = (x1: number, y1: number, x2: number, y2: number, x3: number, y3
         const AI = v_scaler(unit_AB, v_dot(AP, unit_AB));
         const IP = v_sub(AP, AI);
         const dist = v_len(IP);
-        return dist < r3;
+        return dist < r;
     }
 }
 
 export {
     Containers,
+    KeyStatus,
     Vec2,
     hitTest1,
     hitTest2,
