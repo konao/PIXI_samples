@@ -225,15 +225,19 @@ export class Stage {
         // ----------------------------
         if (keys.Digit1) {
             this._bulletMode = "single";
+            keys.Digit1 = false;
         }
         if (keys.Digit2) {
             this._bulletMode = "multi3";
+            keys.Digit2 = false;
         }
         if (keys.Digit3) {
             this._bulletMode = "spread3";
+            keys.Digit3 = false;
         }
         if (keys.Digit4) {
             this._bulletMode = "laser";
+            keys.Digit4 = false;
         }
 
         // ----------------------------
