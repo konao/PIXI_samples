@@ -24,73 +24,6 @@ import * as Utils from './Utils';
 // =================================================
 const g_stage = new Stage.Stage();
 
-// キーボードの入力状態を管理するオブジェクト
-const keys: Utils.KeyStatus = {
-  ArrowUp: false,
-  ArrowDown: false,
-  ArrowLeft: false,
-  ArrowRight: false,
-  Space: false
-};
-
-let bulletMode: string = "single";
-let pause: boolean = false;
-
-// 2. イベントリスナーを登録（キーが押されたか離されたかを記録）
-window.addEventListener('keydown', (e) => {
-  if (e.key in keys) {
-    keys[e.key] = true;
-    e.preventDefault(); // 画面がブラウザでスクロールするのを防ぐ
-  }
-  switch (e.code) {
-    case 'Space': {
-      keys.Space = true;
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-    case 'Digit1': {
-      bulletMode = "single";
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-    case 'Digit2': {
-      bulletMode = "multi3";
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-    case 'Digit3': {
-      bulletMode = "spread3";
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-    case 'Digit4': {
-      bulletMode = "laser";
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-    case 'Digit5': {
-      bulletMode = "missile";
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-    case 'KeyP': {
-      pause = !pause;
-      console.log(`pause: ${pause}`);
-      e.preventDefault(); // スクロール防止
-      break;
-    }
-  }
-});
-
-window.addEventListener('keyup', (e) => {
-  if (e.key in keys) {
-    keys[e.key] = false;
-  }
-  if (e.code === 'Space') {
-    keys.Space = false;
-  }
-});
-
 export default function PixiCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application>();
@@ -142,22 +75,11 @@ export default function PixiCanvas() {
       await g_stage.init(app, containers, wholeTexture, app.screen.width, app.screen.height);
 
       app.ticker.add((ticker) => {
-        if (pause) return;  // 一時停止中なら何もしない
-
         // 前のフレームからの経過時間（秒に変換するためのデルタ値）
         const delta = ticker.deltaTime;
 
-        // ステージカウンタ更新
-        g_stage.countUp();
-
-        // プレーヤー更新
-        g_stage.updatePlayer(delta, keys, bulletMode, pause);
-
-        // 敵更新
-        g_stage.updateEnemies();
-
-        // 弾丸衝突判定、点数加算、他
-        g_stage.hitTest();
+        // ステージ更新
+        g_stage.update(delta);
       });
     });
 
