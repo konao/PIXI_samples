@@ -3,29 +3,104 @@
 // ************************************************************
 
 import * as PIXI from 'pixi.js';
+import * as Game from './Game';
 import * as Key from './Key';
 import * as Player from './Player';
 import * as PlayerBullet from './PlayerBullet';
 import * as EnemyBullet from './EnemyBullet';
 import * as Enemy from './Enemy';
 import * as Explosions from './Explosion';
-import * as Font from './Font';
 import * as Sound from './Sound';
 import * as Utils from './Utils';
 
-enum GameState {
-    Title,
-    Playing,
-    PlayerDead,
-    GameOver
+// ================================================
+//  タイトル画面
+// ================================================
+export class TitleStage {
+    private _game: Game.Game | null = null;
+    private _containers: Utils.Containers | null = null;
+    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
+    private _mainTitleText: PIXI.BitmapText | null = null;
+    private _otherText1: PIXI.BitmapText | null = null;
+
+    public async init(game: Game.Game, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
+        this._game = game;
+        this._containers = containers;
+        this._scrSize = scrSize;
+
+        const fontManager = this._game.getFontManager();
+
+        // タイトル
+        const font1 = fontManager.createNewFont('MyTitleFont1', {
+            fill: '#0088ff',
+            fontWeight: 'bold',
+
+            // 装飾：ドロップシャドウ（立体感が出ます）
+            dropShadow: true,
+            dropShadowColor: '#004466',
+            dropShadowBlur: 0,      // ドット絵フォントならボカシは 0 がおすすめ
+            dropShadowAngle: Math.PI / 4, // 影の方向（45度）
+            dropShadowDistance: 3,  // 影の距離
+        });
+        this._mainTitleText = font1.createBitmapText({
+            fontSize: 60
+        })
+        this._mainTitleText.text = `SUPER SPACE WARRIORS`;
+        this._mainTitleText.x = 40;
+        this._mainTitleText.y = 150;
+
+        const font2 = fontManager.createNewFont('MyGameFont2', {
+            fill: '#0066aa',
+        })
+        this._otherText1 = font2.createBitmapText({
+            fontSize: 32
+        })
+        this._otherText1.text = `Press SPACE to play`;
+        this._otherText1.x = 200;
+        this._otherText1.y = 800;
+
+        // コンテナに追加
+        containers.titleContainer.addChild(this._mainTitleText);
+        containers.titleContainer.addChild(this._otherText1);
+    }
+
+    public update(delta: number) {
+        if (Key.keys.Space) {
+            Key.keys.Space = false;
+
+            if (this._game) {
+                this._game.switchState(Game.GameState.Playing); // プレイスタート
+            }
+        }
+    }
 }
 
-export class Stage {
-    private _app: PIXI.Application | null = null;
+// ================================================
+//  ゲームオーバー画面
+// ================================================
+export class GameOverStage {
+    private _game: Game.Game | null = null;
     private _containers: Utils.Containers | null = null;
-    private _w: number = 0;
-    private _h: number = 0;
-    private _state: GameState = GameState.Title;
+    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
+
+    public async init(game: Game.Game, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
+        this._game = game;
+        this._containers = containers;
+        this._scrSize = scrSize;
+    }
+
+    public update(delta: number) {
+    }
+}
+
+// ================================================
+//  ゲーム画面本体
+// ================================================
+export class PlayStage {
+    // private _app: PIXI.Application | null = null;
+    private _game: Game.Game | null = null;
+    private _containers: Utils.Containers | null = null;
+    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
     private _player: Player.Player | null = null;
     private _playerBullets: PlayerBullet.PlayerBullets | null = null;
     private _enemies: Enemy.Enemies | null = null;
@@ -40,33 +115,32 @@ export class Stage {
     private _bulletMode: string = "single";
     private _pause: boolean = false;
 
-    public async init(app: PIXI.Application, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
-        this._app = app;
+    public async init(game: Game.Game, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
+        // this._app = app;
+        this._game = game;
 
         this._containers = containers;
-        this._w = w;
-        this._h = h;
+        this._scrSize = scrSize;
 
-        // ステート初期化
-        this._state = GameState.Title;
+        // スコアクリア
         this._score = 0;
 
         // プレーヤー
         this._player = new Player.Player();
         this._player.init(containers, wholeTexture);
-        this._player.setPos(w / 2 - 32, h * 4 / 5);
+        this._player.setPos(scrSize.x / 2 - 32, scrSize.y * 4 / 5);
 
         // 弾丸（プレーヤー）
         this._playerBullets = new PlayerBullet.PlayerBullets();
-        this._playerBullets.init(containers, wholeTexture, w, h);
+        this._playerBullets.init(containers, wholeTexture, scrSize);
 
         // 敵
         this._enemies = new Enemy.Enemies();
-        this._enemies.init(containers, wholeTexture, w, h)
+        this._enemies.init(containers, wholeTexture, scrSize)
 
         // 弾丸（敵）
         this._enemyBullets = new EnemyBullet.EnemyBullets();
-        this._enemyBullets.init(containers, wholeTexture, w, h);
+        this._enemyBullets.init(containers, wholeTexture, scrSize);
 
         // 爆発
         this._explosions = new Explosions.Explosions();
@@ -74,9 +148,7 @@ export class Stage {
 
         // テキスト
         // フォント作成
-        const fontManager = new Font.FontManager();
-        await fontManager.init();
-        const font1 = fontManager.createNewFont('MyGameFont1', {
+        const font1 = this._game.getFontManager().createNewFont('MyGameFont1', {
             fontSize: 36,
             fill: '#ffffff',
             fontWeight: 'bold',
@@ -115,18 +187,11 @@ export class Stage {
         // 通常のコンテナレイヤー（uiContainerなど）に追加
         containers.uiContainer.addChild(this._scoreText); // ⚠️ ParticleContainerには入れないでください
         containers.uiContainer.addChild(this._hiscoreText);
-
-        // addChildの順番に注意
-        // （後に追加したものが上に表示される）
-        app.stage.addChild(containers.particleContainer);
-        app.stage.addChild(containers.normalContainer);
-        app.stage.addChild(containers.effectContainer);
-        app.stage.addChild(containers.uiContainer);
     }
 
-    // ゲーム開始
+    // ステージ開始
     public start() {
-
+        this._count = 0;
     }
 
     // ステージ更新
@@ -152,8 +217,8 @@ export class Stage {
         this.hitTest();
     }
 
-    // ゲーム終了
-    public end() {
+    // プレーヤー破壊
+    public playerDestroyed() {
 
     }
 

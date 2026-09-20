@@ -8,15 +8,13 @@ import * as Utils from './Utils';
 export class EnemyBullets {
     private _containers: Utils.Containers | null = null;
     private _tex_bullet: PIXI.Texture | null = null;
-    private _w: number = 0;
-    private _h: number = 0;
+    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
     private _bullets: PIXI.Particle[] = [];
 
-    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
         this._containers = containers;
         this._tex_bullet = wholeTexture.textures['SpaceRage/FX/proton_01.png'];
-        this._w = w;
-        this._h = h;
+        this._scrSize = scrSize;
     }
 
     public genNewBullets(posPlayer: Utils.Vec2, posEnemy: Utils.Vec2, sizeEnemy: Utils.Vec2, bulletSpeed: number) {

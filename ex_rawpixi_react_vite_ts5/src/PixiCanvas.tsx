@@ -7,7 +7,7 @@
 // **************************************************
 import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
-import * as Stage from './Stage';
+import * as Game from './Game';
 import * as Utils from './Utils';
 
 // ── windowオブジェクトの型定義を追加 ──
@@ -22,7 +22,7 @@ import * as Utils from './Utils';
 // =================================================
 //  Global Variables
 // =================================================
-const g_stage = new Stage.Stage();
+const g_game = new Game.Game();
 
 export default function PixiCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -47,39 +47,15 @@ export default function PixiCanvas() {
       // const data = await window.electronAPI.getData();
       // console.log('メインプロセスから受け取ったJSON:', data);
 
-      // ParticleContainerの作成（動かすプロパティを有効化）
-      const particleContainer = new PIXI.ParticleContainer({
-        dynamicProperties: {
-          position: true, // 位置の変更を許可
-          scale: true,    // 拡大・縮小の変更を許可
-          rotation: true, // 回転の変更を許可
-          color: true,     // アルファ値（透明度）の変更を許可
-          vertex: true // 動的にパーティクルのテクスチャを変える場合に必要
-        }
-      });
-
-      // 通常のContainerの作成（アニメーション付きスプライト用）
-      const normalContainer = new PIXI.Container();
-
-      // エフェクト用Containerの作成（アニメーション付きスプライト用）
-      const effectContainer = new PIXI.Container();
-
-      // UI用コンテナ
-      const uiContainer = new PIXI.Container();
-
-      // JSONファイルをAssets.loadすると、内部の画像も自動でロード・分割される
-      const wholeTexture = await PIXI.Assets.load<PIXI.Spritesheet>('image/SpaceShooterAssets.json');
-
-      // ステージ初期化
-      const containers = new Utils.Containers(particleContainer, normalContainer, effectContainer, uiContainer);
-      await g_stage.init(app, containers, wholeTexture, app.screen.width, app.screen.height);
+      const scrSize: Utils.Vec2 = { x: app.screen.width, y: app.screen.height }
+      await g_game.init(app, scrSize);
 
       app.ticker.add((ticker) => {
         // 前のフレームからの経過時間（秒に変換するためのデルタ値）
         const delta = ticker.deltaTime;
 
-        // ステージ更新
-        g_stage.update(delta);
+        // ゲーム状態更新
+        g_game.update(delta);
       });
     });
 

@@ -10,17 +10,15 @@ export class PlayerBullets {
     private _tex_bullet: PIXI.Texture | null = null;
     private _tex_laser: PIXI.Texture | null = null;
     private _tex_missile: PIXI.Texture | null = null;
-    private _w: number = 0;
-    private _h: number = 0;
+    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
     private _bullets: PIXI.Particle[] = [];
 
-    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
         this._containers = containers;
         this._tex_bullet = wholeTexture.textures['SpaceRage/FX/vulcan_3.png'];
         this._tex_laser = wholeTexture.textures['SpaceShooterPack/laser-3.png'];
         this._tex_missile = wholeTexture.textures['SpaceShooterPack/rocket.png'];
-        this._w = w;
-        this._h = h;
+        this._scrSize = scrSize;
     }
 
     public genNewBullets(bulletMode: string, player_x: number, player_y: number, player_w: number, player_h: number) {
