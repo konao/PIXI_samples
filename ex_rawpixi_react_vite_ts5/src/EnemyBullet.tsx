@@ -4,6 +4,7 @@
 
 import * as PIXI from 'pixi.js';
 import * as Utils from './Utils';
+import * as M from './Monad';
 
 export class EnemyBullets {
     private _containers: Utils.Containers | null = null;
@@ -62,39 +63,30 @@ export class EnemyBullets {
         return this._bullets;
     }
 
-    public removeBullets(indsToRemove: number[]) {
-        if (indsToRemove.length > 0) {
-            // Setを使って重複を消し、配列に戻す
-            const indsToRemove2 = [...new Set(indsToRemove)];
-
-            // 降順にソート
-            const sortedInds = indsToRemove2.sort((a, b) => b - a)
-
-            for (const i of sortedInds) {
-                const bullet = this._bullets[i]
-                this._containers?.particleContainer.removeParticle(bullet); // コンテナから消す
-                this._bullets.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
-            }
-        }
-    }
-
     public update() {
-        if (this._bullets.length > 0) {
-            const indsToRemove: number[] = [];
-
-            // 弾丸移動
-            for (let i = 0; i < this._bullets.length; i++) {
-                const p = this._bullets[i]
-                p.x += p.dx;
-                p.y += p.dy;
-                if (p.x < 0 || p.x > this._w || p.y < 0 || p.y > this._h) {
-                    // 画面を外れたものを削除対象に入れる
-                    indsToRemove.push(i)
-                }
-            }
-
-            // 画面を外れた弾丸は消す
-            this.removeBullets(indsToRemove);
+        // ローカルヘルパー関数
+        const isOutOfStage = (p: PIXI.Particle): boolean => {
+            return (p && (p.x < 0 || p.x > this._scrSize.x || p.y < 0 || p.y > this._scrSize.y));
         }
+
+        this._bullets
+            .map(bullet => M.Maybe.of(bullet).map(b => {
+                // 弾丸移動（Maybeを使って配列上の有効なデータだけを更新する）
+                b.x += b.dx;
+                b.y += b.dy;
+
+                // 画面から外れた弾をコンテナから消す
+                if (isOutOfStage(b)) {
+                    this._containers?.particleContainer.removeParticle(b);
+                }
+
+                return b;
+            }).getOrElse(null as any))
+
+            // nullの要素（万が一存在した空データ）を除去
+            .filter(bullet => bullet !== null)
+
+            // 画面上に残っている弾のみ配列に残す
+            .filter(bullet => !isOutOfStage(bullet));
     }
 }

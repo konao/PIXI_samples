@@ -4,6 +4,7 @@
 
 import * as PIXI from 'pixi.js';
 import * as Utils from './Utils';
+import * as M from './Monad';
 
 export class PlayerBullets {
     private _containers: Utils.Containers | null = null;
@@ -114,22 +115,29 @@ export class PlayerBullets {
     }
 
     public update() {
-        if (this._bullets.length > 0) {
-            const indsToRemove: number[] = [];
-
-            // 弾丸移動
-            for (let i = 0; i < this._bullets.length; i++) {
-                const p = this._bullets[i]
-                p.x += p.dx;
-                p.y += p.dy;
-                if (p.y < 0) {
-                    // 画面を外れたものを削除対象に入れる
-                    indsToRemove.push(i)
-                }
-            }
-
-            // 画面を外れた弾丸は消す
-            this.removeBullets(indsToRemove);
+        // ローカルヘルパー関数
+        const isOutOfStage = (playerBullet: PIXI.Particle): boolean => {
+            return (playerBullet && (playerBullet.y < 0));
         }
+
+        this._bullets
+            .map(bullet => M.Maybe.of(bullet).map(b => {
+                // 弾丸移動（Maybeを使って配列上の有効なデータだけを更新する）
+                b.x += b.dx;
+                b.y += b.dy;
+
+                // 画面から外れた弾をコンテナから消す
+                if (isOutOfStage(b)) {
+                    this._containers?.particleContainer.removeParticle(b);
+                }
+
+                return b;
+            }).getOrElse(null as any))
+
+            // nullの要素（万が一存在した空データ）を除去
+            .filter(bullet => bullet !== null)
+
+            // 画面上に残っている弾のみ配列に残す
+            .filter(bullet => !isOutOfStage(bullet));
     }
 }
