@@ -12,6 +12,7 @@ import * as Enemy from './Enemy';
 import * as Explosions from './Explosion';
 import * as Sound from './Sound';
 import * as Utils from './Utils';
+import * as M from './Monad';
 
 // ================================================
 //  タイトル画面
@@ -394,58 +395,53 @@ export class PlayStage {
 
         // プレーヤー弾丸ヒットテスト
         const parBullets: PIXI.Particle[] = this._playerBullets.getParBullets();
-        let indsToRemoveBullets: number[] = [];     // 削除する弾丸のインデックス
-        if (parBullets.length > 0) {
-            for (let i = 0; i < parBullets.length; i++) {
-                const parBullet = parBullets[i];
-                if (parBullet) {
-                    switch (parBullet.type) {
-                        case "bullet":
-                            {
+        const totalScorePoints = parBullets.map((parBullet: PIXI.Particle) => {
+            return M.Maybe.of(parBullet).map((parBullet: PIXI.Particle): number => {
+                switch (parBullet.type) {
+                    case "bullet":
+                        {
+                            let scorePoints = 0;
+                            if (!parBullet.destroyed) {
                                 const posPlayerBullet = {
                                     x: parBullet.x,
                                     y: parBullet.y
                                 };
                                 const playerBulletSize = parBullet.w * 0.8;    // 大体の半径を適当に計算
-                                const scorePoints = this._enemies.hitTest_bullet(posPlayerBullet, playerBulletSize, this._explosions);
+                                scorePoints = this._enemies.hitTest_bullet(posPlayerBullet, playerBulletSize, this._explosions);
                                 if (scorePoints > 0) {
                                     // 当たった
-                                    indsToRemoveBullets.push(i);    // i番目の弾丸を消す
-
-                                    // 点数加算
-                                    this._score += scorePoints;
-                                    this.updateScoreText();
+                                    parBullet.destroyed = true;
                                 }
                             }
-                            break;
-                        case "laser":
-                            {
-                                const posLaser1 = {
-                                    x: parBullet.x,
-                                    y: parBullet.y
-                                }
-                                const posLaser2 = {
-                                    x: parBullet.x,
-                                    y: parBullet.y - 100 // [TODO] 適当、後で調整
-                                }
-                                const scorePoints = this._enemies.hitTest_laser(posLaser1, posLaser2, this._explosions);
-                                if (scorePoints > 0) {
-                                    // 当たった
-                                    // indsToRemoveBullets.push(i);    // レーザーの時は消さない
-
-                                    // 点数加算
-                                    this._score += scorePoints;
-                                    this.updateScoreText();
-                                }
+                            return scorePoints;
+                        }
+                    case "laser":
+                        {
+                            const posLaser1 = {
+                                x: parBullet.x,
+                                y: parBullet.y
                             }
-                            break;
-                    }
+                            const posLaser2 = {
+                                x: parBullet.x,
+                                y: parBullet.y - 100 // [TODO] 適当、後で調整
+                            }
+                            const scorePoints = this._enemies.hitTest_laser(posLaser1, posLaser2, this._explosions);
+                            // if (scorePoints > 0) {
+                            //     // 当たった
+                            //     // parBullet.destroyed = true;  // レーザーの時は消さない
+                            // }
+
+                            return scorePoints;
+                        }
                 }
-            }
+            }).getOrElse(0) // Maybeから中身(number)を取り出す
+        }).reduce((prev: number, curr: number): number => prev + curr, 0);  // number[]からnumberへ変換（和をとる）
 
-            if (indsToRemoveBullets.length > 0) {
-                this._playerBullets.removeBullets(indsToRemoveBullets);
-            }
+        if (totalScorePoints > 0) {
+            this._score += totalScorePoints;    // スコア加算
+            this.updateScoreText(); // スコア表示更新
+
+            this._playerBullets.removeDestroyedBullets();   // 当たった弾丸を消す
         }
     }
 }
