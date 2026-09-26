@@ -387,20 +387,22 @@ class EnemyFormation {
         return this._enemies;
     }
 
-    public removeEnemies(indsToRemove: number[]) {
-        if (indsToRemove.length > 0) {
-            // Setを使って重複を消し、配列に戻す
-            const indsToRemove2 = [...new Set(indsToRemove)];
-
-            // 降順にソート
-            const sortedInds = indsToRemove2.sort((a, b) => b - a)
-
-            for (const i of sortedInds) {
-                const enemy = this._enemies[i]
-                enemy.removeFromContainer();    // コンテナから消す
-                this._enemies.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
+    // 破壊フラグがtrueになっている敵を削除する
+    public removeDestroyedEnemies() {
+        this._enemies = this._enemies.filter(enemy => {
+            const parEnemy = enemy?.getParEnemy();
+            if (parEnemy) {
+                if (parEnemy.destroyed) {
+                    // 破壊されている
+                    enemy.removeFromContainer();    // コンテナから消す
+                    return false;   // 配列からも消す
+                } else {
+                    return true;    // 破壊されていない．残す
+                }
+            } else {
+                return false;   // そもそもParticleがない．（ここは本来こないはずだが）消しておく
             }
-        }
+        })
     }
 
     // 💡 _enemies は通常の Enemy[] のままで、処理の途中で Maybe を噛み合わせる
@@ -415,7 +417,7 @@ class EnemyFormation {
 
                 return e;
             }).getOrElse(null as any))
-            
+
             // nullの要素（万が一存在した空データ）を除去
             .filter(enemy => enemy !== null)
 
@@ -471,126 +473,83 @@ export class Enemies {
         }
     }
 
-    // ヒットテスト(1) - 弾丸
-    public hitTest_bullet(posPlayerBullet: Utils.Vec2, playerBulletSize: number, explosions: Explosion.Explosions): number {
+    // ヒットテスト（共通）
+    public hitTest(fnHitTest: (posEnemy: Utils.Vec2, enemy_r: number) => boolean, explosions: Explosion.Explosions): number {
         let scorePoints = 0;    // 加算スコア
-        const indsToRemoveFormations: number[] = [];
-        for (let i = 0; i < this._formations.length; i++) {
-            const formation = this._formations[i];
-            const pEnemies = formation.getEnemies();
-            const indsToRemoveEnemies: number[] = [];
-            let nHitEnemies = 0;    // 弾丸が当たった敵の個数
-            for (let j = 0; j < pEnemies.length; j++) {
-                const parEnemy = pEnemies[j].getParEnemy();
-                if (parEnemy) {
-                    const posEnemy = {
-                        x: parEnemy.x,
-                        y: parEnemy.y
-                    }
-                    const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
-                    if (Utils.hitTest1(posPlayerBullet, playerBulletSize, posEnemy, enemy_r)) {
-                        // 当たった
-                        indsToRemoveEnemies.push(j);
-                        nHitEnemies += 1;
-                        if (pEnemies.length - nHitEnemies == 0) {
-                            // 編隊の最後の1機だった（編隊は全滅した）
-                            // ボーナスポイント加算
-                            scorePoints += 300;
-                            console.log(`Bonus point! formation destroyed.`);
 
-                            // [TODO] ボーナス点数表示を行う場合はここで行う
-
-                            indsToRemoveFormations.push(i); // 削除するformationのインデックスを記録（消すのは後で）
-                        }
-
-                        // 爆発アニメーションを追加
-                        explosions.addNewExplosion(posEnemy);
-
-                        // 爆発音
-                        Sound.playSE("explosion");
-
-                        // 点数加算
-                        scorePoints += 10;
-                    }
-                }
+        const hitTestAndGetPoint = (parEnemy: PIXI.Particle) => {
+            const posEnemy = {
+                x: parEnemy.x,
+                y: parEnemy.y
             }
-            formation.removeEnemies(indsToRemoveEnemies);
-        }
+            const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
+            if (fnHitTest(posEnemy, enemy_r)) {
+                // 当たった
 
-        // 全滅したformationがあれば消す．
-        if (indsToRemoveFormations.length > 0) {
-            this.removeFormations(indsToRemoveFormations);
-        }
+                // この敵の破壊フラグをon
+                parEnemy.destroyed = true;
+
+                // 爆発アニメーションを追加
+                explosions.addNewExplosion(posEnemy);
+
+                // 爆発音
+                Sound.playSE("explosion");
+
+                return 10   // 加算する点数
+            } else {
+                parEnemy.destroyed = false;
+                return 0
+            }
+        };
+
+        this._formations
+            .map((form: EnemyFormation) => {
+                const pEnemies = form.getEnemies();
+
+                // ヒットテストを行い、加算するスコアを得る
+                const scoresToAdd = pEnemies.map((enemy: Enemy) => {
+                    return M.Maybe.of(enemy.getParEnemy()).map(hitTestAndGetPoint)
+                })
+                    .map(x => x.getOrElse(0))   // Maybeから中身(number)を取り出す
+                    .reduce((prev: number, curr: number) => prev + curr, 0)   // number[]からnumberへ変換（まとめる）
+
+                if (scoresToAdd > 0) {
+                    scorePoints += scoresToAdd; // スコア加算
+
+                    // 撃破された敵をformationから消す
+                    form.removeDestroyedEnemies();
+                }
+            });
+
+        // formationが全滅したかを判定．全滅していたらボーナスポイントを加算してそのformationを消す．
+        this._formations = this._formations
+            .filter((form: EnemyFormation) => {
+                const nAlives = form.getEnemies().length;   // 生き残っている敵の数
+                if (nAlives == 0) {
+                    // 全滅した．ボーナスポイント加算
+                    scorePoints += 300;
+                    console.log(`Bonus point! formation destroyed.`);
+
+                    // [TODO] ボーナス点数表示を行う場合はここで行う
+                }
+                return (nAlives > 0);   // 空でないformationのみ残す
+            })
 
         return scorePoints;
+    }
+
+    // ヒットテスト(1) - 弾丸
+    public hitTest_bullet(posPlayerBullet: Utils.Vec2, playerBulletSize: number, explosions: Explosion.Explosions): number {
+        // 部分適用を使って判定関数の引数を共通用の引数に合わせる
+        const fnHitTest = M.curry(Utils.hitTest1)(posPlayerBullet)(playerBulletSize);
+        return this.hitTest(fnHitTest, explosions);
     }
 
     // ヒットテスト(2) - レーザー
     public hitTest_laser(posLaser1: Utils.Vec2, posLaser2: Utils.Vec2, explosions: Explosion.Explosions): number {
-        let scorePoints = 0;    // 加算スコア
-        const indsToRemoveFormations: number[] = [];
-        for (let i = 0; i < this._formations.length; i++) {
-            const formation = this._formations[i];
-            const pEnemies = formation.getEnemies();
-            const indsToRemoveEnemies: number[] = [];
-            let nHitEnemies = 0;    // 弾丸が当たった敵の個数
-            for (let j = 0; j < pEnemies.length; j++) {
-                const parEnemy = pEnemies[j].getParEnemy();
-                if (parEnemy) {
-                    const posEnemy = {
-                        x: parEnemy.x,
-                        y: parEnemy.y
-                    }
-                    const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
-                    if (Utils.hitTest2(posLaser1, posLaser2, posEnemy, enemy_r)) {
-                        // 当たった
-                        indsToRemoveEnemies.push(j);
-                        nHitEnemies += 1;
-                        if (pEnemies.length - nHitEnemies == 0) {
-                            // 編隊の最後の1機だった（編隊は全滅した）
-                            // ボーナスポイント加算
-                            scorePoints += 300;
-                            console.log(`Bonus point! formation destroyed.`);
-
-                            // [TODO] ボーナス点数表示を行う場合はここで行う
-
-                            indsToRemoveFormations.push(i); // 削除するformationのインデックスを記録（消すのは後で）
-                        }
-
-                        // 爆発アニメーションを追加
-                        explosions.addNewExplosion(posEnemy);
-
-                        // 爆発音
-                        Sound.playSE("explosion");
-
-                        // 点数加算
-                        scorePoints += 10;
-                    }
-                }
-            }
-            formation.removeEnemies(indsToRemoveEnemies);
-        }
-
-        // 全滅したformationがあれば消す．
-        if (indsToRemoveFormations.length > 0) {
-            this.removeFormations(indsToRemoveFormations);
-        }
-
-        return scorePoints;
-    }
-
-    private removeFormations(indsToRemove: number[]) {
-        if (indsToRemove.length > 0) {
-            // Setを使って重複を消し、配列に戻す
-            const indsToRemove2 = [...new Set(indsToRemove)];
-
-            // 降順にソート
-            const sortedInds = indsToRemove2.sort((a, b) => b - a)
-
-            for (const i of sortedInds) {
-                this._formations.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
-            }
-        }
+        // 部分適用を使って判定関数の引数を共通用の引数に合わせる
+        const fnHitTest = M.curry(Utils.hitTest2)(posLaser1)(posLaser2);
+        return this.hitTest(fnHitTest, explosions);
     }
 
     public update() {

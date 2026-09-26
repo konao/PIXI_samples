@@ -334,18 +334,22 @@ export class PlayStage {
         // ----------------------------
         if (keys.Digit1) {
             this._bulletMode = "single";
+            console.log('single-shot');
             keys.Digit1 = false;
         }
         if (keys.Digit2) {
             this._bulletMode = "multi3";
+            console.log('multi-shot');
             keys.Digit2 = false;
         }
         if (keys.Digit3) {
             this._bulletMode = "spread3";
+            console.log('spread');
             keys.Digit3 = false;
         }
         if (keys.Digit4) {
             this._bulletMode = "laser";
+            console.log('laser');
             keys.Digit4 = false;
         }
 
