@@ -317,18 +317,6 @@ export class PlayStage {
         if (!player_moved) {
             player.resetPic(); // 移動していなければ正面の絵に戻す
         }
-        if (keys.Space) {
-            keys.Space = false; // 1回押すごとに一発（これがないとスペースが押しっぱなし状態になってしまう）
-
-            const playerPos = player.getPos();
-            if (playerPos) {
-                // 弾丸生成
-                playerBullets.genNewBullets(this._bulletMode, playerPos.x, playerPos.y, 64, 64)
-
-                // 発射音
-                Sound.playSE("shot");
-            }
-        }
 
         // ----------------------------
         //  弾丸モード切替
@@ -352,6 +340,22 @@ export class PlayStage {
             this._bulletMode = "laser";
             console.log('laser');
             keys.Digit4 = false;
+        }
+
+        // ----------------------------
+        //  弾丸発射
+        // ----------------------------
+        if (keys.Space) {
+            keys.Space = false; // 1回押すごとに一発（これがないとスペースが押しっぱなし状態になってしまう）
+
+            const playerPos = player.getPos();
+            if (playerPos) {
+                // 弾丸生成
+                playerBullets.genNewBullets(this._bulletMode, playerPos.x, playerPos.y, 64, 64)
+
+                // 発射音
+                Sound.playSE("shot");
+            }
         }
 
         // ----------------------------
