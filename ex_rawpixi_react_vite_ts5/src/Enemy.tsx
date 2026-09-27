@@ -6,6 +6,7 @@ import * as Utils from './Utils';
 import * as EnemyBullet from './EnemyBullet';
 import * as Explosion from './Explosion';
 import * as Sound from './Sound';
+import * as M from './Monad'
 
 // 敵（1機）
 export class Enemy {
@@ -402,22 +403,25 @@ class EnemyFormation {
         }
     }
 
+    // 💡 _enemies は通常の Enemy[] のままで、処理の途中で Maybe を噛み合わせる
     public update() {
-        if (this._enemies.length > 0) {
-            const indsToRemove: number[] = [];
+        this._enemies = this._enemies
+            // 各要素を一度 Maybe の箱に入れ、生存している（nullでない）敵だけに処理を適用
+            .map(enemy => M.Maybe.of(enemy).map(e => {
+                e.update(); // 💡 if(enemy) を書かずに、存在するときだけ安全に更新
 
-            for (let i = 0; i < this._enemies.length; i++) {
-                const enemy = this._enemies[i];
-                if (enemy) {
-                    enemy.update();
+                // 画面から外れた敵をコンテナから消す
+                if (e.isOutOfStage()) e.removeFromContainer();
 
-                    if (enemy.isOutOfStage()) indsToRemove.push(i);
-                }
-            }
+                return e;
+            }).getOrElse(null as any))
+            
+            // nullの要素（万が一存在した空データ）を除去
+            .filter(enemy => enemy !== null)
 
-            // 画面から外れた敵を消す
-            this.removeEnemies(indsToRemove);
-        }
+            // 画面外の敵を消す
+            // 画面内に残っている（isOutOfStage が false）敵だけを抽出して配列を更新
+            .filter(enemy => !enemy.isOutOfStage());
     }
 
     public attack(posPlayer: Utils.Vec2, enemyBullets: EnemyBullet.EnemyBullets) {
