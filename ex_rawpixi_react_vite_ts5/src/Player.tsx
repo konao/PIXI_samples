@@ -9,6 +9,8 @@ export class Player {
     private _containers: Utils.Containers | null = null;
     private _tex_player_b: PIXI.Texture[] = [];
     private _player: PIXI.AnimatedSprite | null = null;
+    private readonly _sizePlayer: Utils.Vec2 = { x: 64, y: 64 };
+    private _bAlive: boolean = true;
 
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet) {
         this._containers = containers;
@@ -19,6 +21,7 @@ export class Player {
         // プレーヤーのスプライトを生成
         // 表示画像を切り替えるため、AnimatedSpriteを使う．
         this._player = new PIXI.AnimatedSprite(this._tex_player_b);
+        this._player.anchor = 0.5;  // スプライトの中心を移動、回転の中心にする．
 
         // 自動でアニメーションが動かないようにする
         this._player.autoUpdate = false;
@@ -50,6 +53,10 @@ export class Player {
         }
     }
 
+    public getSize() {
+        return this._sizePlayer;
+    }
+
     public move(dx: number, dy: number, dir: string = "") {
         if (this._player) {
             this._player.x += dx;
@@ -69,5 +76,16 @@ export class Player {
         if (this._player) {
             this._player.currentFrame = 1;  // 正面の絵にリセット
         }
+    }
+
+    public setAlive(b: boolean) {
+        this._bAlive = b;
+        if (this._player) {
+            this._player.visible = b;
+        }
+    }
+
+    public isAlive(): boolean {
+        return this._bAlive;
     }
 }

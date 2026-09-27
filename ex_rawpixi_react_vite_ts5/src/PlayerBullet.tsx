@@ -25,7 +25,7 @@ export class PlayerBullets {
     public genNewBullets(bulletMode: string, player_x: number, player_y: number, player_w: number, player_h: number) {
         if (this._tex_bullet && this._tex_laser && this._containers?.particleContainer) {
             // 弾丸のスプライトを生成
-            const bullet_x = player_x + player_w / 2;
+            const bullet_x = player_x;
             const bullet_y = player_y;
             let bullet_dx = 0;
             const bullet_dy = -10;

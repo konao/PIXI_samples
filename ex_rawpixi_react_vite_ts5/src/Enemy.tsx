@@ -28,7 +28,6 @@ export class Enemy {
         this._parEnemy.init_y = posEnemy.y;  // y座標の初期値
         this._parEnemy.anchorX = 0.5;   // スプライトの中心を移動、回転の中心にする．
         this._parEnemy.anchorY = 0.5;
-        // this._parEnemy.rotation = Math.PI/6;
         this._parEnemy.rotation = 0;    // 初期状態では回転なし
         this._parEnemy.w = this._tex_enemy.width;   // テクスチャのサイズをパーティクルにもセットしておく
         this._parEnemy.h = this._tex_enemy.height;
@@ -479,7 +478,7 @@ export class Enemies {
 
         const hitTestAndGetPoint = (parEnemy: PIXI.Particle) => {
             const posEnemy = { x: parEnemy.x, y: parEnemy.y };
-            const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
+            const enemy_r = parEnemy.w * 0.4;   // 大体の半径を適当に計算
             if (fnHitTest(posEnemy, enemy_r)) {
                 // 当たった
                 parEnemy.destroyed = true;  // この敵の破壊フラグをon
@@ -540,6 +539,22 @@ export class Enemies {
         // 部分適用を使って判定関数の引数を共通用の引数に合わせる
         const fnHitTest = M.curry(Utils.hitTest2)(posLaser1)(posLaser2);
         return this.hitTest(fnHitTest, explosions);
+    }
+
+    // ヒットテスト（敵 vs プレーヤー）
+    public hitTest_player(posPlayer: Utils.Vec2, sizePlayer: number): boolean {
+        const playerDestroyed = this._formations
+            .map((form: EnemyFormation) => {
+                const pEnemies = form.getEnemies();
+                return pEnemies.map((enemy: Enemy) => {
+                    return M.Maybe.of(enemy.getParEnemy()).map((parEnemy: PIXI.Particle) => {
+                        const posEnemy = { x: parEnemy.x, y: parEnemy.y };
+                        const enemy_r = parEnemy.w * 0.4;   // 大体の半径を適当に計算
+                        return Utils.hitTest1(posPlayer, sizePlayer, posEnemy, enemy_r);
+                    }).getOrElse(false);
+                }).some(x => x);    // 配列に1つでもtrueがあればtrue
+            }).some(x => x);
+        return playerDestroyed;
     }
 
     // 移動

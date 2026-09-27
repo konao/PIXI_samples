@@ -173,7 +173,7 @@ export class PlayStage {
         // プレーヤー
         this._player = new Player.Player();
         this._player.init(containers, wholeTexture);
-        this._player.setPos(scrSize.x / 2 - 32, scrSize.y * 6 / 7);
+        this._player.setPos(scrSize.x / 2, scrSize.y * 6 / 7);
 
         // 弾丸（プレーヤー）
         this._playerBullets = new PlayerBullet.PlayerBullets();
@@ -237,10 +237,14 @@ export class PlayStage {
     // ステージ開始
     public start() {
         this._count = 0;
+        this._player?.setAlive(true);
+        Key.resetKeys();
     }
 
     // ステージ更新
     public update(delta: number) {
+        if (!this._game) return;
+
         // ポーズ切替
         if (Key.keys.KeyP) {
             this._pause = !this._pause;
@@ -252,19 +256,16 @@ export class PlayStage {
         // ステージカウンタ更新
         this.countUp();
 
+        const state = this._game.getState();
+
         // プレーヤー更新
-        this.updatePlayer(delta, Key.keys);
+        this.updatePlayer(state, delta, Key.keys);
 
         // 敵更新
-        this.updateEnemies();
+        this.updateEnemies(state);
 
         // 弾丸衝突判定、点数加算、他
         this.hitTest();
-    }
-
-    // プレーヤー破壊
-    public playerDestroyed() {
-
     }
 
     public countUp() {
@@ -280,81 +281,83 @@ export class PlayStage {
         }
     }
 
-    public updatePlayer(delta: number, keys: Key.KeyStatus) {
+    public updatePlayer(state: Game.GameState, delta: number, keys: Key.KeyStatus) {
         if (!this._player || !this._playerBullets) return;
 
         const player = this._player;
         const playerBullets = this._playerBullets;
 
-        // ----------------------------
-        // プレーヤー移動
-        // ----------------------------
+        if (state !== Game.GameState.PlayerDead) {
+            // ----------------------------
+            // プレーヤー移動
+            // ----------------------------
 
-        // 移動速度（1秒間に移動するピクセル数）
-        const moveSpeed = 300;
+            // 移動速度（1秒間に移動するピクセル数）
+            const moveSpeed = 300;
 
-        // 1フレームあたりの実際の移動量
-        const distance = (moveSpeed / 60) * delta;
+            // 1フレームあたりの実際の移動量
+            const distance = (moveSpeed / 60) * delta;
 
-        // 上下左右の移動計算
-        let player_moved = false;
-        if (keys.ArrowUp) {
-            player.move(0, -distance);
-            player_moved = true;
-        }
-        if (keys.ArrowDown) {
-            player.move(0, distance);
-            player_moved = true;
-        }
-        if (keys.ArrowLeft) {
-            player.move(-distance, 0, "left");
-            player_moved = true;
-        }
-        if (keys.ArrowRight) {
-            player.move(distance, 0, "right");
-            player_moved = true;
-        }
-        if (!player_moved) {
-            player.resetPic(); // 移動していなければ正面の絵に戻す
-        }
+            // 上下左右の移動計算
+            let player_moved = false;
+            if (keys.ArrowUp) {
+                player.move(0, -distance);
+                player_moved = true;
+            }
+            if (keys.ArrowDown) {
+                player.move(0, distance);
+                player_moved = true;
+            }
+            if (keys.ArrowLeft) {
+                player.move(-distance, 0, "left");
+                player_moved = true;
+            }
+            if (keys.ArrowRight) {
+                player.move(distance, 0, "right");
+                player_moved = true;
+            }
+            if (!player_moved) {
+                player.resetPic(); // 移動していなければ正面の絵に戻す
+            }
 
-        // ----------------------------
-        //  弾丸モード切替
-        // ----------------------------
-        if (keys.Digit1) {
-            this._bulletMode = "single";
-            console.log('single-shot');
-            keys.Digit1 = false;
-        }
-        if (keys.Digit2) {
-            this._bulletMode = "multi3";
-            console.log('multi-shot');
-            keys.Digit2 = false;
-        }
-        if (keys.Digit3) {
-            this._bulletMode = "spread3";
-            console.log('spread');
-            keys.Digit3 = false;
-        }
-        if (keys.Digit4) {
-            this._bulletMode = "laser";
-            console.log('laser');
-            keys.Digit4 = false;
-        }
+            // ----------------------------
+            //  弾丸モード切替
+            // ----------------------------
+            if (keys.Digit1) {
+                this._bulletMode = "single";
+                console.log('single-shot');
+                keys.Digit1 = false;
+            }
+            if (keys.Digit2) {
+                this._bulletMode = "multi3";
+                console.log('multi-shot');
+                keys.Digit2 = false;
+            }
+            if (keys.Digit3) {
+                this._bulletMode = "spread3";
+                console.log('spread');
+                keys.Digit3 = false;
+            }
+            if (keys.Digit4) {
+                this._bulletMode = "laser";
+                console.log('laser');
+                keys.Digit4 = false;
+            }
 
-        // ----------------------------
-        //  弾丸発射
-        // ----------------------------
-        if (keys.Space) {
-            keys.Space = false; // 1回押すごとに一発（これがないとスペースが押しっぱなし状態になってしまう）
+            // ----------------------------
+            //  弾丸発射
+            // ----------------------------
+            if (keys.Space) {
+                keys.Space = false; // 1回押すごとに一発（これがないとスペースが押しっぱなし状態になってしまう）
 
-            const playerPos = player.getPos();
-            if (playerPos) {
-                // 弾丸生成
-                playerBullets.genNewBullets(this._bulletMode, playerPos.x, playerPos.y, 64, 64)
+                const playerPos = player.getPos();
+                if (playerPos) {
+                    // 弾丸生成
+                    playerBullets.genNewBullets(this._bulletMode, playerPos.x, playerPos.y, 64, 64)
 
-                // 発射音
-                Sound.playSE("shot");
+                    // 発射音
+                    Sound.playSE("shot");
+                }
             }
         }
 
@@ -364,15 +367,25 @@ export class PlayStage {
         this._playerBullets.update();
     }
 
-    public updateEnemies() {
-        if (!this._enemies || !this._enemyBullets || !this._player) return;
+    public updateEnemies(state: Game.GameState) {
+        if (!this._enemies || !this._enemyBullets || !this._player || !this._game) return;
 
-        // ----------------------------
-        // 敵生成
-        // ----------------------------
-        if ((this._count % 200) == 0) {
-            const posPlayer = this._player.getPos();
-            this._enemies.genEnemies(posPlayer);
+        if (state !== Game.GameState.PlayerDead) {
+            // ----------------------------
+            // 敵生成
+            // ----------------------------
+            if ((this._count % 200) == 0) {
+                const posPlayer = this._player.getPos();
+                this._enemies.genEnemies(posPlayer);
+            }
+
+            // ----------------------------
+            // 敵攻撃
+            // ----------------------------
+            const playerPos = this._player.getPos();
+            if (playerPos) {
+                this._enemies.attack(playerPos, this._enemyBullets);
+            }
         }
 
         // ----------------------------
@@ -381,21 +394,13 @@ export class PlayStage {
         this._enemies.update();
 
         // ----------------------------
-        // 敵攻撃
-        // ----------------------------
-        const playerPos = this._player.getPos();
-        if (playerPos) {
-            this._enemies.attack(playerPos, this._enemyBullets);
-        }
-
-        // ----------------------------
         // 敵弾丸移動
         // ----------------------------
         this._enemyBullets.update();
     }
 
     public hitTest() {
-        if (!this._player || !this._playerBullets || !this._enemies || !this._explosions) return;
+        if (!this._game || !this._player || !this._playerBullets || !this._enemies || !this._enemyBullets || !this._explosions) return;
 
         // プレーヤー弾丸ヒットテスト
         const parBullets: PIXI.Particle[] = this._playerBullets.getParBullets();
@@ -447,5 +452,40 @@ export class PlayStage {
 
             this._playerBullets.removeDestroyedBullets();   // 当たった弾丸を消す
         }
+
+        if (this._player.isAlive()) {
+            // 敵弾丸ヒットテスト
+            const posPlayer = this._player.getPos();
+            const sizePlayer = this._player.getSize().x / 2 * 0.8;   // 大体の半径を適当に計算
+            const parEnemyBullets: PIXI.Particle[] = this._enemyBullets.getParBullets();
+            parEnemyBullets.map((parEnemyBullet: PIXI.Particle) => {
+                M.Maybe.of(parEnemyBullet).map((pb: PIXI.Particle) => {
+                    const posEnemyBullet = { x: pb.x, y: pb.y };
+                    const sizeEnemyBullet = pb.w * 0.4;    // 大体の半径を適当に計算
+                    if (Utils.hitTest1(posEnemyBullet, sizeEnemyBullet, posPlayer, sizePlayer)) {
+                        // 当たった
+                        this.playerDestroyed(posPlayer);
+                    }
+                });
+            });
+
+            // 敵衝突ヒットテスト
+            if (this._enemies.hitTest_player(posPlayer, sizePlayer)) {
+                // 衝突した
+                this.playerDestroyed(posPlayer);
+            }
+        }
+    }
+
+    // プレーヤー破壊
+    private playerDestroyed(posPlayer: Utils.Vec2) {
+        if (!this._game || !this._player || !this._explosions) return;
+
+        this._player.setAlive(false);   // 死亡
+
+        this._explosions.addNewExplosion(posPlayer);   // 爆発アニメーションを追加
+        Sound.playSE("explosion");  // 爆発音
+
+        this._game.switchState(Game.GameState.PlayerDead);  // ステート更新
     }
 }

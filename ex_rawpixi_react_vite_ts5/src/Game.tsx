@@ -16,12 +16,12 @@ export enum GameState {
 
 export class Game {
     private _state: GameState = GameState.Title;
-    // private _state: GameState = GameState.Playing;
     private _containers: Utils.Containers | null = null;
     private _titleStage: Stage.TitleStage = new Stage.TitleStage();
     private _playStage: Stage.PlayStage = new Stage.PlayStage();
     private _gameOverStage: Stage.GameOverStage = new Stage.GameOverStage();
     private _fontManager: Font.FontManager = new Font.FontManager();
+    private _playerDeadCount: number = 0;
 
     public async init(app: PIXI.Application, scrSize: Utils.Vec2) {
         // -------------------------------
@@ -88,6 +88,10 @@ export class Game {
         return this._fontManager;
     }
 
+    public getState() {
+        return this._state;
+    }
+
     public switchState(state: GameState) {
         if (!this._containers) return;
 
@@ -97,8 +101,13 @@ export class Game {
                 this._containers.setVisible(Utils.ContainerType.Title);
                 break;
             case GameState.Playing:
+                this._containers.setVisible(Utils.ContainerType.Game);
+                this._playStage.start();
+                break;
             case GameState.PlayerDead:
                 this._containers.setVisible(Utils.ContainerType.Game);
+                this._playerDeadCount = 400;    // 復活するまでのカウントを初期化
+                
                 break;
             case GameState.GameOver:
                 this._containers.setVisible(Utils.ContainerType.Title);
@@ -112,8 +121,16 @@ export class Game {
                 this._titleStage.update(delta);
                 break;
             case GameState.Playing:
-            case GameState.PlayerDead:
                 this._playStage.update(delta);
+                break;
+            case GameState.PlayerDead:
+                this._playerDeadCount -= 1;
+                if (this._playerDeadCount <= 0) {
+                    // 0になったら再びプレイ状態に遷移
+                    this.switchState(GameState.Playing);
+                } else {
+                    this._playStage.update(delta);
+                }
                 break;
             case GameState.GameOver:
                 this._gameOverStage.update(delta);

@@ -69,7 +69,7 @@ export class EnemyBullets {
             return (p && (p.x < 0 || p.x > this._scrSize.x || p.y < 0 || p.y > this._scrSize.y));
         }
 
-        this._bullets
+        this._bullets = this._bullets
             .map(bullet => M.Maybe.of(bullet).map(b => {
                 // 弾丸移動（Maybeを使って配列上の有効なデータだけを更新する）
                 b.x += b.dx;

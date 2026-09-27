@@ -65,3 +65,8 @@ window.addEventListener('keyup', (e) => {
     }
 });
 
+export const resetKeys = () => {
+    for (const k of Object.keys(keys)) {
+        keys[k] = false;
+    }
+}
