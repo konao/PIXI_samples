@@ -121,6 +121,9 @@ export default function PixiCanvas() {
       });
 
       // 通常のContainerの作成（アニメーション付きスプライト用）
+      const normalContainer = new PIXI.Container();
+
+      // エフェクト用Containerの作成（アニメーション付きスプライト用）
       const effectContainer = new PIXI.Container();
 
       // UI用コンテナ
@@ -130,7 +133,7 @@ export default function PixiCanvas() {
       const wholeTexture = await PIXI.Assets.load<PIXI.Spritesheet>('image/SpaceRage.json');
 
       // ステージ初期化
-      const containers = new Utils.Containers(particleContainer, effectContainer, uiContainer);
+      const containers = new Utils.Containers(particleContainer, normalContainer, effectContainer, uiContainer);
       await g_stage.init(app, containers, wholeTexture, app.screen.width, app.screen.height);
 
       // 移動速度（1秒間に移動するピクセル数）
@@ -153,10 +156,26 @@ export default function PixiCanvas() {
         g_stage.countUp();
 
         // 上下左右の移動計算
-        if (keys.ArrowUp) player?.move(0, -distance);
-        if (keys.ArrowDown) player?.move(0, distance);
-        if (keys.ArrowLeft) player?.move(-distance, 0);
-        if (keys.ArrowRight) player?.move(distance, 0);
+        let player_moved = false;
+        if (keys.ArrowUp) {
+          player?.move(0, -distance);
+          player_moved = true;
+        }
+        if (keys.ArrowDown) {
+          player?.move(0, distance);
+          player_moved = true;
+        }
+        if (keys.ArrowLeft) {
+          player?.move(-distance, 0, "left");
+          player_moved = true;
+        }
+        if (keys.ArrowRight) {
+          player?.move(distance, 0, "right");
+          player_moved = true;
+        }
+        if (!player_moved) {
+          player?.resetPic(); // 移動していなければ正面の絵に戻す
+        }
         if (keys.Space) {
           keys.Space = false; // 1回押すごとに一発
 

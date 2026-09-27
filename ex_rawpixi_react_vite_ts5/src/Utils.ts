@@ -7,12 +7,14 @@ import * as PIXI from 'pixi.js';
 //  コンテナを格納するクラス
 // ----------------------------------------------
 class Containers {
-    public particleContainer: PIXI.ParticleContainer;
-    public effectContainer: PIXI.Container;
-    public uiContainer: PIXI.Container;
+    public particleContainer: PIXI.ParticleContainer;   // パーティクル格納用（最も高速）
+    public normalContainer: PIXI.Container; // 通常スプライト格納用（主にAnimatedSptire格納用）
+    public effectContainer: PIXI.Container; // エフェクト用（爆発アニメーションスプライトなど）
+    public uiContainer: PIXI.Container; // UIコンテナ（スコア表示など）
 
-    constructor(_particleContainer: PIXI.ParticleContainer, _effectContainer: PIXI.Container, _uiContainer: PIXI.Container) {
+    constructor(_particleContainer: PIXI.ParticleContainer, _normalContainer: PIXI.Container, _effectContainer: PIXI.Container, _uiContainer: PIXI.Container) {
         this.particleContainer = _particleContainer;
+        this.normalContainer = _normalContainer;
         this.effectContainer = _effectContainer;
         this.uiContainer = _uiContainer;
     }
