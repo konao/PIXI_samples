@@ -19,20 +19,26 @@ export class EnemyBullets {
         this._h = h;
     }
 
-    public genNewBullets(player_x: number, player_y: number, enemy_x: number, enemy_y: number, enemy_w: number, enemy_h: number, bulletSpeed: number) {
+    public genNewBullets(posPlayer: Utils.Vec2, posEnemy: Utils.Vec2, sizeEnemy: Utils.Vec2, bulletSpeed: number) {
+        const player_x: number = posPlayer.x;
+        const player_y: number = posPlayer.y;
+        const enemy_x: number = posEnemy.x;
+        const enemy_y: number = posEnemy.y;
+        const enemy_w: number = sizeEnemy.x;
+        const enemy_h: number = sizeEnemy.y;
         if (this._tex_bullet && this._containers?.particleContainer) {
-                // 弾丸のスプライトを生成
-                const bullet_x = enemy_x + enemy_w / 2;
-                const bullet_y = enemy_y + enemy_h / 2;
-                try {
-                    const dist = Math.sqrt((player_x - enemy_x)*(player_x - enemy_x) + (player_y - enemy_y)*(player_y - enemy_y));
-                    let bullet_dx = (player_x - enemy_x) / dist * bulletSpeed;
-                    let bullet_dy = (player_y - enemy_y) / dist * bulletSpeed;
-                    this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
-                }
-                catch {
-                    // do nothing
-                }
+            // 弾丸のスプライトを生成
+            const bullet_x = enemy_x + enemy_w / 2;
+            const bullet_y = enemy_y + enemy_h / 2;
+            try {
+                const dist = Math.sqrt((player_x - enemy_x) * (player_x - enemy_x) + (player_y - enemy_y) * (player_y - enemy_y));
+                let bullet_dx = (player_x - enemy_x) / dist * bulletSpeed;
+                let bullet_dy = (player_y - enemy_y) / dist * bulletSpeed;
+                this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
+            }
+            catch {
+                // do nothing
+            }
         }
     }
 

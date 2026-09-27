@@ -16,10 +16,10 @@ export class Explosions {
         }
     }
 
-    public addNewExplosion(x: number, y: number) {
+    public addNewExplosion(posExplosion: Utils.Vec2) {
         const parExplosion = new PIXI.AnimatedSprite(this._tex_explotions);
-        parExplosion.x = x;
-        parExplosion.y = y;
+        parExplosion.x = posExplosion.x;
+        parExplosion.y = posExplosion.y;
         parExplosion.anchor.set(0.5);
         parExplosion.animationSpeed = 1.0;  // 値が大きいほど速い
         parExplosion.loop = false;  // ループしない
