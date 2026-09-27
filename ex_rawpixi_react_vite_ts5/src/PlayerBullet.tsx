@@ -25,21 +25,28 @@ export class PlayerBullets {
             for (let i = 0; i < bulletMode; i++) {
                 // 弾丸のスプライトを生成
                 const bullet_x = player_x + player_w / 2;
-                const bullet_y = player_y - player_h / 2;
+                const bullet_y = player_y;
                 let bullet_dx = 0;
-                let bullet_dy = -10;
+                const bullet_dy = -10;
                 switch (bulletMode) {
                     case 1:
-                        bullet_dx = 0;
+                        this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
                         break;
                     case 3:
-                        bullet_dx = (i - 1) * 2;
+                        // 放射状に散らす
+                        for (let i = 0; i < 3; i++) {
+                            bullet_dx = (i - 1) * 2;
+                            this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
+                        }
                         break;
                     case 5:
-                        bullet_dx = (i - 2) * 2;
+                        // 平行に連発
+                        for (let i = 0; i < 3; i++) {
+                            this.addBullet(bullet_x + (i - 1) * 15, bullet_y, bullet_dx, bullet_dy);
+                        }
                         break;
                 }
-                this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
+
             }
         }
     }
