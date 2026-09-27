@@ -121,28 +121,9 @@ export class TitleStage {
 }
 
 // ================================================
-//  ゲームオーバー画面
-// ================================================
-export class GameOverStage {
-    private _game: Game.Game | null = null;
-    private _containers: Utils.Containers | null = null;
-    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
-
-    public async init(game: Game.Game, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
-        this._game = game;
-        this._containers = containers;
-        this._scrSize = scrSize;
-    }
-
-    public update(delta: number) {
-    }
-}
-
-// ================================================
 //  ゲーム画面本体
 // ================================================
 export class PlayStage {
-    // private _app: PIXI.Application | null = null;
     private _game: Game.Game | null = null;
     private _containers: Utils.Containers | null = null;
     private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
@@ -151,12 +132,15 @@ export class PlayStage {
     private _enemies: Enemy.Enemies | null = null;
     private _enemyBullets: EnemyBullet.EnemyBullets | null = null;
     private _explosions: Explosions.Explosions | null = null;
-    private _stageNo: number = 1;
+    private _stageNo: number = 0;
     private _count: number = 0;
     private _score: number = 0;
     private _hiscore: number = 0;
+    private _fighters: number = 0;    // プレーヤー戦闘機数
     private _scoreText: PIXI.BitmapText | null = null;
     private _hiscoreText: PIXI.BitmapText | null = null;
+    private _fightersText: PIXI.BitmapText | null = null;
+    private _gameOverText: PIXI.BitmapText | null = null;
     private _bulletMode: string = "single";
     private _pause: boolean = false;
 
@@ -167,13 +151,9 @@ export class PlayStage {
         this._containers = containers;
         this._scrSize = scrSize;
 
-        // スコアクリア
-        this._score = 0;
-
         // プレーヤー
         this._player = new Player.Player();
-        this._player.init(containers, wholeTexture);
-        this._player.setPos(scrSize.x / 2, scrSize.y * 6 / 7);
+        this._player.init(containers, wholeTexture, scrSize);
 
         // 弾丸（プレーヤー）
         this._playerBullets = new PlayerBullet.PlayerBullets();
@@ -219,6 +199,12 @@ export class PlayStage {
         this._hiscoreText = font1.createBitmapText({
             fontSize: 36
         });
+        this._fightersText = font1.createBitmapText({
+            fontSize: 30
+        });
+        this._gameOverText = font1.createBitmapText({
+            fontSize: 60
+        })
 
         // 表示位置を設定
         this._scoreText.x = 30;
@@ -227,18 +213,43 @@ export class PlayStage {
         this._hiscoreText.x = 420;
         this._hiscoreText.y = 20;
 
+        this._fightersText.x = 30;
+        this._fightersText.y = scrSize.y - 50;
+
+        this._gameOverText.text = `GAME OVER`;
+        this._gameOverText.x = 230;
+        this._gameOverText.y = scrSize.y / 2;
+        this._gameOverText.visible = false;
+
         this.updateScoreText();
 
         // 通常のコンテナレイヤー（uiContainerなど）に追加
-        containers.uiContainer.addChild(this._scoreText); // ⚠️ ParticleContainerには入れないでください
+        containers.uiContainer.addChild(this._scoreText);
         containers.uiContainer.addChild(this._hiscoreText);
+        containers.uiContainer.addChild(this._fightersText);
+        containers.uiContainer.addChild(this._gameOverText);
     }
 
-    // ステージ開始
-    public start() {
-        this._count = 0;
-        this._player?.setAlive(true);
+    // スタート
+    public hardStart() {
+        this._score = 0;    // スコアクリア
+        this._fighters = 3; // 初期プレーヤー数
+        this._bulletMode = "single";    // ショットモード
+        this._stageNo = 1;  // ステージNo
+        this.updateScoreText();
+    }
+
+    // 再スタート
+    public softStart() {
+        if (this._player) {
+            this._player?.setAlive(true);
+            this._player.setPos(this._scrSize.x / 2, this._scrSize.y * 6 / 7);
+        }
+        if (this._gameOverText) {
+            this._gameOverText.visible = false;
+        }
         Key.resetKeys();
+        this._count = 0;
     }
 
     // ステージ更新
@@ -279,6 +290,9 @@ export class PlayStage {
         if (this._hiscoreText) {
             this._hiscoreText.text = `HISCORE: ${String(this._hiscore).padStart(6, '0')}`;
         }
+        if (this._fightersText) {
+            this._fightersText.text = `FIGHTERS: ${String(this._fighters).padStart(1, '0')}`;
+        }
     }
 
     public updatePlayer(state: Game.GameState, delta: number, keys: Key.KeyStatus) {
@@ -287,7 +301,7 @@ export class PlayStage {
         const player = this._player;
         const playerBullets = this._playerBullets;
 
-        if (state !== Game.GameState.PlayerDead) {
+        if (state == Game.GameState.Playing) {
             // ----------------------------
             // プレーヤー移動
             // ----------------------------
@@ -370,7 +384,7 @@ export class PlayStage {
     public updateEnemies(state: Game.GameState) {
         if (!this._enemies || !this._enemyBullets || !this._player || !this._game) return;
 
-        if (state !== Game.GameState.PlayerDead) {
+        if (state == Game.GameState.Playing) {
             // ----------------------------
             // 敵生成
             // ----------------------------
@@ -486,6 +500,20 @@ export class PlayStage {
         this._explosions.addNewExplosion(posPlayer);   // 爆発アニメーションを追加
         Sound.playSE("explosion");  // 爆発音
 
-        this._game.switchState(Game.GameState.PlayerDead);  // ステート更新
+        this._fighters -= 1;
+        this.updateScoreText();
+
+        const nextState = (this._fighters > 0) ? Game.GameState.PlayerDead : Game.GameState.GameOver;
+        this._game.switchState(nextState);  // ステート更新
+    }
+
+    // ゲームオーバー
+    public gameOver() {
+        if (this._gameOverText) this._gameOverText.visible = true;
+
+        if (this._score > this._hiscore) {
+            // ハイスコア更新
+            this._hiscore = this._score;
+        }
     }
 }

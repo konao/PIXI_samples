@@ -1,5 +1,5 @@
 // ************************************************************
-//  ゲーム本体（ステート管理のみ）
+//  ゲーム本体
 // ************************************************************
 
 import * as PIXI from 'pixi.js';
@@ -19,9 +19,9 @@ export class Game {
     private _containers: Utils.Containers | null = null;
     private _titleStage: Stage.TitleStage = new Stage.TitleStage();
     private _playStage: Stage.PlayStage = new Stage.PlayStage();
-    private _gameOverStage: Stage.GameOverStage = new Stage.GameOverStage();
     private _fontManager: Font.FontManager = new Font.FontManager();
-    private _playerDeadCount: number = 0;
+    private _playerDeadWaitCount: number = 0;
+    private _gameOverWaitCount: number = 0;
 
     public async init(app: PIXI.Application, scrSize: Utils.Vec2) {
         // -------------------------------
@@ -51,6 +51,9 @@ export class Game {
         // タイトル用コンテナ
         const titleContainer = new PIXI.Container();
 
+        // ゲームオーバー画面用コンテナ
+        const gameOverContainer = new PIXI.Container();
+
         // addChildの順番に注意
         // （後に追加したものが上に表示される）
         app.stage.addChild(particleContainer);
@@ -58,6 +61,7 @@ export class Game {
         app.stage.addChild(effectContainer);
         app.stage.addChild(uiContainer);
         app.stage.addChild(titleContainer);
+        app.stage.addChild(gameOverContainer);
 
         // -------------------------------
         //  テクスチャロード
@@ -78,7 +82,6 @@ export class Game {
         this._containers = containers;
         this._titleStage.init(this, containers, wholeTexture, scrSize);
         this._playStage.init(this, containers, wholeTexture, scrSize);
-        this._gameOverStage.init(this, containers, wholeTexture, scrSize);
 
         // 最初のステートへ移行
         this.switchState(GameState.Title);
@@ -99,18 +102,20 @@ export class Game {
         switch (state) {
             case GameState.Title:
                 this._containers.setVisible(Utils.ContainerType.Title);
+                this._playStage.hardStart();
                 break;
             case GameState.Playing:
                 this._containers.setVisible(Utils.ContainerType.Game);
-                this._playStage.start();
+                this._playStage.softStart();
                 break;
             case GameState.PlayerDead:
                 this._containers.setVisible(Utils.ContainerType.Game);
-                this._playerDeadCount = 400;    // 復活するまでのカウントを初期化
-                
+                this._playerDeadWaitCount = 400;    // 復活するまでのカウンタ
                 break;
             case GameState.GameOver:
-                this._containers.setVisible(Utils.ContainerType.Title);
+                this._containers.setVisible(Utils.ContainerType.Game);
+                this._playStage.gameOver();
+                this._gameOverWaitCount = 700;  // タイトル画面に戻るまでのカウンタ
                 break;
         }
     }
@@ -124,8 +129,8 @@ export class Game {
                 this._playStage.update(delta);
                 break;
             case GameState.PlayerDead:
-                this._playerDeadCount -= 1;
-                if (this._playerDeadCount <= 0) {
+                this._playerDeadWaitCount -= 1;
+                if (this._playerDeadWaitCount <= 0) {
                     // 0になったら再びプレイ状態に遷移
                     this.switchState(GameState.Playing);
                 } else {
@@ -133,7 +138,13 @@ export class Game {
                 }
                 break;
             case GameState.GameOver:
-                this._gameOverStage.update(delta);
+                this._gameOverWaitCount -= 1;
+                if (this._gameOverWaitCount <= 0) {
+                    // 0になったらタイトル画面へ遷移
+                    this.switchState(GameState.Title);
+                } else {
+                    this._playStage.update(delta);
+                }
                 break;
         }
     }

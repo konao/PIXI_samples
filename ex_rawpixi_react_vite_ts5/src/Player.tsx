@@ -1,5 +1,5 @@
 // ************************************************************
-//  宇宙船
+//  プレーヤー
 // ************************************************************
 
 import * as PIXI from 'pixi.js';
@@ -11,12 +11,14 @@ export class Player {
     private _player: PIXI.AnimatedSprite | null = null;
     private readonly _sizePlayer: Utils.Vec2 = { x: 64, y: 64 };
     private _bAlive: boolean = true;
+    private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
 
-    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet) {
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
         this._containers = containers;
         this._tex_player_b.push(wholeTexture.textures['SpaceRage/Player/player_b_l1.png']); // 左向き
         this._tex_player_b.push(wholeTexture.textures['SpaceRage/Player/player_b_m.png']);  // 正面
         this._tex_player_b.push(wholeTexture.textures['SpaceRage/Player/player_b_r1.png']); // 右向き
+        this._scrSize = scrSize;
 
         // プレーヤーのスプライトを生成
         // 表示画像を切り替えるため、AnimatedSpriteを使う．
@@ -58,16 +60,27 @@ export class Player {
     }
 
     public move(dx: number, dy: number, dir: string = "") {
+        // ローカルヘルパー関数
+        const isOutOfStage = (p: Utils.Vec2, sz: Utils.Vec2): boolean => {
+            const w = sz.x / 2;
+            const h = sz.y / 2;
+            return (p && ((p.x - w) < 0 || (p.x + w) > this._scrSize.x || (p.y - h) < 0 || (p.y + h) > this._scrSize.y));
+        }
+
         if (this._player) {
-            this._player.x += dx;
-            this._player.y += dy;
-            switch (dir) {
-                case "left":
-                    this._player.currentFrame = 0;  // 左向きの絵にする
-                    break;
-                case "right":
-                    this._player.currentFrame = 2;  // 右向きの絵にする
-                    break;
+            const p = { x: this._player.x + dx, y: this._player.y + dy };
+            if (!isOutOfStage(p, this._sizePlayer)) {   // 画面範囲チェック
+                this._player.x = p.x;
+                this._player.y = p.y;
+
+                switch (dir) {
+                    case "left":
+                        this._player.currentFrame = 0;  // 左向きの絵にする
+                        break;
+                    case "right":
+                        this._player.currentFrame = 2;  // 右向きの絵にする
+                        break;
+                }
             }
         }
     }
