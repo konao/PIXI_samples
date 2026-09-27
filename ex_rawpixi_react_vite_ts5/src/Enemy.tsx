@@ -70,7 +70,6 @@ export class Enemy {
 export class Enemies {
     private _container: PIXI.ParticleContainer | null = null;
     private _wholeTextures: PIXI.Spritesheet | null = null;
-    // private _tex_bullet: PIXI.Texture | null = null;
     private _w: number = 0;
     private _h: number = 0;
     private _enemies: Enemy[] = [];
@@ -78,7 +77,6 @@ export class Enemies {
     public init(container: PIXI.ParticleContainer, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
         this._container = container;
         this._wholeTextures = wholeTexture;
-        // this._tex_bullet = wholeTexture.textures['FX/vulcan_3.png'];
         this._w = w;
         this._h = h;
     }
@@ -89,11 +87,33 @@ export class Enemies {
 
             const x = Math.random() * this._w;
             const aid = Math.trunc(Math.random() * 2);
+            const eid = Math.trunc(Math.random() * 6);
+            let etex = "";
+            switch (eid) {
+                case 0:
+                    etex = "enemy_1_b_m";
+                    break;
+                case 1:
+                    etex = "enemy_1_g_m";
+                    break;
+                case 2:
+                    etex = "enemy_1_r_m";
+                    break;
+                case 3:
+                    etex = "enemy_2_b_m";
+                    break;
+                case 4:
+                    etex = "enemy_2_g_m";
+                    break;
+                case 5:
+                    etex = "enemy_2_r_m";
+                    break;
+            }
 
             for (let i=0; i<nEnemies; i++) {
                 const y = i*(-80);
                 const enemy = new Enemy();
-                enemy.init(this._container, this._wholeTextures, "enemy_1_r_m", x, y, this._w, this._h, aid);
+                enemy.init(this._container, this._wholeTextures, etex, x, y, this._w, this._h, aid);
 
                 this._enemies.push(enemy);
             }
