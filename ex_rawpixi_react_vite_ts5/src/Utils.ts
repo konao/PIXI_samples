@@ -76,6 +76,10 @@ const hitTest1 = (x1: number, y1: number, r1: number, x2: number, y2: number, r2
 //  @param x1, y1 レーザーの端点(A)
 //  @param x2, y2 レーザーの端点(B)
 //  @param x3, y3, r3 敵の位置(P)とおよその半径
+//
+//  ＜参考サイト＞
+//  点と線分の最近傍点と距離の計算
+//  https://qiita.com/deltaMASH/items/e7ffcca78c9b75710d09
 // ----------------------------------------------
 const hitTest2 = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, r3: number): boolean => {
     const A: Vec2 = {x: x1, y: y1};
