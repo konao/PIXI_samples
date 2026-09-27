@@ -12,9 +12,9 @@ export class Player {
 
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet) {
         this._containers = containers;
-        this._tex_player_b.push(wholeTexture.textures['Player/player_b_l1.png']); // 左向き
-        this._tex_player_b.push(wholeTexture.textures['Player/player_b_m.png']);  // 正面
-        this._tex_player_b.push(wholeTexture.textures['Player/player_b_r1.png']); // 右向き
+        this._tex_player_b.push(wholeTexture.textures['SpaceRage/Player/player_b_l1.png']); // 左向き
+        this._tex_player_b.push(wholeTexture.textures['SpaceRage/Player/player_b_m.png']);  // 正面
+        this._tex_player_b.push(wholeTexture.textures['SpaceRage/Player/player_b_r1.png']); // 右向き
 
         // プレーヤーのスプライトを生成
         // 表示画像を切り替えるため、AnimatedSpriteを使う．

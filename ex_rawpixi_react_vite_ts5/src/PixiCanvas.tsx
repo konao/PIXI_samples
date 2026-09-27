@@ -130,7 +130,7 @@ export default function PixiCanvas() {
       const uiContainer = new PIXI.Container();
 
       // JSONファイルをAssets.loadすると、内部の画像も自動でロード・分割される
-      const wholeTexture = await PIXI.Assets.load<PIXI.Spritesheet>('image/SpaceRage.json');
+      const wholeTexture = await PIXI.Assets.load<PIXI.Spritesheet>('image/SpaceShooterAssets.json');
 
       // ステージ初期化
       const containers = new Utils.Containers(particleContainer, normalContainer, effectContainer, uiContainer);
