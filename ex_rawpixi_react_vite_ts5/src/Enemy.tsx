@@ -231,18 +231,18 @@ class AttackRoute {
                             y
                         }
                         const p2 = {    // 回転成分
-                            x: k*r*Math.cos(theta),
-                            y: r*Math.sin(theta)
+                            x: k * r * Math.cos(theta),
+                            y: r * Math.sin(theta)
                         }
                         const p = Utils.v_add(p1, p2);
                         route.push(p);  // ルートを追加
 
-                        rotations.push(k*theta);    // 回転角を追加
+                        rotations.push(k * theta);    // 回転角を追加
                     }
 
                     // 変位の配列に変換
                     for (let i = 0; i < route.length - 1; i++) {
-                        const d: Utils.Vec2 = Utils.v_sub(route[i+1], route[i]);
+                        const d: Utils.Vec2 = Utils.v_sub(route[i + 1], route[i]);
                         this._routes.push(new AttackRouteElem({ x: d.x, y: d.y }, rotations[i]));
                     }
                 }
@@ -294,10 +294,10 @@ class AttackRoutes {
                 {
                     if (Math.random() < 0.5) {
                         // 画面の左端から1/3のどこか
-                        initialPosEnemy_x = Math.random() * param.scrSize.x/3;
+                        initialPosEnemy_x = Math.random() * param.scrSize.x / 3;
                     } else {
                         // 画面の右端から1/3のどこか
-                        initialPosEnemy_x = param.scrSize.x - Math.random() * param.scrSize.x/3;
+                        initialPosEnemy_x = param.scrSize.x - Math.random() * param.scrSize.x / 3;
                     }
                     speed = 3;
                 }
@@ -368,7 +368,7 @@ class EnemyFormation {
             posPlayer,
             scrSize: this._scrSize,
             // 以下はダミー（genRoutes()内で計算される）
-            posEnemy: { x:0, y:0 },
+            posEnemy: { x: 0, y: 0 },
             speed: 0
         }
         routes.genRoutes(aid, attackParam, nEnemies);
@@ -446,11 +446,10 @@ export class Enemies {
     private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
     private _formations: EnemyFormation[] = [];
 
-    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
         this._containers = containers;
         this._wholeTextures = wholeTexture;
-        this._scrSize.x = w;
-        this._scrSize.y = h;
+        this._scrSize = scrSize;
     }
 
     public genEnemies(posPlayer: Utils.Vec2) {
