@@ -470,12 +470,12 @@ export class PlayStage {
         if (this._player.isAlive()) {
             // 敵弾丸ヒットテスト
             const posPlayer = this._player.getPos();
-            const sizePlayer = this._player.getSize().x / 2 * 0.8;   // 大体の半径を適当に計算
+            const sizePlayer = Utils.sz2r(this._player.getSize());
             const parEnemyBullets: PIXI.Particle[] = this._enemyBullets.getParBullets();
             parEnemyBullets.map((parEnemyBullet: PIXI.Particle) => {
                 M.Maybe.of(parEnemyBullet).map((pb: PIXI.Particle) => {
                     const posEnemyBullet = { x: pb.x, y: pb.y };
-                    const sizeEnemyBullet = pb.w * 0.4;    // 大体の半径を適当に計算
+                    const sizeEnemyBullet = Utils.sz2r({ x: pb.w, y: pb.h });
                     if (Utils.hitTest1(posEnemyBullet, sizeEnemyBullet, posPlayer, sizePlayer)) {
                         // 当たった
                         this.playerDestroyed(posPlayer);

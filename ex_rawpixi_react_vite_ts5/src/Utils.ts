@@ -129,3 +129,12 @@ export const hitTest2 = (A: Vec2, B: Vec2, P: Vec2, r: number): boolean => {
         return dist < r;
     }
 }
+
+// ----------------------------------------------
+//  キャラクターサイズから大体の半径を計算
+// ----------------------------------------------
+export const sz2r = (size: Vec2): number => {
+    const half_w = size.x / 2;
+    const root2 = 1.41421356;
+    return half_w * root2;
+}
