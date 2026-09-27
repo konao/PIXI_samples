@@ -8,6 +8,7 @@ import * as Bullet from './Bullet';
 import * as Enemy from './Enemy';
 import * as Explosions from './Explosion';
 import * as Font from './Font';
+import * as Sound from './Sound';
 import * as Utils from './Utils';
 
 export class Stage {
@@ -160,6 +161,9 @@ export class Stage {
 
                                 // 爆発アニメーションを追加
                                 this._explosions?.addNewExplosion(enemy_x, enemy_y);
+
+                                // 爆発音
+                                Sound.playSE("explosion");
 
                                 // 点数加算
                                 this._score += 10;
