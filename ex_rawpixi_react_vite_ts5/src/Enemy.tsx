@@ -32,6 +32,7 @@ export class Enemy {
         this._parEnemy.rotation = 0;    // 初期状態では回転なし
         this._parEnemy.w = this._tex_enemy.width;   // テクスチャのサイズをパーティクルにもセットしておく
         this._parEnemy.h = this._tex_enemy.height;
+        this._parEnemy.destroyed = false;
         this._aid = aid;
         this._count = 0;
         this._containers.particleContainer.addParticle(this._parEnemy);
@@ -430,18 +431,17 @@ class EnemyFormation {
         const attackRatio = 0.005;  // 攻撃頻度（大きいほど攻撃が多くなる）
         const bulletSpeed = 5; // 弾丸の速さ（大きいほど弾丸が速い）[TODO] aidによって変えてもいい
 
-        for (let i = 0; i < this._enemies.length; i++) {
-            const enemy = this._enemies[i];
-            if (enemy && Math.random() < attackRatio) { // 攻撃を行うか？
+        this._enemies.map((enemy: Enemy) => {
+            M.Maybe.of(enemy).map((enemy: Enemy) => {   // Maybe.mapを使って有効な(nullでない)enemyだけに対して処理を行う
                 const parEnemy = enemy.getParEnemy();
-                if (parEnemy) {
+                if (parEnemy && Math.random() < attackRatio) { // 攻撃を行うか？
                     // 攻撃
                     const posEnemy = { x: parEnemy.x, y: parEnemy.y };
                     const sizeEnemy = { x: 64, y: 64 };
                     enemyBullets.genNewBullets(posPlayer, posEnemy, sizeEnemy, bulletSpeed);
                 }
-            }
-        }
+            })
+        })
     }
 }
 
@@ -501,7 +501,7 @@ export class Enemies {
                     return M.Maybe.of(enemy.getParEnemy()).map(hitTestAndGetPoint)
                 })
                     .map(x => x.getOrElse(0))   // Maybeから中身(number)を取り出す
-                    .reduce((prev: number, curr: number) => prev + curr, 0)   // number[]からnumberへ変換（まとめる）
+                    .reduce((prev: number, curr: number) => prev + curr, 0)   // number[]からnumberへ変換（和をとる）
 
                 if (scoresToAdd > 0) {
                     scorePoints += scoresToAdd; // スコア加算
@@ -542,15 +542,23 @@ export class Enemies {
         return this.hitTest(fnHitTest, explosions);
     }
 
+    // 移動
     public update() {
-        for (const formation of this._formations) {
-            formation.update();
+        for (const form of this._formations) {
+            form.update();
         }
+
+        // 空のformationを消す
+        this._formations = this._formations
+            .filter((form: EnemyFormation) => {
+                return (form.getEnemies().length > 0);   // 空でないformationのみ残す
+            })
     }
 
+    // 攻撃
     public attack(posPlayer: Utils.Vec2, enemyBullets: EnemyBullet.EnemyBullets) {
-        for (const formation of this._formations) {
-            formation.attack(posPlayer, enemyBullets);
+        for (const form of this._formations) {
+            form.attack(posPlayer, enemyBullets);
         }
     }
 }

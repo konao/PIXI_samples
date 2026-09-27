@@ -69,6 +69,7 @@ export class PlayerBullets {
             bullet.h = tex.height;
             bullet.dx = dx;
             bullet.dy = dy;
+            bullet.destroyed = false;
             this._bullets.push(bullet)
             this._containers.particleContainer.addParticle(bullet)
         }
@@ -98,20 +99,21 @@ export class PlayerBullets {
         return this._bullets;
     }
 
-    public removeBullets(indsToRemove: number[]) {
-        if (indsToRemove.length > 0) {
-            // Setを使って重複を消し、配列に戻す
-            const indsToRemove2 = [...new Set(indsToRemove)];
-
-            // 降順にソート
-            const sortedInds = indsToRemove2.sort((a, b) => b - a)
-
-            for (const i of sortedInds) {
-                const bullet = this._bullets[i]
-                this._containers?.particleContainer.removeParticle(bullet); // コンテナから消す
-                this._bullets.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
+    // 破壊フラグがtrueになっている弾丸を削除する
+    public removeDestroyedBullets() {
+        this._bullets = this._bullets.filter(bullet => {
+            if (bullet) {
+                if (bullet.destroyed) {
+                    // 破壊されている
+                    this._containers?.particleContainer.removeParticle(bullet); // コンテナから消す
+                    return false;   // 配列からも消す
+                } else {
+                    return true;    // 破壊されていない．残す
+                }
+            } else {
+                return false;   // そもそもParticleがない．（ここは本来こないはずだが）消しておく
             }
-        }
+        })
     }
 
     public update() {
