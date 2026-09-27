@@ -121,8 +121,8 @@ export class Enemies {
                     break;
             }
 
-            for (let i=0; i<nEnemies; i++) {
-                const y = i*(-80);
+            for (let i = 0; i < nEnemies; i++) {
+                const y = i * (-80);
                 const enemy = new Enemy();
                 enemy.init(this._containers, this._wholeTextures, etex, x, y, this._w, this._h, aid);
 
@@ -141,7 +141,7 @@ export class Enemies {
             const indsToRemove2 = [...new Set(indsToRemove)];
 
             // 降順にソート
-            const sortedInds = indsToRemove2.sort((a, b) => b-a)
+            const sortedInds = indsToRemove2.sort((a, b) => b - a)
 
             for (const i of sortedInds) {
                 const enemy = this._enemies[i]
@@ -155,7 +155,7 @@ export class Enemies {
         if (this._enemies.length > 0) {
             const indsToRemove: number[] = [];
 
-            for (let i=0; i<this._enemies.length; i++) {
+            for (let i = 0; i < this._enemies.length; i++) {
                 const enemy = this._enemies[i];
                 if (enemy) {
                     enemy.update();

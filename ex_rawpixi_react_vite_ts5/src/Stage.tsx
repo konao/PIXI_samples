@@ -7,9 +7,11 @@ import * as Player from './Player';
 import * as Bullet from './Bullet';
 import * as Enemy from './Enemy';
 import * as Explosions from './Explosion';
+import * as Font from './Font';
 import * as Utils from './Utils';
 
 export class Stage {
+    private _app: PIXI.Application | null = null;
     private _containers: Utils.Containers | null = null;
     private _w: number = 0;
     private _h: number = 0;
@@ -20,8 +22,13 @@ export class Stage {
     private _stageNo: number = 1;
     private _count: number = 0;
     private _score: number = 0;
+    private _hiscore: number = 0;
+    private _scoreText: PIXI.BitmapText | null = null;
+    private _hiscoreText: PIXI.BitmapText | null = null;
 
-    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
+    public async init(app: PIXI.Application, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
+        this._app = app;
+
         this._containers = containers;
         this._w = w;
         this._h = h;
@@ -42,6 +49,56 @@ export class Stage {
         // 爆発
         this._explosions = new Explosions.Explosions();
         this._explosions.init(containers, wholeTexture);
+
+        // テキスト
+        // フォント作成
+        const fontManager = new Font.FontManager();
+        await fontManager.init();
+        const font1 = fontManager.createNewFont('MyGameFont1', {
+            fontSize: 36,
+            fill: '#ffffff',
+            fontWeight: 'bold',
+
+            // 装飾：ドロップシャドウ（立体感が出ます）
+            dropShadow: true,
+            dropShadowColor: '#0080ff',
+            dropShadowBlur: 0,      // ドット絵フォントならボカシは 0 がおすすめ
+            dropShadowAngle: Math.PI / 4, // 影の方向（45度）
+            dropShadowDistance: 5,  // 影の距離
+        });
+
+        // 複数個のフォントを作成できる
+        // const font2 = fontManager.createNewFont('MyGameFont2', {
+        //     fontSize: 36,
+        //     fill: '#ffffff',
+        // })
+
+        // テキスト表示エリア作成
+        this._scoreText = font1.createBitmapText({
+            fontSize: 36
+        })
+        this._hiscoreText = font1.createBitmapText({
+            fontSize: 36
+        });
+
+        // 表示位置を設定
+        this._scoreText.x = 30;
+        this._scoreText.y = 20;
+
+        this._hiscoreText.x = 420;
+        this._hiscoreText.y = 20;
+
+        this.updateScoreText();
+
+        // 通常のコンテナレイヤー（uiContainerなど）に追加
+        containers.uiContainer.addChild(this._scoreText); // ⚠️ ParticleContainerには入れないでください
+        containers.uiContainer.addChild(this._hiscoreText);
+
+        // addChildの順番に注意
+        // （後に追加したものが上に表示される）
+        app.stage.addChild(containers.particleContainer);
+        app.stage.addChild(containers.effectContainer);
+        app.stage.addChild(containers.uiContainer);
     }
 
     public getPlayer() {
@@ -66,6 +123,15 @@ export class Stage {
 
     public getCount() {
         return this._count;
+    }
+
+    public updateScoreText() {
+        if (this._scoreText) {
+            this._scoreText.text = `SCORE: ${String(this._score).padStart(6, '0')}`;
+        }
+        if (this._hiscoreText) {
+            this._hiscoreText.text = `HISCORE: ${String(this._hiscore).padStart(6, '0')}`;
+        }
     }
 
     public hitTest(player: Player.Player, bullets: Bullet.Bullets, enemies: Enemy.Enemies) {
@@ -94,6 +160,10 @@ export class Stage {
 
                                 // 爆発アニメーションを追加
                                 this._explosions?.addNewExplosion(enemy_x, enemy_y);
+
+                                // 点数加算
+                                this._score += 10;
+                                this.updateScoreText();
                             }
                         }
                     }
