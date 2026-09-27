@@ -15,9 +15,8 @@ export class Enemy {
     private _sw: number = 0;    // 画面サイズ（幅）
     private _sh: number = 0;    // 画面サイズ（高さ）
 
-    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, spiecies: string, x: number, y: number, sw: number, sh: number, aid: number) {
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, texName: string, x: number, y: number, sw: number, sh: number, aid: number) {
         this._containers = containers;
-        const texName = `SpaceRage/Enemies/${spiecies}.png`;  // (ex) enemy_1_r_m.png
         this._tex_enemy = wholeTexture.textures[texName];
         this._parEnemy = new PIXI.Particle(this._tex_enemy)
         this._parEnemy.x = x;
@@ -99,26 +98,29 @@ export class Enemies {
 
             const x = Math.random() * this._w;
             const aid = Math.trunc(Math.random() * 2);
-            const eid = Math.trunc(Math.random() * 6);
+            const eid = Math.trunc(Math.random() * 7);
             let etex = "";
             switch (eid) {
                 case 0:
-                    etex = "enemy_1_b_m";
+                    etex = "SpaceRage/Enemies/enemy_1_b_m.png";
                     break;
                 case 1:
-                    etex = "enemy_1_g_m";
+                    etex = "SpaceRage/Enemies/enemy_1_g_m.png";
                     break;
                 case 2:
-                    etex = "enemy_1_r_m";
+                    etex = "SpaceRage/Enemies/enemy_1_r_m.png";
                     break;
                 case 3:
-                    etex = "enemy_2_b_m";
+                    etex = "SpaceRage/Enemies/enemy_2_b_m.png";
                     break;
                 case 4:
-                    etex = "enemy_2_g_m";
+                    etex = "SpaceRage/Enemies/enemy_2_g_m.png";
                     break;
                 case 5:
-                    etex = "enemy_2_r_m";
+                    etex = "SpaceRage/Enemies/enemy_2_r_m.png";
+                    break;
+                case 6:
+                    etex = "Others/Galaxian.png";
                     break;
             }
 
@@ -172,7 +174,7 @@ export class Enemies {
 
     public attack(player_x: number, player_y: number, enemyBullets: EnemyBullet.EnemyBullets) {
         const attackRatio = 0.005;  // 攻撃頻度（大きいほど攻撃が多くなる）
-        const bulletSpeed = 10; // 弾丸の速さ（大きいほど弾丸が速い）
+        const bulletSpeed = 3; // 弾丸の速さ（大きいほど弾丸が速い）
 
         for (let i = 0; i < this._enemies.length; i++) {
             const enemy = this._enemies[i];
