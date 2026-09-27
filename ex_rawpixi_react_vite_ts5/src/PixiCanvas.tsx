@@ -146,8 +146,9 @@ export default function PixiCanvas() {
         const distance = (moveSpeed / 60) * delta;
 
         const player = g_stage.getPlayer();
-        const bullets = g_stage.getBullets();
+        const playerBullets = g_stage.getPlayerBullets();
         const enemies = g_stage.getEnemies();
+        const enemyBullets = g_stage.getEnemyBullets();
 
         g_stage.countUp();
 
@@ -162,7 +163,7 @@ export default function PixiCanvas() {
           const playerPos = player?.getPos();
           if (playerPos) {
             // 弾丸生成
-            bullets?.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
+            playerBullets?.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
 
             // 発射音
             Sound.playSE("shot");
@@ -170,7 +171,7 @@ export default function PixiCanvas() {
         }
 
         // 弾丸移動
-        bullets?.update();
+        playerBullets?.update();
 
         if ((g_stage.getCount() % 100) == 0) {
           // 敵生成
@@ -180,9 +181,15 @@ export default function PixiCanvas() {
         // 敵移動
         enemies?.update();
 
+        // 敵攻撃
+        g_stage.enemyAttack();
+
+        // 敵弾丸移動
+        enemyBullets?.update();
+
         // 弾丸衝突判定、点数加算、他
-        if (player && bullets && enemies) {
-          g_stage.hitTest(player, bullets, enemies);
+        if (player && playerBullets && enemies) {
+          g_stage.hitTest1(player, playerBullets, enemies);
         }
       });
     });

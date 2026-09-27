@@ -1,11 +1,11 @@
 // ************************************************************
-//  弾丸
+//  弾丸（敵）
 // ************************************************************
 
 import * as PIXI from 'pixi.js';
 import * as Utils from './Utils';
 
-export class Bullets {
+export class EnemyBullets {
     private _containers: Utils.Containers | null = null;
     private _tex_bullet: PIXI.Texture | null = null;
     private _w: number = 0;
@@ -14,33 +14,25 @@ export class Bullets {
 
     public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
         this._containers = containers;
-        this._tex_bullet = wholeTexture.textures['FX/vulcan_3.png'];
+        this._tex_bullet = wholeTexture.textures['FX/proton_01.png'];
         this._w = w;
         this._h = h;
     }
 
-    public genNewBullets(bulletMode: number, player_x: number, player_y: number, player_w: number, player_h: number) {
-        console.log(bulletMode);
+    public genNewBullets(player_x: number, player_y: number, enemy_x: number, enemy_y: number, enemy_w: number, enemy_h: number, bulletSpeed: number) {
         if (this._tex_bullet && this._containers?.particleContainer) {
-            for (let i = 0; i < bulletMode; i++) {
                 // 弾丸のスプライトを生成
-                const bullet_x = player_x + player_w / 2;
-                const bullet_y = player_y - player_h / 2;
-                let bullet_dx = 0;
-                let bullet_dy = -10;
-                switch (bulletMode) {
-                    case 1:
-                        bullet_dx = 0;
-                        break;
-                    case 3:
-                        bullet_dx = (i - 1) * 2;
-                        break;
-                    case 5:
-                        bullet_dx = (i - 2) * 2;
-                        break;
+                const bullet_x = enemy_x + enemy_w / 2;
+                const bullet_y = enemy_y + enemy_h / 2;
+                try {
+                    const dist = Math.sqrt((player_x - enemy_x)*(player_x - enemy_x) + (player_y - enemy_y)*(player_y - enemy_y));
+                    let bullet_dx = (player_x - enemy_x) / dist * bulletSpeed;
+                    let bullet_dy = (player_y - enemy_y) / dist * bulletSpeed;
+                    this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
                 }
-                this.addBullet(bullet_x, bullet_y, bullet_dx, bullet_dy);
-            }
+                catch {
+                    // do nothing
+                }
         }
     }
 
