@@ -2,27 +2,34 @@
 //  敵
 // ************************************************************
 import * as PIXI from 'pixi.js';
+import * as Utils from './Utils';
 
 export class Enemy {
-    private _container: PIXI.ParticleContainer | null = null;
+    private _containers: Utils.Containers | null = null;
     private _tex_enemy: PIXI.Texture | null = null;
     private _spiecies: string = "";
     private _parEnemy: PIXI.Particle | null = null;  // 敵スプライト（パーティクル）
     private _aid: number = 0;   // 攻撃パターンid
     private _count: number = 0; // カウント
-    private _sw: number = 0;
-    private _sh: number = 0;
+    private _sw: number = 0;    // 画面サイズ（幅）
+    private _sh: number = 0;    // 画面サイズ（高さ）
 
-    public init(container: PIXI.ParticleContainer, wholeTexture: PIXI.Spritesheet, spiecies: string, x: number, y: number, sw: number, sh: number, aid: number) {
-        this._container = container;
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, spiecies: string, x: number, y: number, sw: number, sh: number, aid: number) {
+        this._containers = containers;
         const texName = `Enemies/${spiecies}.png`;  // (ex) enemy_1_r_m.png
         this._tex_enemy = wholeTexture.textures[texName];
         this._parEnemy = new PIXI.Particle(this._tex_enemy)
         this._parEnemy.x = x;
         this._parEnemy.y = y;
+        this._parEnemy.anchorX = 0.5;   // スプライトの中心を移動、回転の中心にする．
+        this._parEnemy.anchorY = 0.5;
+        // this._parEnemy.rotation = Math.PI/6;
+        this._parEnemy.rotation = 0;    // 初期状態では回転なし
+        this._parEnemy.w = this._tex_enemy.width;   // テクスチャのサイズをパーティクルにもセットしておく
+        this._parEnemy.h = this._tex_enemy.height;
         this._aid = aid;
         this._count = 0;
-        this._container.addParticle(this._parEnemy);
+        this._containers.particleContainer.addParticle(this._parEnemy);
         this._sw = sw;
         this._sh = sh;
     }
@@ -60,29 +67,33 @@ export class Enemy {
     }
 
     public removeFromContainer() {
-        if (this._container && this._parEnemy) {
-            this._container.removeParticle(this._parEnemy);
+        if (this._containers?.particleContainer && this._parEnemy) {
+            this._containers.particleContainer.removeParticle(this._parEnemy);
         }
+    }
+
+    public getParEnemy() {
+        return this._parEnemy;
     }
 }
 
 // 攻撃パターン
 export class Enemies {
-    private _container: PIXI.ParticleContainer | null = null;
+    private _containers: Utils.Containers | null = null;
     private _wholeTextures: PIXI.Spritesheet | null = null;
     private _w: number = 0;
     private _h: number = 0;
     private _enemies: Enemy[] = [];
 
-    public init(container: PIXI.ParticleContainer, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
-        this._container = container;
+    public init(containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
+        this._containers = containers;
         this._wholeTextures = wholeTexture;
         this._w = w;
         this._h = h;
     }
 
     public genEnemies() {
-        if (this._container && this._wholeTextures) {
+        if (this._containers?.particleContainer && this._wholeTextures) {
             const nEnemies = 10;
 
             const x = Math.random() * this._w;
@@ -113,9 +124,29 @@ export class Enemies {
             for (let i=0; i<nEnemies; i++) {
                 const y = i*(-80);
                 const enemy = new Enemy();
-                enemy.init(this._container, this._wholeTextures, etex, x, y, this._w, this._h, aid);
+                enemy.init(this._containers, this._wholeTextures, etex, x, y, this._w, this._h, aid);
 
                 this._enemies.push(enemy);
+            }
+        }
+    }
+
+    public getEnemies() {
+        return this._enemies;
+    }
+
+    public removeEnemies(indsToRemove: number[]) {
+        if (indsToRemove.length > 0) {
+            // Setを使って重複を消し、配列に戻す
+            const indsToRemove2 = [...new Set(indsToRemove)];
+
+            // 降順にソート
+            const sortedInds = indsToRemove2.sort((a, b) => b-a)
+
+            for (const i of sortedInds) {
+                const enemy = this._enemies[i]
+                enemy.removeFromContainer();    // コンテナから消す
+                this._enemies.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
             }
         }
     }
@@ -134,16 +165,7 @@ export class Enemies {
             }
 
             // 画面から外れた敵を消す
-            if (indsToRemove.length > 0) {
-                // 降順にソート
-                const sortedInds = indsToRemove.sort((a, b) => b-a)
-
-                for (const i of sortedInds) {
-                    const enemy = this._enemies[i]
-                    enemy.removeFromContainer();    // コンテナから消す
-                    this._enemies.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
-                }
-            }
+            this.removeEnemies(indsToRemove);
         }
     }
 }
