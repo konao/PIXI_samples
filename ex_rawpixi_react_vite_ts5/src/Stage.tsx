@@ -3,6 +3,7 @@
 // ************************************************************
 
 import * as PIXI from 'pixi.js';
+import * as Key from './Key';
 import * as Player from './Player';
 import * as PlayerBullet from './PlayerBullet';
 import * as EnemyBullet from './EnemyBullet';
@@ -12,11 +13,19 @@ import * as Font from './Font';
 import * as Sound from './Sound';
 import * as Utils from './Utils';
 
+enum GameState {
+    Title,
+    Playing,
+    PlayerDead,
+    GameOver
+}
+
 export class Stage {
     private _app: PIXI.Application | null = null;
     private _containers: Utils.Containers | null = null;
     private _w: number = 0;
     private _h: number = 0;
+    private _state: GameState = GameState.Title;
     private _player: Player.Player | null = null;
     private _playerBullets: PlayerBullet.PlayerBullets | null = null;
     private _enemies: Enemy.Enemies | null = null;
@@ -28,6 +37,8 @@ export class Stage {
     private _hiscore: number = 0;
     private _scoreText: PIXI.BitmapText | null = null;
     private _hiscoreText: PIXI.BitmapText | null = null;
+    private _bulletMode: string = "single";
+    private _pause: boolean = false;
 
     public async init(app: PIXI.Application, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, w: number, h: number) {
         this._app = app;
@@ -35,6 +46,10 @@ export class Stage {
         this._containers = containers;
         this._w = w;
         this._h = h;
+
+        // ステート初期化
+        this._state = GameState.Title;
+        this._score = 0;
 
         // プレーヤー
         this._player = new Player.Player();
@@ -109,6 +124,39 @@ export class Stage {
         app.stage.addChild(containers.uiContainer);
     }
 
+    // ゲーム開始
+    public start() {
+
+    }
+
+    // ステージ更新
+    public update(delta: number) {
+        // ポーズ切替
+        if (Key.keys.KeyP) {
+            this._pause = !this._pause;
+            Key.keys.KeyP = false;
+        }
+
+        if (this._pause) return;  // 一時停止中なら何もしない
+
+        // ステージカウンタ更新
+        this.countUp();
+
+        // プレーヤー更新
+        this.updatePlayer(delta, Key.keys);
+
+        // 敵更新
+        this.updateEnemies();
+
+        // 弾丸衝突判定、点数加算、他
+        this.hitTest();
+    }
+
+    // ゲーム終了
+    public end() {
+
+    }
+
     public countUp() {
         this._count += 1;
     }
@@ -122,7 +170,7 @@ export class Stage {
         }
     }
 
-    public updatePlayer(delta: number, keys: Utils.KeyStatus, bulletMode: string, pause: boolean) {
+    public updatePlayer(delta: number, keys: Key.KeyStatus) {
         if (!this._player || !this._playerBullets) return;
 
         const player = this._player;
@@ -160,16 +208,32 @@ export class Stage {
             player.resetPic(); // 移動していなければ正面の絵に戻す
         }
         if (keys.Space) {
-            keys.Space = false; // 1回押すごとに一発
+            keys.Space = false; // 1回押すごとに一発（これがないとスペースが押しっぱなし状態になってしまう）
 
             const playerPos = player.getPos();
             if (playerPos) {
                 // 弾丸生成
-                playerBullets.genNewBullets(bulletMode, playerPos.x, playerPos.y, 64, 64)
+                playerBullets.genNewBullets(this._bulletMode, playerPos.x, playerPos.y, 64, 64)
 
                 // 発射音
                 Sound.playSE("shot");
             }
+        }
+
+        // ----------------------------
+        //  弾丸モード切替
+        // ----------------------------
+        if (keys.Digit1) {
+            this._bulletMode = "single";
+        }
+        if (keys.Digit2) {
+            this._bulletMode = "multi3";
+        }
+        if (keys.Digit3) {
+            this._bulletMode = "spread3";
+        }
+        if (keys.Digit4) {
+            this._bulletMode = "laser";
         }
 
         // ----------------------------

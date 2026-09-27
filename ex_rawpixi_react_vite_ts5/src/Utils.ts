@@ -21,11 +21,6 @@ class Containers {
 }
 
 // ----------------------------------------------
-//  キーボードの状態を格納する型
-// ----------------------------------------------
-type KeyStatus = { [key: string]: boolean }
-
-// ----------------------------------------------
 //  ベクトルとベクトル演算
 // ----------------------------------------------
 type Vec2 = {
@@ -111,7 +106,6 @@ const hitTest2 = (A: Vec2, B: Vec2, P: Vec2, r: number): boolean => {
 
 export {
     Containers,
-    KeyStatus,
     Vec2,
     hitTest1,
     hitTest2,
