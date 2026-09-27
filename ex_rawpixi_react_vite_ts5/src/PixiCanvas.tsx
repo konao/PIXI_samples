@@ -28,16 +28,39 @@ const keys: { [key: string]: boolean } = {
     Space: false
 };
 
+let bulletMode: number = 1;
+
 // 2. イベントリスナーを登録（キーが押されたか離されたかを記録）
 window.addEventListener('keydown', (e) => {
     if (e.key in keys) {
         keys[e.key] = true;
         e.preventDefault(); // 画面がブラウザでスクロールするのを防ぐ
     }
-    if (e.code === 'Space') {
+    switch (e.code) {
+      case 'Space': {
         keys.Space = true;
         e.preventDefault(); // スクロール防止
-    }    
+        break;
+      }
+      case 'Digit1': {
+        bulletMode = 1;
+        console.log(bulletMode);
+        e.preventDefault(); // スクロール防止
+        break;
+      }
+      case 'Digit3': {
+        bulletMode = 3;
+        console.log(bulletMode);
+        e.preventDefault(); // スクロール防止
+        break;
+      }
+      case 'Digit5': {
+        bulletMode = 5;
+        console.log(bulletMode);
+        e.preventDefault(); // スクロール防止
+        break;
+      }
+    }
 });
 
 window.addEventListener('keyup', (e) => {
@@ -121,12 +144,27 @@ export default function PixiCanvas() {
         if (keys.Space) {
           keys.Space = false; // 1回押すごとに一発
 
-          // 弾丸のスプライトを生成
-          const bullet = new PIXI.Particle(tex_bullet)
-          bullet.x = player.x + 32;
-          bullet.y = player.y - 10;
-          bullets.push(bullet)
-          particleContainer.addParticle(bullet)
+          console.log(bulletMode);
+          for (let i=0; i<bulletMode; i++) {
+            // 弾丸のスプライトを生成
+            const bullet = new PIXI.Particle(tex_bullet)
+            bullet.x = player.x + 32;
+            bullet.y = player.y - 10;
+            switch (bulletMode) {
+              case 1:
+                bullet.dx = 0;
+                break;
+              case 3:
+                bullet.dx = (i-1)*2;
+                break;
+              case 5:
+                bullet.dx = (i-2)*2;
+                break;
+            }
+            bullet.dy = -10;
+            bullets.push(bullet)
+            particleContainer.addParticle(bullet)
+          }
         }
 
         if (bullets.length > 0) {
@@ -135,7 +173,8 @@ export default function PixiCanvas() {
           // 弾丸移動
           for (let i=0; i<bullets.length; i++) {
             const p = bullets[i]
-            p.y -= 10;
+            p.x += p.dx;
+            p.y += p.dy;
             if (p.y < 0) {
               // 画面を外れたものを削除対象に入れる
               indsToRemove.push(i)
@@ -148,7 +187,7 @@ export default function PixiCanvas() {
             const sortedInds = indsToRemove.sort((a, b) => b-a)
 
             for (const i of sortedInds) {
-              const bullet = bullets[sortedInds[i]]
+              const bullet = bullets[i]
               particleContainer.removeParticle(bullet); // コンテナから消す
               bullets.splice(i, 1); // i番目の要素を削除して配列の長さを縮める
             }
