@@ -35,7 +35,7 @@ const keys: { [key: string]: boolean } = {
   Space: false
 };
 
-let bulletMode: number = 1;
+let bulletMode: string = "single";
 let pause: boolean = false;
 
 // 2. イベントリスナーを登録（キーが押されたか離されたかを記録）
@@ -51,19 +51,31 @@ window.addEventListener('keydown', (e) => {
       break;
     }
     case 'Digit1': {
-      bulletMode = 1;
+      bulletMode = "single";
+      console.log(bulletMode);
+      e.preventDefault(); // スクロール防止
+      break;
+    }
+    case 'Digit2': {
+      bulletMode = "multi3";
       console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
     case 'Digit3': {
-      bulletMode = 3;
+      bulletMode = "spread3";
+      console.log(bulletMode);
+      e.preventDefault(); // スクロール防止
+      break;
+    }
+    case 'Digit4': {
+      bulletMode = "laser";
       console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
     }
     case 'Digit5': {
-      bulletMode = 5;
+      bulletMode = "missile";
       console.log(bulletMode);
       e.preventDefault(); // スクロール防止
       break;
