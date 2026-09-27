@@ -21,16 +21,21 @@ export class TitleStage {
     private _containers: Utils.Containers | null = null;
     private _scrSize: Utils.Vec2 = { x: 0, y: 0 };
     private _mainTitleText: PIXI.BitmapText | null = null;
+    private _explText1: PIXI.BitmapText | null = null;
+    private _explText2: PIXI.BitmapText | null = null;
+    private _explText3: PIXI.BitmapText | null = null;
     private _otherText1: PIXI.BitmapText | null = null;
+    private _count: number = 0;
 
     public async init(game: Game.Game, containers: Utils.Containers, wholeTexture: PIXI.Spritesheet, scrSize: Utils.Vec2) {
         this._game = game;
         this._containers = containers;
         this._scrSize = scrSize;
+        this._count = 0;
 
         const fontManager = this._game.getFontManager();
 
-        // タイトル
+        // ----------------------------
         const font1 = fontManager.createNewFont('MyTitleFont1', {
             fill: '#0088ff',
             fontWeight: 'bold',
@@ -49,18 +54,48 @@ export class TitleStage {
         this._mainTitleText.x = 40;
         this._mainTitleText.y = 150;
 
+        // ----------------------------
         const font2 = fontManager.createNewFont('MyGameFont2', {
             fill: '#0066aa',
         })
-        this._otherText1 = font2.createBitmapText({
+        this._explText1 = font2.createBitmapText({
             fontSize: 32
         })
+        this._explText1.text = `Arrow keys: Move ship`;
+        this._explText1.x = 200;
+        this._explText1.y = 550;
+
+        this._explText2 = font2.createBitmapText({
+            fontSize: 32
+        })
+        this._explText2.text = `Space: Shot bullet`;
+        this._explText2.x = 200;
+        this._explText2.y = 590;
+
+        this._explText3 = font2.createBitmapText({
+            fontSize: 32
+        })
+        this._explText3.text = `1-4: Change weapon`;
+        this._explText3.x = 200;
+        this._explText3.y = 630;
+
+        // ----------------------------
+        const font3 = fontManager.createNewFont('MyGameFont3', {
+            fill: '#0066aa',
+            fontWeight: 'bold'
+        })
+        this._otherText1 = font3.createBitmapText({
+            fontSize: 40
+        })
         this._otherText1.text = `Press SPACE to play`;
-        this._otherText1.x = 200;
-        this._otherText1.y = 800;
+        this._otherText1.x = 180;
+        this._otherText1.y = 820;
 
         // コンテナに追加
         containers.titleContainer.addChild(this._mainTitleText);
+        containers.titleContainer.addChild(this._explText1);
+        containers.titleContainer.addChild(this._explText2);
+        containers.titleContainer.addChild(this._explText3);
         containers.titleContainer.addChild(this._otherText1);
     }
 
@@ -71,6 +106,15 @@ export class TitleStage {
             if (this._game) {
                 this._game.switchState(Game.GameState.Playing); // プレイスタート
             }
+        }
+
+        this._count++;
+
+        if (this._count > 30) {
+            if (this._otherText1) {
+                this._otherText1.visible = !this._otherText1.visible;
+            }
+            this._count = 0;
         }
     }
 }
@@ -128,7 +172,7 @@ export class PlayStage {
         // プレーヤー
         this._player = new Player.Player();
         this._player.init(containers, wholeTexture);
-        this._player.setPos(scrSize.x / 2 - 32, scrSize.y * 4 / 5);
+        this._player.setPos(scrSize.x / 2 - 32, scrSize.y * 6 / 7);
 
         // 弾丸（プレーヤー）
         this._playerBullets = new PlayerBullet.PlayerBullets();
