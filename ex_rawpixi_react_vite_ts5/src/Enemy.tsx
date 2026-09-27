@@ -478,24 +478,14 @@ export class Enemies {
         let scorePoints = 0;    // 加算スコア
 
         const hitTestAndGetPoint = (parEnemy: PIXI.Particle) => {
-            const posEnemy = {
-                x: parEnemy.x,
-                y: parEnemy.y
-            }
+            const posEnemy = { x: parEnemy.x, y: parEnemy.y };
             const enemy_r = parEnemy.w * 0.8;   // 大体の半径を適当に計算
             if (fnHitTest(posEnemy, enemy_r)) {
                 // 当たった
-
-                // この敵の破壊フラグをon
-                parEnemy.destroyed = true;
-
-                // 爆発アニメーションを追加
-                explosions.addNewExplosion(posEnemy);
-
-                // 爆発音
-                Sound.playSE("explosion");
-
-                return 10   // 加算する点数
+                parEnemy.destroyed = true;  // この敵の破壊フラグをon
+                explosions.addNewExplosion(posEnemy);   // 爆発アニメーションを追加
+                Sound.playSE("explosion");  // 爆発音
+                return 10   // 加算する点数を返す
             } else {
                 parEnemy.destroyed = false;
                 return 0
