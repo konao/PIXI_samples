@@ -478,7 +478,7 @@ export class Enemies {
 
         const hitTestAndGetPoint = (parEnemy: PIXI.Particle) => {
             const posEnemy = { x: parEnemy.x, y: parEnemy.y };
-            const enemy_r = parEnemy.w * 0.4;   // 大体の半径を適当に計算
+            const enemy_r = parEnemy.w * 0.6;   // 大体の半径を適当に計算
             if (fnHitTest(posEnemy, enemy_r)) {
                 // 当たった
                 parEnemy.destroyed = true;  // この敵の破壊フラグをon
@@ -549,7 +549,7 @@ export class Enemies {
                 return pEnemies.map((enemy: Enemy) => {
                     return M.Maybe.of(enemy.getParEnemy()).map((parEnemy: PIXI.Particle) => {
                         const posEnemy = { x: parEnemy.x, y: parEnemy.y };
-                        const enemy_r = parEnemy.w * 0.4;   // 大体の半径を適当に計算
+                        const enemy_r = parEnemy.w * 0.6;   // 大体の半径を適当に計算
                         return Utils.hitTest1(posPlayer, sizePlayer, posEnemy, enemy_r);
                     }).getOrElse(false);
                 }).some(x => x);    // 配列に1つでもtrueがあればtrue
