@@ -21,6 +21,8 @@ export class Enemy {
         this._parEnemy = new PIXI.Particle(this._tex_enemy)
         this._parEnemy.x = x;
         this._parEnemy.y = y;
+        this._parEnemy.init_x = x;  // x座標の初期値
+        this._parEnemy.init_y = y;  // y座標の初期値
         this._parEnemy.anchorX = 0.5;   // スプライトの中心を移動、回転の中心にする．
         this._parEnemy.anchorY = 0.5;
         // this._parEnemy.rotation = Math.PI/6;
@@ -43,14 +45,33 @@ export class Enemy {
             if (this._parEnemy.y >= 0) {
                 // 画面に現れたら移動パターンを変える
                 let targetX = 0;
-                if (this._aid == 1) {
-                    targetX = this._sw * 1.2;    // 画面の右端を少し過ぎたあたりを目標
+                if (this._aid == 0 || this._aid == 1) {
+                    switch (this._aid) {
+                        case 0:
+                            targetX = this._sw * 1.2;    // 画面の右端を少し過ぎたあたりを目標
+                            break;
+                        case 1:
+                            targetX = -this._sw * 0.2;  // 画面の左端を少し過ぎたあたりを目標
+                            break;
+                    }
+                    const dx = (targetX - this._parEnemy.x) / this._sh * diffY;
+                    this._parEnemy.x += dx;
                 } else {
-                    targetX = - this._sw * 0.2;  // 画面の左端を少し過ぎたあたりを目標
+                    const yposRatio = this._parEnemy.y / this._sh;  // 画面の縦位置でどこにいるか(0=一番上、1=一番下)
+                    let dx = 0;
+                    switch (this._aid) {
+                        case 2:
+                            // 蛇行ルート
+                            dx = (this._sw * 0.6) * Math.sin(yposRatio * Math.PI);
+                            if (this._parEnemy.init_x < this._sw/2) dx = -dx;   // 出現x座標が画面真ん中より左なら左に曲がるようにする
+                            break;
+                        case 3:
+                            // 蛇行ルート（その2）
+                            dx = (this._sw * 0.6) * Math.sin(yposRatio * Math.PI * 2);
+                            break;
+                    }
+                    this._parEnemy.x = this._parEnemy.init_x + dx;
                 }
-
-                const dx = (targetX - this._parEnemy.x) / this._sh * diffY;
-                this._parEnemy.x += dx;
             }
         }
     }
@@ -96,9 +117,9 @@ export class Enemies {
         if (this._containers?.particleContainer && this._wholeTextures) {
             const nEnemies = 10;
 
-            const x = Math.random() * this._w;
-            const aid = Math.trunc(Math.random() * 2);
-            const eid = Math.trunc(Math.random() * 7);
+            const x = Math.random() * this._w;  // 出現位置
+            const eid = Math.trunc(Math.random() * 7);  // 敵id(=0-6)
+            const aid = Math.trunc(Math.random() * 4);  // 攻撃パターンid(=0-3)
             let etex = "";
             switch (eid) {
                 case 0:

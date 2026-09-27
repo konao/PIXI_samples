@@ -204,7 +204,7 @@ export default function PixiCanvas() {
         // 弾丸移動
         playerBullets?.update();
 
-        if ((g_stage.getCount() % 100) == 0) {
+        if ((g_stage.getCount() % 200) == 0) {
           // 敵生成
           enemies?.genEnemies();
         }
